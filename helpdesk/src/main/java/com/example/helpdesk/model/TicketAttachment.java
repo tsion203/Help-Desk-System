@@ -30,7 +30,7 @@ public class TicketAttachment {
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column(name = "filePath", nullable = false)  
     private String filePath;
 
     @Column(name = "file_size", nullable = false)
