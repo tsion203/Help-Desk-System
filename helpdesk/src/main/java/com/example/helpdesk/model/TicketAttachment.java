@@ -29,6 +29,7 @@ public class TicketAttachment {
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
+    
 
     @Column(name = "filePath", nullable = false)  
     private String filePath;

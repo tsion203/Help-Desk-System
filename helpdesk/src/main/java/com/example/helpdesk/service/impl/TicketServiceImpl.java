@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
 import com.example.helpdesk.dto.TicketAttachmentResponseDTO;
@@ -54,6 +55,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public TicketResponseDTO create(TicketCreateDTO ticketCreateDTO) {
         Ticket ticket = new Ticket();
         ticket.setTicketNumber(generateTicketNumber());
@@ -70,11 +72,13 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TicketResponseDTO getById(Long id) {
         return mapToResponseDTO(findTicketById(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAll() {
         return ticketRepository.findAll()
                 .stream()
@@ -83,6 +87,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO) {
         Ticket ticket = findTicketById(id);
 
@@ -113,12 +118,14 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Ticket ticket = findTicketById(id);
         ticketRepository.delete(ticket);
     }
 
     @Override
+    @Transactional
     public TicketResponseDTO assignTicket(Long ticketId, Long assigneeId, Long assignedById) {
         Ticket ticket = findTicketById(ticketId);
         User oldAssignee = ticket.getAssignedTo();
@@ -142,6 +149,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public TicketResponseDTO changeStatus(Long ticketId, TicketStatus newStatus, Long changedById) {
         Ticket ticket = findTicketById(ticketId);
         TicketStatus oldStatus = ticket.getStatus();
@@ -166,6 +174,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketResponseDTO> getTicketsByCreator(Long creatorId) {
         findUserById(creatorId);
         return ticketRepository.findByCreatedById(creatorId)
@@ -175,6 +184,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketResponseDTO> getTicketsByAssignee(Long assigneeId) {
         findUserById(assigneeId);
         return ticketRepository.findByAssignedToId(assigneeId)
