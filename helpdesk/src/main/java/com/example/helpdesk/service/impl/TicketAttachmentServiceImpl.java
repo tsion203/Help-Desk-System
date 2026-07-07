@@ -128,7 +128,8 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
                 attachment.getFileSize(),
                 attachment.getUploadedAt(),
                 attachment.getTicket().getId(),
-                attachment.getUploadedBy().getId()
+                attachment.getUploadedBy().getId(),
+                attachment.getUploadedBy().getFirstName() + " " + attachment.getUploadedBy().getLastName()
         );
     }
 }

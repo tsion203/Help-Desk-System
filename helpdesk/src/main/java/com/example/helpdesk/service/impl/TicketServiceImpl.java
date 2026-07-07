@@ -20,7 +20,6 @@ import com.example.helpdesk.model.TicketAssignmentHistory;
 import com.example.helpdesk.model.TicketAttachment;
 import com.example.helpdesk.model.TicketCategory;
 import com.example.helpdesk.model.TicketComment;
-import com.example.helpdesk.model.TicketPriority;
 import com.example.helpdesk.model.TicketStatus;
 import com.example.helpdesk.model.TicketStatusHistory;
 import com.example.helpdesk.model.User;
@@ -221,7 +220,24 @@ public class TicketServiceImpl implements TicketService {
         }
         return findCategoryById(id);
     }
+    @Override
+    public List<TicketAssignmentHistoryResponseDTO> getAssignmentHistory(Long ticketId) {
 
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+
+        return mapAssignmentHistory(ticket.getAssignmentHistory());
+    }
+
+    @Override
+    public List<TicketStatusHistoryResponseDTO> getStatusHistory(Long ticketId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+
+        return mapStatusHistory(ticket.getStatusHistory());
+    }
+    
     private TicketResponseDTO mapToResponseDTO(Ticket ticket) {
         User createdBy = ticket.getCreatedBy();
         User assignedTo = ticket.getAssignedTo();

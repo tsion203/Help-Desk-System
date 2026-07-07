@@ -37,15 +37,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO create(UserCreateDTO userCreateDTO) {
         User user = new User();
-        user.setEmail(userCreateDTO.getEmail());
-        user.setEmployeeId(userCreateDTO.getEmployeeId());
-        user.setFirstName(userCreateDTO.getFirstName());
-        user.setLastName(userCreateDTO.getLastName());
-        user.setPhoneNumber(userCreateDTO.getPhoneNumber());
-        user.setActive(userCreateDTO.getActive());
-        user.setDepartment(findDepartmentById(userCreateDTO.getDepartmentId()));
-        user.setRoles(findRolesByIds(userCreateDTO.getRoleIds()));
-        return mapToResponseDTO(userRepository.save(user));
+        try {
+            user.setEmail(userCreateDTO.getEmail());
+            user.setEmployeeId(userCreateDTO.getEmployeeId());
+            user.setFirstName(userCreateDTO.getFirstName());
+            user.setLastName(userCreateDTO.getLastName());
+            user.setPhoneNumber(userCreateDTO.getPhoneNumber());
+            user.setActive(userCreateDTO.getActive());
+            user.setDepartment(findDepartmentById(userCreateDTO.getDepartmentId()));
+            user.setRoles(findRolesByIds(userCreateDTO.getRoleIds()));
+            return mapToResponseDTO(userRepository.save(user));
+        } catch (Exception ex) {
+            System.out.println("Error occure:" + ex.getMessage());
+            return null;
+        }
+        finally{
+       
+        }
+
+        
     }
 
     @Override

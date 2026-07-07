@@ -30,7 +30,10 @@ public class TicketCreateDTO {
     @NotNull
     private Long createdById;
 
+    @NotNull
     private Long assignedToId;
 
+
+    @NotNull
     private Long categoryId;
 }
