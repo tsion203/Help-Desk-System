@@ -2,6 +2,7 @@ package com.example.helpdesk.service.impl;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.helpdesk.dto.RoleResponseDTO;
@@ -23,15 +24,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(
             UserRepository userRepository,
             DepartmentRepository departmentRepository,
-            RoleRepository roleRepository
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -44,6 +48,7 @@ public class UserServiceImpl implements UserService {
             user.setLastName(userCreateDTO.getLastName());
             user.setPhoneNumber(userCreateDTO.getPhoneNumber());
             user.setActive(userCreateDTO.getActive());
+            user.setPassword(passwordEncoder.encode("password123"));
             user.setDepartment(findDepartmentById(userCreateDTO.getDepartmentId()));
             user.setRoles(findRolesByIds(userCreateDTO.getRoleIds()));
             return mapToResponseDTO(userRepository.save(user));
