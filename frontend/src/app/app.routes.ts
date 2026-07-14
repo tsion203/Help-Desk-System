@@ -33,7 +33,7 @@ export const routes: Routes = [
 
   { path: '', component: LoginComponent },
 
-  { path: 'home', component: HomeComponent },
+  { path: 'home', component: HomeComponent, },
   { path: 'dashboard', component: DashboardComponent },
 
   { path: 'users', component: UserListComponent },
