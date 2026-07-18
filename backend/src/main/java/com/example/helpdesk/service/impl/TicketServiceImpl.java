@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
 import com.example.helpdesk.dto.TicketAttachmentResponseDTO;
 import com.example.helpdesk.dto.TicketCommentResponseDTO;
@@ -28,6 +29,7 @@ import com.example.helpdesk.repository.TicketCategoryRepository;
 import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.TicketStatusHistoryRepository;
 import com.example.helpdesk.repository.UserRepository;
+import com.example.helpdesk.service.NotificationService;
 import com.example.helpdesk.service.TicketService;
 
 @Service
@@ -38,19 +40,22 @@ public class TicketServiceImpl implements TicketService {
     private final TicketCategoryRepository ticketCategoryRepository;
     private final TicketAssignmentHistoryRepository ticketAssignmentHistoryRepository;
     private final TicketStatusHistoryRepository ticketStatusHistoryRepository;
+    private final NotificationService notificationService;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
             UserRepository userRepository,
             TicketCategoryRepository ticketCategoryRepository,
             TicketAssignmentHistoryRepository ticketAssignmentHistoryRepository,
-            TicketStatusHistoryRepository ticketStatusHistoryRepository
+            TicketStatusHistoryRepository ticketStatusHistoryRepository,
+            NotificationService notificationService
     ) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.ticketAssignmentHistoryRepository = ticketAssignmentHistoryRepository;
         this.ticketStatusHistoryRepository = ticketStatusHistoryRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -67,7 +72,9 @@ public class TicketServiceImpl implements TicketService {
         ticket.setCreatedBy(findUserById(ticketCreateDTO.getCreatedById()));
         ticket.setAssignedTo(findNullableUserById(ticketCreateDTO.getAssignedToId()));
         ticket.setCategory(findNullableCategoryById(ticketCreateDTO.getCategoryId()));
-        return mapToResponseDTO(ticketRepository.save(ticket));
+        Ticket savedTicket = ticketRepository.save(ticket);
+        createNotificationForTicketCreation(savedTicket);
+        return mapToResponseDTO(savedTicket);
     }
 
     @Override
@@ -113,7 +120,11 @@ public class TicketServiceImpl implements TicketService {
         }
 
         ticket.setUpdatedAt(LocalDateTime.now());
-        return mapToResponseDTO(ticketRepository.save(ticket));
+        Ticket savedTicket = ticketRepository.save(ticket);
+        if (ticketUpdateDTO.getStatus() != null) {
+            createNotificationForStatusChange(savedTicket, ticketUpdateDTO.getStatus());
+        }
+        return mapToResponseDTO(savedTicket);
     }
 
     @Override
@@ -144,6 +155,7 @@ public class TicketServiceImpl implements TicketService {
         history.setAssignedAt(LocalDateTime.now());
         ticketAssignmentHistoryRepository.save(history);
 
+        createNotificationForAssignment(savedTicket, oldAssignee, newAssignee, assignedBy);
         return mapToResponseDTO(savedTicket);
     }
 
@@ -169,6 +181,7 @@ public class TicketServiceImpl implements TicketService {
         history.setChangedAt(LocalDateTime.now());
         ticketStatusHistoryRepository.save(history);
 
+        createNotificationForStatusChange(savedTicket, newStatus);
         return mapToResponseDTO(savedTicket);
     }
 
@@ -238,6 +251,87 @@ public class TicketServiceImpl implements TicketService {
         return mapStatusHistory(ticket.getStatusHistory());
     }
     
+    private void createNotificationForTicketCreation(Ticket ticket) {
+        if (ticket.getCreatedBy() == null) {
+            return;
+        }
+
+        notificationService.create(new NotificationCreateDTO(
+                "Ticket created",
+                "Your ticket has been created successfully.",
+                "TICKET_CREATED",
+                ticket.getCreatedBy().getId(),
+                ticket.getId()
+        ));
+
+        if (ticket.getAssignedTo() != null && !ticket.getAssignedTo().getId().equals(ticket.getCreatedBy().getId())) {
+            notificationService.create(new NotificationCreateDTO(
+                    "New ticket assigned",
+                    "A new ticket has been assigned to you.",
+                    "TICKET_ASSIGNED",
+                    ticket.getAssignedTo().getId(),
+                    ticket.getId()
+            ));
+        }
+    }
+
+    private void createNotificationForAssignment(Ticket ticket, User oldAssignee, User newAssignee, User assignedBy) {
+        if (newAssignee != null) {
+            notificationService.create(new NotificationCreateDTO(
+                    "Ticket assigned",
+                    "You have been assigned to ticket " + ticket.getTicketNumber() + ".",
+                    "TICKET_ASSIGNED",
+                    newAssignee.getId(),
+                    ticket.getId()
+            ));
+        }
+
+        if (assignedBy != null && oldAssignee != null && (newAssignee == null || !oldAssignee.getId().equals(newAssignee.getId()))) {
+            notificationService.create(new NotificationCreateDTO(
+                    "Ticket reassigned",
+                    "Ticket " + ticket.getTicketNumber() + " was reassigned.",
+                    "TICKET_REASSIGNED",
+                    assignedBy.getId(),
+                    ticket.getId()
+            ));
+        }
+    }
+
+    private void createNotificationForStatusChange(Ticket ticket, TicketStatus newStatus) {
+        if (newStatus == null) {
+            return;
+        }
+
+        String title = switch (newStatus) {
+            case RESOLVED -> "Ticket resolved";
+            case CLOSED -> "Ticket closed";
+            default -> "Ticket status updated";
+        };
+
+        String message = "Ticket " + ticket.getTicketNumber() + " is now " + newStatus.name() + ".";
+        String type = newStatus == TicketStatus.RESOLVED ? "TICKET_RESOLVED" : "TICKET_STATUS_CHANGED";
+
+        if (ticket.getAssignedTo() != null) {
+            notificationService.create(new NotificationCreateDTO(
+                    title,
+                    message,
+                    type,
+                    ticket.getAssignedTo().getId(),
+                    ticket.getId()
+            ));
+        }
+
+        if (ticket.getCreatedBy() != null && !ticket.getCreatedBy().getId().equals(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getId() : null)) {
+            notificationService.create(new NotificationCreateDTO(
+                    title,
+                    message,
+                    type,
+                    ticket.getCreatedBy().getId(),
+                    ticket.getId()
+            ));
+        }
+    }
+
     private TicketResponseDTO mapToResponseDTO(Ticket ticket) {
         User createdBy = ticket.getCreatedBy();
         User assignedTo = ticket.getAssignedTo();
