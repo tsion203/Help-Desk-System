@@ -31,6 +31,7 @@ import com.example.helpdesk.repository.TicketCategoryRepository;
 import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.TicketStatusHistoryRepository;
 import com.example.helpdesk.repository.UserRepository;
+import com.example.helpdesk.service.EmailService;
 import com.example.helpdesk.service.NotificationService;
 import com.example.helpdesk.service.TicketService;
 
@@ -43,6 +44,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketAssignmentHistoryRepository ticketAssignmentHistoryRepository;
     private final TicketStatusHistoryRepository ticketStatusHistoryRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
@@ -50,7 +52,8 @@ public class TicketServiceImpl implements TicketService {
             TicketCategoryRepository ticketCategoryRepository,
             TicketAssignmentHistoryRepository ticketAssignmentHistoryRepository,
             TicketStatusHistoryRepository ticketStatusHistoryRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            EmailService emailService
     ) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
@@ -58,6 +61,7 @@ public class TicketServiceImpl implements TicketService {
         this.ticketAssignmentHistoryRepository = ticketAssignmentHistoryRepository;
         this.ticketStatusHistoryRepository = ticketStatusHistoryRepository;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -139,6 +143,7 @@ public class TicketServiceImpl implements TicketService {
         }
         if (assigneeChanged) {
             saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
+            emailService.sendTicketAssigned(savedTicket, newAssignee);
         }
         return mapToResponseDTO(savedTicket);
     }
@@ -291,6 +296,7 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getCreatedBy().getId(),
                 ticket.getId()
         ));
+        emailService.sendTicketCreated(ticket, ticket.getCreatedBy());
 
         if (ticket.getAssignedTo() != null && !ticket.getAssignedTo().getId().equals(ticket.getCreatedBy().getId())) {
             notificationService.create(new NotificationCreateDTO(
@@ -300,6 +306,7 @@ public class TicketServiceImpl implements TicketService {
                     ticket.getAssignedTo().getId(),
                     ticket.getId()
             ));
+            emailService.sendTicketAssigned(ticket, ticket.getAssignedTo());
         }
     }
 
@@ -312,6 +319,7 @@ public class TicketServiceImpl implements TicketService {
                     newAssignee.getId(),
                     ticket.getId()
             ));
+            emailService.sendTicketAssigned(ticket, newAssignee);
         }
 
         if (assignedBy != null && oldAssignee != null && (newAssignee == null || !oldAssignee.getId().equals(newAssignee.getId()))) {
@@ -347,6 +355,7 @@ public class TicketServiceImpl implements TicketService {
                     ticket.getAssignedTo().getId(),
                     ticket.getId()
             ));
+            sendStatusEmail(ticket, ticket.getAssignedTo(), newStatus);
         }
 
         if (ticket.getCreatedBy() != null && !ticket.getCreatedBy().getId().equals(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getId() : null)) {
@@ -357,7 +366,16 @@ public class TicketServiceImpl implements TicketService {
                     ticket.getCreatedBy().getId(),
                     ticket.getId()
             ));
+            sendStatusEmail(ticket, ticket.getCreatedBy(), newStatus);
         }
+    }
+
+    private void sendStatusEmail(Ticket ticket, User recipient, TicketStatus status) {
+        if (status == TicketStatus.RESOLVED) {
+            emailService.sendTicketResolved(ticket, recipient);
+            return;
+        }
+        emailService.sendTicketStatusChanged(ticket, recipient);
     }
 
     private TicketResponseDTO mapToResponseDTO(Ticket ticket) {

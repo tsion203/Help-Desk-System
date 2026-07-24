@@ -15,6 +15,7 @@ import com.example.helpdesk.model.User;
 import com.example.helpdesk.repository.TicketCommentRepository;
 import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.UserRepository;
+import com.example.helpdesk.service.EmailService;
 import com.example.helpdesk.service.NotificationService;
 import com.example.helpdesk.service.TicketCommentService;
 
@@ -25,17 +26,20 @@ public class TicketCommentServiceImpl implements TicketCommentService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public TicketCommentServiceImpl(
             TicketCommentRepository ticketCommentRepository,
             TicketRepository ticketRepository,
             UserRepository userRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            EmailService emailService
     ) {
         this.ticketCommentRepository = ticketCommentRepository;
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
         ticketComment.setTicket(ticket);
         ticketComment.setUser(commentAuthor);
         TicketComment savedComment = ticketCommentRepository.save(ticketComment);
-        createNotificationForComment(ticket, commentAuthor);
+        createNotificationForComment(ticket, savedComment, commentAuthor);
         return mapToResponseDTO(savedComment);
     }
 
@@ -95,7 +99,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    private void createNotificationForComment(Ticket ticket, User commentAuthor) {
+    private void createNotificationForComment(Ticket ticket, TicketComment comment, User commentAuthor) {
         if (ticket == null || commentAuthor == null) {
             return;
         }
@@ -108,6 +112,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
                     ticket.getCreatedBy().getId(),
                     ticket.getId()
             ));
+            emailService.sendCommentAdded(ticket, comment, ticket.getCreatedBy());
         }
 
         if (ticket.getAssignedTo() != null && !ticket.getAssignedTo().getId().equals(commentAuthor.getId())) {
@@ -118,6 +123,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
                     ticket.getAssignedTo().getId(),
                     ticket.getId()
             ));
+            emailService.sendCommentAdded(ticket, comment, ticket.getAssignedTo());
         }
     }
 
