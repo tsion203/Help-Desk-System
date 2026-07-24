@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
@@ -96,6 +98,12 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO) {
         Ticket ticket = findTicketById(id);
+        TicketStatus oldStatus = ticket.getStatus();
+        User oldAssignee = ticket.getAssignedTo();
+        User newAssignee = oldAssignee;
+        boolean statusChanged = ticketUpdateDTO.getStatus() != null
+                && ticketUpdateDTO.getStatus() != oldStatus;
+        boolean assigneeChanged = false;
 
         if (ticketUpdateDTO.getSubject() != null) {
             ticket.setSubject(ticketUpdateDTO.getSubject());
@@ -113,7 +121,9 @@ public class TicketServiceImpl implements TicketService {
             ticket.setPriority(ticketUpdateDTO.getPriority());
         }
         if (ticketUpdateDTO.getAssignedToId() != null) {
-            ticket.setAssignedTo(findUserById(ticketUpdateDTO.getAssignedToId()));
+            newAssignee = findUserById(ticketUpdateDTO.getAssignedToId());
+            assigneeChanged = oldAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
+            ticket.setAssignedTo(newAssignee);
         }
         if (ticketUpdateDTO.getCategoryId() != null) {
             ticket.setCategory(findCategoryById(ticketUpdateDTO.getCategoryId()));
@@ -121,8 +131,14 @@ public class TicketServiceImpl implements TicketService {
 
         ticket.setUpdatedAt(LocalDateTime.now());
         Ticket savedTicket = ticketRepository.save(ticket);
-        if (ticketUpdateDTO.getStatus() != null) {
+
+        User updatedBy = findCurrentUserOrNull();
+        if (statusChanged) {
+            saveStatusHistory(savedTicket, oldStatus, ticketUpdateDTO.getStatus(), updatedBy);
             createNotificationForStatusChange(savedTicket, ticketUpdateDTO.getStatus());
+        }
+        if (assigneeChanged) {
+            saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
         }
         return mapToResponseDTO(savedTicket);
     }
@@ -147,13 +163,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setUpdatedAt(LocalDateTime.now());
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        TicketAssignmentHistory history = new TicketAssignmentHistory();
-        history.setTicket(savedTicket);
-        history.setOldAssignee(oldAssignee);
-        history.setNewAssignee(newAssignee);
-        history.setAssignedBy(assignedBy);
-        history.setAssignedAt(LocalDateTime.now());
-        ticketAssignmentHistoryRepository.save(history);
+        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, assignedBy);
 
         createNotificationForAssignment(savedTicket, oldAssignee, newAssignee, assignedBy);
         return mapToResponseDTO(savedTicket);
@@ -173,13 +183,7 @@ public class TicketServiceImpl implements TicketService {
         }
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        TicketStatusHistory history = new TicketStatusHistory();
-        history.setTicket(savedTicket);
-        history.setOldStatus(oldStatus != null ? oldStatus.name() : null);
-        history.setNewStatus(newStatus.name());
-        history.setChangedBy(changedBy);
-        history.setChangedAt(LocalDateTime.now());
-        ticketStatusHistoryRepository.save(history);
+        saveStatusHistory(savedTicket, oldStatus, newStatus, changedBy);
 
         createNotificationForStatusChange(savedTicket, newStatus);
         return mapToResponseDTO(savedTicket);
@@ -234,21 +238,45 @@ public class TicketServiceImpl implements TicketService {
         return findCategoryById(id);
     }
     @Override
+    @Transactional(readOnly = true)
     public List<TicketAssignmentHistoryResponseDTO> getAssignmentHistory(Long ticketId) {
-
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
-
-        return mapAssignmentHistory(ticket.getAssignmentHistory());
+        findTicketById(ticketId);
+        return mapAssignmentHistory(ticketAssignmentHistoryRepository.findByTicketIdOrderByAssignedAtAsc(ticketId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TicketStatusHistoryResponseDTO> getStatusHistory(Long ticketId) {
+        findTicketById(ticketId);
+        return mapStatusHistory(ticketStatusHistoryRepository.findByTicketIdOrderByChangedAtAsc(ticketId));
+    }
 
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+    private void saveStatusHistory(Ticket ticket, TicketStatus oldStatus, TicketStatus newStatus, User changedBy) {
+        TicketStatusHistory history = new TicketStatusHistory();
+        history.setTicket(ticket);
+        history.setOldStatus(oldStatus != null ? oldStatus.name() : null);
+        history.setNewStatus(newStatus.name());
+        history.setChangedBy(changedBy);
+        history.setChangedAt(LocalDateTime.now());
+        ticketStatusHistoryRepository.save(history);
+    }
 
-        return mapStatusHistory(ticket.getStatusHistory());
+    private void saveAssignmentHistory(Ticket ticket, User oldAssignee, User newAssignee, User assignedBy) {
+        TicketAssignmentHistory history = new TicketAssignmentHistory();
+        history.setTicket(ticket);
+        history.setOldAssignee(oldAssignee);
+        history.setNewAssignee(newAssignee);
+        history.setAssignedBy(assignedBy);
+        history.setAssignedAt(LocalDateTime.now());
+        ticketAssignmentHistoryRepository.save(history);
+    }
+
+    private User findCurrentUserOrNull() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return userRepository.findByEmail(authentication.getName()).orElse(null);
     }
     
     private void createNotificationForTicketCreation(Ticket ticket) {
