@@ -28,6 +28,7 @@ import { TicketAttachmentFormComponent } from './components/tickets/ticket-attac
 
 import { TicketAssignmentHistoryComponent } from './components/tickets/ticket-assignment-history/ticket-assignment-history.component';
 import { TicketStatusHistoryComponent } from './components/tickets/ticket-status-history/ticket-status-history.component';
+import { NotificationListComponent } from './components/notifications/notification-list/notification-list.component';
 
 export const routes: Routes = [
 
@@ -60,6 +61,8 @@ export const routes: Routes = [
   { path: 'tickets/:id/assignment-history', component: TicketAssignmentHistoryComponent },
 
   { path: 'tickets/:id/status-history', component: TicketStatusHistoryComponent },
+
+  { path: 'notifications', component: NotificationListComponent },
 
   { path: '**', redirectTo: '' }
 
