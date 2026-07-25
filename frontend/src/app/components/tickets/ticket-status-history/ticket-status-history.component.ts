@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { TicketService } from '../../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-status-history',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './ticket-status-history.component.html',
 })
-export class TicketStatusHistoryComponent {}
+export class TicketStatusHistoryComponent {
+  constructor(private readonly ticketService: TicketService) {}
+}

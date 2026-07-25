@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {}
+export class LoginComponent {
+  constructor(private readonly authService: AuthService) {}
+}

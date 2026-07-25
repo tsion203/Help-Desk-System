@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DepartmentService } from '../../../services/department.service';
 
 @Component({
   selector: 'app-department-list',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './department-list.component.html',
 })
-export class DepartmentListComponent {}
+export class DepartmentListComponent {
+  constructor(private readonly departmentService: DepartmentService) {}
+}

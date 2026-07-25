@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-notification-list',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './notification-list.component.html',
 })
-export class NotificationListComponent {}
+export class NotificationListComponent {
+  constructor(private readonly notificationService: NotificationService) {}
+}

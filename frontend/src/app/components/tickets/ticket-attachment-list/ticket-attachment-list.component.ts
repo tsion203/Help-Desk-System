@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { TicketAttachmentService } from '../../../services/ticket-attachment.service';
 
 @Component({
   selector: 'app-ticket-attachment-list',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './ticket-attachment-list.component.html',
 })
-export class TicketAttachmentListComponent {}
+export class TicketAttachmentListComponent {
+  constructor(private readonly ticketAttachmentService: TicketAttachmentService) {}
+}

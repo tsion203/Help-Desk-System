@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RoleService } from '../../../services/role.service';
 
 @Component({
   selector: 'app-role-list',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './role-list.component.html',
 })
-export class RoleListComponent {}
+export class RoleListComponent {
+  constructor(private readonly roleService: RoleService) {}
+}

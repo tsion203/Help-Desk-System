@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  constructor(private readonly notificationService: NotificationService) {}
+}

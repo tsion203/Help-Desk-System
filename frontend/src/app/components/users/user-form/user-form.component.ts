@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-user-form',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './user-form.component.html',
 })
-export class UserFormComponent {}
+export class UserFormComponent {
+  constructor(private readonly userService: UserService) {}
+}

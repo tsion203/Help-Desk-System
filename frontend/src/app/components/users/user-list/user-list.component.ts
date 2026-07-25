@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-user-list',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './user-list.component.html',
 })
-export class UserListComponent {}
+export class UserListComponent {
+  constructor(private readonly userService: UserService) {}
+}

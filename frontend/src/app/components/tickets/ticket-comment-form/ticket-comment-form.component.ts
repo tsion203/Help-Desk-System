@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { TicketCommentService } from '../../../services/ticket-comment.service';
 
 @Component({
   selector: 'app-ticket-comment-form',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './ticket-comment-form.component.html',
 })
-export class TicketCommentFormComponent {}
+export class TicketCommentFormComponent {
+  constructor(private readonly ticketCommentService: TicketCommentService) {}
+}
