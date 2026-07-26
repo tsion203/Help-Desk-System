@@ -1,3 +1,49 @@
-<aside>
-  <h3>Sidebar</h3>
+<aside
+  class="sidebar"
+  [class.collapsed]="isCollapsed"
+  aria-label="Primary navigation"
+>
+  <div class="sidebar-header">
+    <span class="sidebar-title">Navigation</span>
+    <button
+      class="collapse-button"
+      type="button"
+      (click)="toggleSidebar()"
+      [attr.aria-expanded]="!isCollapsed"
+      [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <span aria-hidden="true">{{ isCollapsed ? '›' : '‹' }}</span>
+    </button>
+  </div>
+
+  <nav>
+    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
+      <span class="nav-icon" aria-hidden="true">▦</span>
+      <span class="nav-text">Dashboard</span>
+    </a>
+    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" title="Tickets">
+      <span class="nav-icon" aria-hidden="true">⌑</span>
+      <span class="nav-text">Tickets</span>
+    </a>
+    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" title="My assigned tickets">
+      <span class="nav-icon" aria-hidden="true">✓</span>
+      <span class="nav-text">My assigned</span>
+    </a>
+
+    <ng-container *ngIf="isAdmin">
+      <p class="nav-label">Administration</p>
+      <a class="nav-link" routerLink="/departments" routerLinkActive="active" title="Departments">
+        <span class="nav-icon" aria-hidden="true">⌂</span>
+        <span class="nav-text">Departments</span>
+      </a>
+      <a class="nav-link" routerLink="/users" routerLinkActive="active" title="Users">
+        <span class="nav-icon" aria-hidden="true">♙</span>
+        <span class="nav-text">Users</span>
+      </a>
+      <a class="nav-link" routerLink="/roles" routerLinkActive="active" title="Roles">
+        <span class="nav-icon" aria-hidden="true">⚿</span>
+        <span class="nav-text">Roles</span>
+      </a>
+    </ng-container>
+  </nav>
 </aside>

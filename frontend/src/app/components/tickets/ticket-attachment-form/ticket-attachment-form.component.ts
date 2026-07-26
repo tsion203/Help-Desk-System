@@ -6,6 +6,7 @@ import { TicketAttachmentService } from '../../../services/ticket-attachment.ser
   standalone: true,
   imports: [],
   templateUrl: './ticket-attachment-form.component.html',
+  styleUrl: './ticket-attachment-form.component.scss',
 })
 export class TicketAttachmentFormComponent {
   constructor(private readonly ticketAttachmentService: TicketAttachmentService) {}

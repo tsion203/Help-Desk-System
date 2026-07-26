@@ -6,6 +6,7 @@ import { TicketService } from '../../../services/ticket.service';
   standalone: true,
   imports: [],
   templateUrl: './ticket-details.component.html',
+  styleUrl: './ticket-details.component.scss',
 })
 export class TicketDetailsComponent {
   constructor(private readonly ticketService: TicketService) {}

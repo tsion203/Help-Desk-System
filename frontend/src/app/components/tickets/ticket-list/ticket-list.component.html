@@ -1,4 +1,62 @@
-<section>
-  <h2>Ticket List</h2>
-  <p>Ticket list content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Tickets</h1>
+      <p>Track and manage support requests.</p>
+    </div>
+    <a class="btn btn-primary" href="/tickets/new">New ticket</a>
+  </header>
+  <section class="table-card">
+    <div class="toolbar">
+      <input class="search" type="search" placeholder="Search ID, subject, requester" /><select>
+        <option>Status: all</option>
+        <option>Open</option>
+        <option>In progress</option>
+        <option>Resolved</option></select
+      ><select>
+        <option>Priority: all</option>
+        <option>Critical</option>
+        <option>High</option></select
+      ><select>
+        <option>Category: all</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID ↕</th>
+          <th>Subject ↕</th>
+          <th>Requester</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="/tickets/1042">HD-1042</a></td>
+          <td>Unable to access VPN</td>
+          <td>Alex Morgan</td>
+          <td><span class="badge status-open">Open</span></td>
+          <td><span class="badge priority-high">High</span></td>
+          <td>12 min ago</td>
+        </tr>
+        <tr>
+          <td>HD-1041</td>
+          <td>Laptop software request</td>
+          <td>Jamie Lee</td>
+          <td><span class="badge status-progress">In progress</span></td>
+          <td><span class="badge priority-medium">Medium</span></td>
+          <td>1 hr ago</td>
+        </tr>
+      </tbody>
+    </table>
+    <footer class="pagination">
+      <span>Showing 1–10 of 82 tickets</span>
+      <nav>
+        <button class="btn btn-secondary">Previous</button
+        ><button class="btn btn-secondary">Next</button>
+      </nav>
+    </footer>
+  </section>
+</main>

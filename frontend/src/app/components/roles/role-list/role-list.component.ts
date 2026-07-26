@@ -6,6 +6,7 @@ import { RoleService } from '../../../services/role.service';
   standalone: true,
   imports: [],
   templateUrl: './role-list.component.html',
+  styleUrl: './role-list.component.scss',
 })
 export class RoleListComponent {
   constructor(private readonly roleService: RoleService) {}

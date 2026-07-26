@@ -1,0 +1,8 @@
+:host { --primary:#000066; display:block; } 
+.navbar{height:48px;background:#000040;color:#fff;display:flex;align-items:center;gap:22px;padding:0 28px}
+.brand{font-weight:700;font-size:18px; width: 193px}
+.nav-search{flex:1;max-width:210px}
+.nav-search input{width:100%;border:0;border-radius:7px;padding:9px 12px}
+.nav-actions{margin-left:auto;display:flex;align-items:center;gap:15px}
+.icon-button{background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;background:#c7d2fe;color:#000066;display:grid;place-items:center;font-weight:700}

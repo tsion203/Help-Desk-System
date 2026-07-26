@@ -1,0 +1,15 @@
+.application-layout {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+.application-content {
+  min-width: 0;
+  flex: 1;
+}
+
+@media (max-width: 800px) {
+  .application-layout {
+    display: block;
+  }
+}

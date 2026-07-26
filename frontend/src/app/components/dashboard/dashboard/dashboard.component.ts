@@ -6,6 +6,7 @@ import { NotificationService } from '../../../services/notification.service';
   standalone: true,
   imports: [],
   templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
   constructor(private readonly notificationService: NotificationService) {}

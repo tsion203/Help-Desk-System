@@ -1,1 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root { --navy:#000066; --navy-dark:#000040; --navy-hover:#1a1a8c; --open:#2563eb; --progress:#f59e0b; --resolved:#10b981; --closed:#6b7280; --critical:#ef4444; --ink:#172033; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fc; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font:14px/1.5 Inter,Arial,sans-serif; }
+button,input,select,textarea { font:inherit; }
+a { color:inherit; text-decoration:none; }
+.page { max-width:1440px; margin:auto; padding:32px; }
+.page-header,.toolbar,.card-header,.meta-strip,.footer-inner { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.page-header { margin-bottom:24px; } .page-header h1 { margin:0; font-size:25px; } .page-header p { margin:4px 0 0; color:var(--muted); }
+.card,.table-card,.form-card,.auth-card,.profile-card { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:0 5px 18px rgba(15,23,42,.06); }
+.card,.form-card,.profile-card { padding:22px; } .table-card { overflow:hidden; }
+.grid { display:grid; gap:18px; } .grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); } .grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)); } .grid-4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.metric { padding:20px; border-radius:14px; background:#fff; border:1px solid var(--line); box-shadow:0 4px 12px rgba(15,23,42,.05); } .metric small,.muted { color:var(--muted); } .metric strong { display:block; font-size:28px; margin-top:4px; }
+.btn { border:0; border-radius:8px; padding:10px 15px; cursor:pointer; font-weight:600; transition:.2s; } .btn-primary { background:var(--navy); color:#fff; } .btn-primary:hover { background:var(--navy-hover); } .btn-secondary { background:#eef2ff; color:var(--navy); } .btn-danger { background:#fef2f2; color:#b91c1c; }
+.field { display:grid; gap:6px; } .field label { font-weight:600; } .field input,.field select,.field textarea,.search { width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; background:#fff; } .field input:focus,.field select:focus,.field textarea:focus,.search:focus { outline:3px solid rgba(37,99,235,.18); border-color:var(--open); } .error { min-height:18px; color:#dc2626; font-size:12px; }
+.badge { display:inline-flex; align-items:center; border-radius:999px; padding:4px 9px; font-size:12px; font-weight:700; } .status-open{background:#dbeafe;color:#1d4ed8}.status-progress{background:#fef3c7;color:#b45309}.status-resolved{background:#d1fae5;color:#047857}.status-closed{background:#e5e7eb;color:#4b5563}.priority-high,.priority-critical{background:#fee2e2;color:#b91c1c}.priority-medium{background:#fef3c7;color:#b45309}.priority-low{background:#e0e7ff;color:#3730a3}
+table { width:100%; border-collapse:collapse; } th,td { padding:14px 18px; text-align:left; border-bottom:1px solid var(--line); } th { color:var(--muted); background:#f8fafc; font-size:12px; text-transform:uppercase; } tr:hover td { background:#fafbff; } .table-actions { display:flex; gap:8px; }
+.toolbar { padding:16px; border-bottom:1px solid var(--line); flex-wrap:wrap; } .toolbar .search { max-width:300px; } .pagination { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; color:var(--muted); } .pagination nav { display:flex; gap:6px; }
+.timeline { border-left:2px solid #c7d2fe; margin:8px 0 0 7px; padding-left:20px; } .timeline-item { position:relative; padding:0 0 20px; } .timeline-item:before { content:''; position:absolute; width:10px; height:10px; border-radius:50%; background:var(--navy); left:-26px; top:5px; }
+.dropzone { border:2px dashed #a5b4fc; border-radius:10px; padding:25px; text-align:center; background:#f8faff; color:var(--muted); } .stack { display:grid; gap:14px; }
+@media (max-width:800px) { .page{padding:20px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.page-header,.meta-strip{align-items:flex-start;flex-direction:column} .table-card{overflow:auto} }

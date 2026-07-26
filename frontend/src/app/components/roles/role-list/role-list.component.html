@@ -1,4 +1,30 @@
-<section>
-  <h2>Role List</h2>
-  <p>Role list content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Roles</h1>
+      <p>Control system permissions.</p>
+    </div>
+    <a class="btn btn-primary" href="/roles/new">Add role</a>
+  </header>
+  <section class="table-card">
+    <div class="toolbar"><input class="search" type="search" placeholder="Search roles" /></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Description</th>
+          <th>Users</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Administrator</td>
+          <td>Full system access</td>
+          <td>3</td>
+          <td><button class="btn btn-secondary">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>

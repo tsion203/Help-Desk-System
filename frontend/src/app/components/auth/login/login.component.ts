@@ -6,6 +6,7 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [],
   templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   constructor(private readonly authService: AuthService) {}

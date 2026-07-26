@@ -1,4 +1,31 @@
-<section>
-  <h2>Login</h2>
-  <p>Authentication form will go here.</p>
-</section>
+<main class="auth-card" aria-labelledby="login-title">
+  <header class="auth-head">
+    <p>HELP DESK</p>
+    <h1 id="login-title">Welcome back</h1>
+    <span>Sign in to manage your tickets</span>
+  </header>
+  <form class="auth-body stack">
+    <div class="field">
+      <label for="email">Work email</label
+      ><input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="name@company.com"
+        required
+      /><span class="error" aria-live="polite"></span>
+    </div>
+    <div class="field">
+      <label for="password">Password</label
+      ><input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+        required
+      /><span class="error" aria-live="polite"></span>
+    </div>
+    <label class="remember"><input type="checkbox" /> Remember me</label
+    ><button class="btn btn-primary" type="submit">Sign in</button>
+  </form>
+</main>

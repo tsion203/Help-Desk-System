@@ -6,6 +6,7 @@ import { DepartmentService } from '../../../services/department.service';
   standalone: true,
   imports: [],
   templateUrl: './department-form.component.html',
+  styleUrl: './department-form.component.scss',
 })
 export class DepartmentFormComponent {
   constructor(private readonly departmentService: DepartmentService) {}

@@ -6,6 +6,7 @@ import { UserService } from '../../../services/user.service';
   standalone: true,
   imports: [],
   templateUrl: './user-details.component.html',
+  styleUrl: './user-details.component.scss',
 })
 export class UserDetailsComponent {
   constructor(private readonly userService: UserService) {}

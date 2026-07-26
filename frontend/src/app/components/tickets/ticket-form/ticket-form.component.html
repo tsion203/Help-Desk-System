@@ -1,4 +1,54 @@
-<section>
-  <h2>Ticket Form</h2>
-  <p>Ticket form content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Create ticket</h1>
+      <p>Provide enough detail for the support team to help quickly.</p>
+    </div>
+  </header>
+  <form class="form-card stack">
+    <div class="grid grid-2">
+      <div class="field">
+        <label for="subject">Subject</label
+        ><input id="subject" required placeholder="Briefly describe the issue" /><span
+          class="error"
+        ></span>
+      </div>
+      <div class="field">
+        <label for="category">Category</label
+        ><select id="category">
+          <option>Select a category</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="priority">Priority</label
+        ><select id="priority">
+          <option>Medium</option>
+          <option>High</option>
+          <option>Critical</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="assignee">Assignee</label
+        ><select id="assignee">
+          <option>Unassigned</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="description">Description</label
+      ><textarea
+        id="description"
+        rows="7"
+        placeholder="Explain what happened, what you expected, and any error messages."
+      ></textarea
+      ><span class="error"></span>
+    </div>
+    <label class="dropzone"
+      >Drop attachments here or <input type="file" hidden /> <strong>browse files</strong></label
+    >
+    <div>
+      <button class="btn btn-primary" type="submit">Create ticket</button>
+      <a class="btn btn-secondary" href="/tickets">Cancel</a>
+    </div>
+  </form>
+</main>

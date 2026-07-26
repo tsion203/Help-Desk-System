@@ -6,6 +6,7 @@ import { RoleService } from '../../../services/role.service';
   standalone: true,
   imports: [],
   templateUrl: './role-form.component.html',
+  styleUrl: './role-form.component.scss',
 })
 export class RoleFormComponent {
   constructor(private readonly roleService: RoleService) {}

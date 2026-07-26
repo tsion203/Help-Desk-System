@@ -1,0 +1,93 @@
+:host {
+  --primary: #000066;
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  padding: 24px;
+  overflow: hidden;
+  place-items: center;
+  background: linear-gradient(125deg, #000040 0%, #000066 48%, #1a1a8c 100%);
+}
+
+:host::before,
+:host::after {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  content: '';
+  opacity: 0.38;
+  filter: blur(4px);
+  animation: drift 14s ease-in-out infinite alternate;
+}
+
+:host::before {
+  top: -160px;
+  left: -110px;
+  background: #38bdf8;
+}
+
+:host::after {
+  right: -140px;
+  bottom: -180px;
+  background: #a78bfa;
+  animation-delay: -6s;
+}
+
+.auth-card {
+  z-index: 1;
+  width: min(100%, 430px);
+  overflow: hidden;
+  box-shadow: 0 24px 55px rgb(0 0 32 / 32%);
+  animation: card-enter 500ms ease-out;
+}
+
+.auth-head {
+  padding: 28px;
+  color: #fff;
+  background: rgb(0 0 64 / 88%);
+}
+
+.auth-head h1 {
+  margin: 0;
+}
+
+.auth-body {
+  padding: 28px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  width: 100%;
+}
+
+@keyframes drift {
+  to {
+    transform: translate(80px, 55px) scale(1.16);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host::before,
+  :host::after,
+  .auth-card {
+    animation: none;
+  }
+}

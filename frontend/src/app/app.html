@@ -1,2 +1,14 @@
- <router-outlet></router-outlet>
-   
+@if (showApplicationShell) {
+  <app-navbar />
+
+  <div class="application-layout">
+    <app-sidebar />
+    <main class="application-content">
+      <router-outlet />
+    </main>
+  </div>
+
+  <app-footer />
+} @else {
+  <router-outlet />
+}

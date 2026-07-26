@@ -1,4 +1,37 @@
-<section>
-  <h2>Department List</h2>
-  <p>Department list content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Departments</h1>
+      <p>Manage service teams and ownership.</p>
+    </div>
+    <a class="btn btn-primary" href="/departments/new">Add department</a>
+  </header>
+  <section class="table-card">
+    <div class="toolbar">
+      <input class="search" type="search" placeholder="Search departments" /><select>
+        <option>All statuses</option>
+        <option>Active</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Manager</th>
+          <th>Users</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Information Technology</td>
+          <td>Jordan Davis</td>
+          <td>24</td>
+          <td><span class="badge status-resolved">Active</span></td>
+          <td><button class="btn btn-secondary">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
