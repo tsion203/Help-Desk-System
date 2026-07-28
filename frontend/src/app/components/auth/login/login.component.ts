@@ -1,13 +1,23 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../../services/auth.service';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { LoginRequest } from '../../../models/auth-request';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [],
+  imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  constructor(private readonly authService: AuthService) {}
+  readonly loginForm = new FormGroup({
+    email: new FormControl('', { nonNullable: true }),
+    password: new FormControl('', { nonNullable: true }),
+  });
+
+  loginRequest: LoginRequest | null = null;
+
+  onLogin(): void {
+    this.loginRequest = this.loginForm.getRawValue();
+  }
 }

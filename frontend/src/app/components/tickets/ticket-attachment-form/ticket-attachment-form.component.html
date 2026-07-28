@@ -1,4 +1,11 @@
-<section>
-  <h2>Ticket Attachment Form</h2>
-  <p>Attachment form content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header"><h1>New ticket attachment</h1></header>
+  <form class="form-card stack" [formGroup]="attachmentForm" (ngSubmit)="onSave()">
+    <div class="field"><label for="fileName">File name</label><input id="fileName" formControlName="fileName" /></div>
+    <div class="field"><label for="filePath">File path</label><input id="filePath" formControlName="filePath" /></div>
+    <div class="field"><label for="fileSize">File size</label><input id="fileSize" type="number" formControlName="fileSize" /></div>
+    <div class="field"><label for="ticketId">Ticket ID</label><input id="ticketId" type="number" formControlName="ticketId" /></div>
+    <div class="field"><label for="uploadedById">Uploaded by</label><input id="uploadedById" type="number" formControlName="uploadedById" /></div>
+    <button class="btn btn-primary" type="submit">Save attachment</button>
+  </form>
+</main>

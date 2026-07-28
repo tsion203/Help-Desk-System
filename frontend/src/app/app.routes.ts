@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { LoginComponent } from './components/auth/login/login.component';
+import { RegisterComponent } from './components/auth/register/register.component';
 
 import { HomeComponent } from './components/home/home.component';
 import { DashboardComponent } from './components/dashboard/dashboard/dashboard.component';
@@ -33,6 +34,7 @@ import { NotificationListComponent } from './components/notifications/notificati
 export const routes: Routes = [
 
   { path: '', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
 
   { path: 'home', component: HomeComponent, },
   { path: 'dashboard', component: DashboardComponent },

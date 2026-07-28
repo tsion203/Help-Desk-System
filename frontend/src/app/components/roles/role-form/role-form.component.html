@@ -5,15 +5,15 @@
       <p>Define a permission group.</p>
     </div>
   </header>
-  <form class="form-card stack">
+  <form class="form-card stack" [formGroup]="roleForm" (ngSubmit)="onSave()">
     <div class="field">
-      <label>Role name</label><input required placeholder="e.g. Support agent" /><span
+      <label for="name">Role name</label><input id="name" formControlName="name" placeholder="e.g. Support agent" /><span
         class="error"
       ></span>
     </div>
-    <div class="field"><label>Description</label><textarea rows="4"></textarea></div>
+    <div class="field"><label for="description">Description</label><textarea id="description" rows="4" formControlName="description"></textarea></div>
     <div>
-      <button class="btn btn-primary">Save role</button>
+      <button class="btn btn-primary" type="submit">Save role</button>
       <a class="btn btn-secondary" href="/roles">Cancel</a>
     </div>
   </form>

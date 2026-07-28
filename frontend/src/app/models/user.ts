@@ -12,3 +12,14 @@ export interface User {
   department: Department;
   roles: Role[];
 }
+
+export interface UserRequest {
+  email: string;
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  active: boolean;
+  departmentId: number;
+  roleIds: number[];
+}

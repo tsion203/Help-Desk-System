@@ -1,0 +1,18 @@
+<main class="auth-card" aria-labelledby="register-title">
+  <header class="auth-head">
+    <p>HELP DESK</p>
+    <h1 id="register-title">Create account</h1>
+  </header>
+  <form class="auth-body stack" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+    <div class="field"><label for="email">Email</label><input id="email" type="email" formControlName="email" /></div>
+    <div class="field"><label for="password">Password</label><input id="password" type="password" formControlName="password" /></div>
+    <div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" formControlName="employeeId" /></div>
+    <div class="field"><label for="firstName">First name</label><input id="firstName" formControlName="firstName" /></div>
+    <div class="field"><label for="lastName">Last name</label><input id="lastName" formControlName="lastName" /></div>
+    <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" formControlName="phoneNumber" /></div>
+    <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option></select></div>
+    <div class="field"><label for="roleIds">Roles</label><select id="roleIds" formControlName="roleIds" multiple></select></div>
+    <label><input type="checkbox" formControlName="active" /> Active</label>
+    <button class="btn btn-primary" type="submit">Register</button>
+  </form>
+</main>

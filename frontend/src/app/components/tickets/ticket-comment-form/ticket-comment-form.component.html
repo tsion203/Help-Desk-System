@@ -1,4 +1,9 @@
-<section>
-  <h2>Ticket Comment Form</h2>
-  <p>Comment form content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header"><h1>New ticket comment</h1></header>
+  <form class="form-card stack" [formGroup]="commentForm" (ngSubmit)="onSave()">
+    <div class="field"><label for="ticketId">Ticket ID</label><input id="ticketId" type="number" formControlName="ticketId" /></div>
+    <div class="field"><label for="userId">User ID</label><input id="userId" type="number" formControlName="userId" /></div>
+    <div class="field"><label for="comment">Comment</label><textarea id="comment" rows="5" formControlName="comment"></textarea></div>
+    <button class="btn btn-primary" type="submit">Save comment</button>
+  </form>
+</main>

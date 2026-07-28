@@ -3,3 +3,5 @@ export interface Department {
   name: string;
   description: string;
 }
+
+export type DepartmentRequest = Pick<Department, 'name' | 'description'>;

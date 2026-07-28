@@ -1,4 +1,16 @@
-<section>
-  <h2>User Form</h2>
-  <p>User form content will go here.</p>
-</section>
+<main class="page">
+  <header class="page-header"><h1>User form</h1></header>
+  <form class="form-card stack" [formGroup]="userForm" (ngSubmit)="onSave()">
+    <div class="grid grid-2">
+      <div class="field"><label for="email">Email</label><input id="email" type="email" formControlName="email" /></div>
+      <div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" formControlName="employeeId" /></div>
+      <div class="field"><label for="firstName">First name</label><input id="firstName" formControlName="firstName" /></div>
+      <div class="field"><label for="lastName">Last name</label><input id="lastName" formControlName="lastName" /></div>
+      <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" formControlName="phoneNumber" /></div>
+      <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option></select></div>
+      <div class="field"><label for="roleIds">Roles</label><select id="roleIds" formControlName="roleIds" multiple></select></div>
+    </div>
+    <label><input type="checkbox" formControlName="active" /> Active</label>
+    <button class="btn btn-primary" type="submit">Save user</button>
+  </form>
+</main>

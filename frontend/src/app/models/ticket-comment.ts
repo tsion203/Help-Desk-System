@@ -6,3 +6,5 @@ export interface TicketComment {
   userId: number;
   userName: string;
 }
+
+export type TicketCommentRequest = Pick<TicketComment, 'comment' | 'ticketId' | 'userId'>;

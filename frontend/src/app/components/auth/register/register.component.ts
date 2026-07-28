@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { UserRequest } from '../../../models/user';
+import { RegisterRequest } from '../../../models/auth-request';
 
 @Component({
-  selector: 'app-user-form',
+  selector: 'app-register',
   standalone: true,
   imports: [ReactiveFormsModule],
-  templateUrl: './user-form.component.html',
-  styleUrl: './user-form.component.scss',
+  templateUrl: './register.component.html',
 })
-export class UserFormComponent {
-  readonly userForm = new FormGroup({
+export class RegisterComponent {
+  readonly registerForm = new FormGroup({
     email: new FormControl('', { nonNullable: true }),
+    password: new FormControl('', { nonNullable: true }),
     employeeId: new FormControl('', { nonNullable: true }),
     firstName: new FormControl('', { nonNullable: true }),
     lastName: new FormControl('', { nonNullable: true }),
@@ -21,11 +21,11 @@ export class UserFormComponent {
     roleIds: new FormControl<number[]>([], { nonNullable: true }),
   });
 
-  userRequest: UserRequest | null = null;
+  registerRequest: RegisterRequest | null = null;
 
-  onSave(): void {
-    const value = this.userForm.getRawValue();
-    this.userRequest = {
+  onRegister(): void {
+    const value = this.registerForm.getRawValue();
+    this.registerRequest = {
       ...value,
       departmentId: Number(value.departmentId),
       roleIds: value.roleIds.map(Number),

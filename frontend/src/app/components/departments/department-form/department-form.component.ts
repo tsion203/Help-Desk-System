@@ -1,13 +1,23 @@
 import { Component } from '@angular/core';
-import { DepartmentService } from '../../../services/department.service';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { DepartmentRequest } from '../../../models/department';
 
 @Component({
   selector: 'app-department-form',
   standalone: true,
-  imports: [],
+  imports: [ReactiveFormsModule],
   templateUrl: './department-form.component.html',
   styleUrl: './department-form.component.scss',
 })
 export class DepartmentFormComponent {
-  constructor(private readonly departmentService: DepartmentService) {}
+  readonly departmentForm = new FormGroup({
+    name: new FormControl('', { nonNullable: true }),
+    description: new FormControl('', { nonNullable: true }),
+  });
+
+  departmentRequest: DepartmentRequest | null = null;
+
+  onSave(): void {
+    this.departmentRequest = this.departmentForm.getRawValue();
+  }
 }

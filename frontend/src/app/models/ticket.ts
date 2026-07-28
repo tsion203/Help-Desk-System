@@ -24,3 +24,13 @@ export interface Ticket {
   statusHistory: TicketStatusHistory[];
   assignmentHistory: TicketAssignmentHistory[];
 }
+
+export interface TicketRequest {
+  subject: string;
+  description: string;
+  status: string;
+  priority: string;
+  createdById: number;
+  assignedToId: number;
+  categoryId: number;
+}

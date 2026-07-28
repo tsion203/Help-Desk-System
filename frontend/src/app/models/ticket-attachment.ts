@@ -8,3 +8,8 @@ export interface TicketAttachment {
   uploadedById: number;
   uploadedByName: string;
 }
+
+export type TicketAttachmentRequest = Pick<
+  TicketAttachment,
+  'fileName' | 'filePath' | 'fileSize' | 'ticketId' | 'uploadedById'
+>;

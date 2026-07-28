@@ -4,11 +4,12 @@
     <h1 id="login-title">Welcome back</h1>
     <span>Sign in to manage your tickets</span>
   </header>
-  <form class="auth-body stack">
+  <form class="auth-body stack" [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <div class="field">
       <label for="email">Work email</label
       ><input
         id="email"
+        formControlName="email"
         type="email"
         autocomplete="email"
         placeholder="name@company.com"
@@ -19,13 +20,13 @@
       <label for="password">Password</label
       ><input
         id="password"
+        formControlName="password"
         type="password"
         autocomplete="current-password"
         placeholder="Enter your password"
         required
       /><span class="error" aria-live="polite"></span>
     </div>
-    <label class="remember"><input type="checkbox" /> Remember me</label
-    ><button class="btn btn-primary" type="submit">Sign in</button>
+    <button class="btn btn-primary" type="submit">Sign in</button>
   </form>
 </main>
