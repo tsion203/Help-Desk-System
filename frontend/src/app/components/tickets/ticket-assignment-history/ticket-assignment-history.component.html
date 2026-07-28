@@ -1,4 +1,3 @@
-<section>
-  <h2>Ticket Assignment History</h2>
-  <p>Assignment history content will go here.</p>
-</section>
+<section class="page"><h2>Ticket Assignment History</h2><p *ngIf="loading">Loading assignment history...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <div class="timeline-item" *ngFor="let item of assignmentHistory"><strong>{{ item.oldAssigneeName || 'Unassigned' }} → {{ item.newAssigneeName }}</strong><p>Assigned by {{ item.assignedByName }}</p><small>{{ item.assignedAt }}</small></div>
+  <p *ngIf="!loading && !errorMessage && assignmentHistory.length === 0">No assignment history found.</p></section>

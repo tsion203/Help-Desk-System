@@ -1,13 +1,18 @@
 import { Component } from '@angular/core';
-import { DepartmentService } from '../../../services/department.service';
+import { CommonModule } from '@angular/common';
+import { Department } from '../../../models/department';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-department-list',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './department-list.component.html',
   styleUrl: './department-list.component.scss',
 })
 export class DepartmentListComponent {
-  constructor(private readonly departmentService: DepartmentService) {}
+  departments: Department[] = [];
+  loading = false;
+  errorMessage = '';
+  readonly filterForm = new FormGroup({ search: new FormControl('', { nonNullable: true }), status: new FormControl('all', { nonNullable: true }) });
 }

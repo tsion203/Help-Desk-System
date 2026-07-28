@@ -1,4 +1,3 @@
-<section>
-  <h2>Ticket Comments</h2>
-  <p>Comment list content will go here.</p>
-</section>
+<section class="page"><h2>Ticket Comments</h2><p *ngIf="loading">Loading comments...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <article class="card" *ngFor="let comment of comments"><strong>{{ comment.userName }}</strong><p>{{ comment.comment }}</p><small>{{ comment.commentedAt }}</small></article>
+  <p *ngIf="!loading && !errorMessage && comments.length === 0">No comments found.</p></section>

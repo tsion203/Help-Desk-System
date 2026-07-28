@@ -17,6 +17,7 @@
         <label for="category">Category</label
         ><select id="category" formControlName="categoryId">
           <option [ngValue]="0">Select a category</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
         </select>
       </div>
       <div class="field">
@@ -32,10 +33,11 @@
         <label for="assignee">Assignee</label
         ><select id="assignee" formControlName="assignedToId">
           <option [ngValue]="0">Unassigned</option>
+          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
         </select>
       </div>
       <div class="field">
-        <label for="createdBy">Created by</label><select id="createdBy" formControlName="createdById"><option [ngValue]="0">Select requester</option></select>
+        <label for="createdBy">Created by</label><select id="createdBy" formControlName="createdById"><option [ngValue]="0">Select requester</option><option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option></select>
       </div>
       <div class="field">
         <label for="status">Status</label><select id="status" formControlName="status"><option value="OPEN">Open</option></select>

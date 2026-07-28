@@ -7,31 +7,34 @@
     <a class="btn btn-primary" href="/departments/new">Add department</a>
   </header>
   <section class="table-card">
-    <div class="toolbar">
-      <input class="search" type="search" placeholder="Search departments" /><select>
-        <option>All statuses</option>
-        <option>Active</option>
+    <form class="toolbar" [formGroup]="filterForm">
+      <input class="search" type="search" formControlName="search" placeholder="Search departments" /><select formControlName="status">
+        <option value="all">All statuses</option>
+        <option value="active">Active</option>
       </select>
-    </div>
+    </form>
     <table>
       <thead>
         <tr>
           <th>Name</th>
-          <th>Manager</th>
-          <th>Users</th>
-          <th>Status</th>
+          <th>Description</th>
+          <th>ID</th>
+          <th>Availability</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Information Technology</td>
-          <td>Jordan Davis</td>
-          <td>24</td>
-          <td><span class="badge status-resolved">Active</span></td>
+        <tr *ngFor="let department of departments">
+          <td>{{ department.name }}</td>
+          <td>{{ department.description }}</td>
+          <td>{{ department.id }}</td>
+          <td><span class="badge status-resolved">Available</span></td>
           <td><button class="btn btn-secondary">Edit</button></td>
         </tr>
       </tbody>
     </table>
+    <p *ngIf="loading">Loading departments...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p *ngIf="!loading && !errorMessage && departments.length === 0">No departments found.</p>
   </section>
 </main>

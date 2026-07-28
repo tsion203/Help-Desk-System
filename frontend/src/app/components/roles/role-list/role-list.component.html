@@ -7,24 +7,27 @@
     <a class="btn btn-primary" href="/roles/new">Add role</a>
   </header>
   <section class="table-card">
-    <div class="toolbar"><input class="search" type="search" placeholder="Search roles" /></div>
+    <form class="toolbar" [formGroup]="filterForm"><input class="search" type="search" formControlName="search" placeholder="Search roles" /></form>
     <table>
       <thead>
         <tr>
           <th>Role</th>
           <th>Description</th>
-          <th>Users</th>
+          <th>ID</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Administrator</td>
-          <td>Full system access</td>
-          <td>3</td>
+        <tr *ngFor="let role of roles">
+          <td>{{ role.name }}</td>
+          <td>{{ role.description }}</td>
+          <td>{{ role.id }}</td>
           <td><button class="btn btn-secondary">Edit</button></td>
         </tr>
       </tbody>
     </table>
+    <p *ngIf="loading">Loading roles...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p *ngIf="!loading && !errorMessage && roles.length === 0">No roles found.</p>
   </section>
 </main>

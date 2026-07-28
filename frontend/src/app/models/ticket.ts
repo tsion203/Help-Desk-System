@@ -34,3 +34,8 @@ export interface TicketRequest {
   assignedToId: number;
   categoryId: number;
 }
+
+export type TicketUpdateRequest = Pick<
+  TicketRequest,
+  'subject' | 'description' | 'status' | 'priority' | 'assignedToId' | 'categoryId'
+>;

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LoginRequest } from '../../../models/auth-request';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -16,6 +17,7 @@ export class LoginComponent {
   });
 
   loginRequest: LoginRequest | null = null;
+  errorMessage = '';
 
   onLogin(): void {
     this.loginRequest = this.loginForm.getRawValue();

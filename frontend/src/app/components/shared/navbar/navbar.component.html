@@ -1,10 +1,1 @@
-<header class="navbar">
-  <a class="brand" href="/dashboard">HelpDesk      </a
-  ><label class="nav-search"
-    ><input type="search" placeholder=" Search ticket ID"
-  /></label>
-  <div class="nav-actions">
-    <button class="icon-button" aria-label="Notifications">♧</button
-    ><button class="avatar" aria-label="Open profile menu">JD</button>
-  </div>
-</header>
+<header class="navbar"><span class="brand">{{ appName }}</span><form class="nav-search" [formGroup]="searchForm"><label><input type="search" formControlName="search" placeholder="Search ticket ID" /></label></form><div class="nav-actions"><button class="icon-button" aria-label="Notifications">Notifications <span class="badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span></button><button class="avatar" aria-label="Open profile menu" *ngIf="userInitials">{{ userInitials }}</button></div></header>

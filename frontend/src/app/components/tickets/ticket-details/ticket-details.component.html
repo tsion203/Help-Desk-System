@@ -1,60 +1,11 @@
-<main class="page">
-  <header class="page-header">
-    <div>
-      <p class="muted">Ticket HD-1042</p>
-      <h1>Unable to access VPN</h1>
-    </div>
-    <a class="btn btn-primary" href="/tickets/1042/edit">Update ticket</a>
-  </header>
-  <section class="card meta-strip">
-    <span><strong>Created</strong><br />Jul 26, 2026</span
-    ><span class="badge status-progress">In progress</span
-    ><span class="badge priority-high">High priority</span
-    ><span><strong>Assigned to</strong><br />Jordan Davis</span>
-  </section>
-  <div class="grid grid-3" style="margin-top: 18px">
-    <section class="card" style="grid-column: span 2">
-      <h2>Description</h2>
-      <p>
-        The VPN client displays an authentication error when connecting from home. The issue started
-        this morning after the password reset.
-      </p>
-      <hr />
-      <h2>Attachments</h2>
-      <p class="muted">vpn-error.png · 1.2 MB</p>
-      <label class="dropzone">Drop files here or browse</label>
-      <hr />
-      <h2>Conversation</h2>
-      <article class="card">
-        <strong>Jordan Davis</strong>
-        <p>We are reviewing the access logs now.</p>
-        <small class="muted">12 minutes ago</small>
-      </article>
-      <form class="stack" style="margin-top: 14px">
-        <textarea rows="4" placeholder="Write a reply..."></textarea
-        ><button class="btn btn-primary" type="submit">Post comment</button>
-      </form>
+<main class="page"><p *ngIf="loading">Loading ticket...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <ng-container *ngIf="ticket as currentTicket"><header class="page-header"><div><p>{{ currentTicket.ticketNumber }}</p><h1>{{ currentTicket.subject }}</h1></div></header>
+    <section class="card meta-strip"><span>Created {{ currentTicket.createdAt }}</span><span class="badge">{{ currentTicket.status }}</span><span class="badge">{{ currentTicket.priority }}</span><span>Assigned to {{ currentTicket.assignedToName || 'Unassigned' }}</span></section>
+    <section class="card"><h2>Description</h2><p>{{ currentTicket.description }}</p>
+      <section *ngIf="currentTicket.attachments.length > 0"><h2>Attachments</h2><p *ngFor="let attachment of currentTicket.attachments">{{ attachment.fileName }} · {{ attachment.fileSize }} bytes</p></section>
+      <section *ngIf="currentTicket.comments.length > 0"><h2>Conversation</h2><article class="card" *ngFor="let comment of currentTicket.comments"><strong>{{ comment.userName }}</strong><p>{{ comment.comment }}</p><small>{{ comment.commentedAt }}</small></article></section>
+      <form [formGroup]="commentForm" (ngSubmit)="onComment()"><input type="hidden" formControlName="ticketId" /><input type="hidden" formControlName="userId" /><textarea rows="4" formControlName="comment" placeholder="Write a reply..."></textarea><button class="btn btn-primary" type="submit">Post comment</button></form>
+      <section *ngIf="currentTicket.statusHistory.length > 0"><h2>Status history</h2><div *ngFor="let item of currentTicket.statusHistory">{{ item.oldStatus }} → {{ item.newStatus }} · {{ item.changedAt }}</div></section>
+      <section *ngIf="currentTicket.assignmentHistory.length > 0"><h2>Assignment history</h2><div *ngFor="let item of currentTicket.assignmentHistory">{{ item.oldAssigneeName }} → {{ item.newAssigneeName }} · {{ item.assignedAt }}</div></section>
     </section>
-    <aside class="stack">
-      <section class="card">
-        <h2>Status history</h2>
-        <div class="timeline">
-          <div class="timeline-item">
-            <strong>In progress</strong><br /><small class="muted">12 min ago</small>
-          </div>
-          <div class="timeline-item">
-            <strong>Open</strong><br /><small class="muted">Today</small>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <h2>Assignment history</h2>
-        <div class="timeline">
-          <div class="timeline-item">
-            <strong>Assigned to Jordan Davis</strong><br /><small class="muted">12 min ago</small>
-          </div>
-        </div>
-      </section>
-    </aside>
-  </div>
-</main>
+  </ng-container><p *ngIf="!loading && !errorMessage && !ticket">No ticket selected.</p></main>

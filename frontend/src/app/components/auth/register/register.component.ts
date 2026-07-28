@@ -1,14 +1,20 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RegisterRequest } from '../../../models/auth-request';
+import { Department } from '../../../models/department';
+import { Role } from '../../../models/role';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
+  departments: Department[] = [];
+  roles: Role[] = [];
+  errorMessage = '';
   readonly registerForm = new FormGroup({
     email: new FormControl('', { nonNullable: true }),
     password: new FormControl('', { nonNullable: true }),

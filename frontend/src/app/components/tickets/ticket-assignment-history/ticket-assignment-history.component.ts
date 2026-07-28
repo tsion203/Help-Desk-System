@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
-import { TicketService } from '../../../services/ticket.service';
+import { CommonModule } from '@angular/common';
+import { TicketAssignmentHistory } from '../../../models/ticket-assignment-history';
 
 @Component({
   selector: 'app-ticket-assignment-history',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './ticket-assignment-history.component.html',
   styleUrl: './ticket-assignment-history.component.scss',
 })
 export class TicketAssignmentHistoryComponent {
-  constructor(private readonly ticketService: TicketService) {}
+  assignmentHistory: TicketAssignmentHistory[] = [];
+  loading = false;
+  errorMessage = '';
 }

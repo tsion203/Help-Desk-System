@@ -10,9 +10,10 @@
     <div class="field"><label for="firstName">First name</label><input id="firstName" formControlName="firstName" /></div>
     <div class="field"><label for="lastName">Last name</label><input id="lastName" formControlName="lastName" /></div>
     <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" formControlName="phoneNumber" /></div>
-    <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option></select></div>
-    <div class="field"><label for="roleIds">Roles</label><select id="roleIds" formControlName="roleIds" multiple></select></div>
+    <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option><option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option></select></div>
+    <div class="field"><label for="roleIds">Roles</label><select id="roleIds" formControlName="roleIds" multiple><option *ngFor="let role of roles" [ngValue]="role.id">{{ role.name }}</option></select></div>
     <label><input type="checkbox" formControlName="active" /> Active</label>
     <button class="btn btn-primary" type="submit">Register</button>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </form>
 </main>

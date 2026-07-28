@@ -28,5 +28,6 @@
       /><span class="error" aria-live="polite"></span>
     </div>
     <button class="btn btn-primary" type="submit">Sign in</button>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </form>
 </main>

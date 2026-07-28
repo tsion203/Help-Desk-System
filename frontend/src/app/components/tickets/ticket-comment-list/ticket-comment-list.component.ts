@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
-import { TicketCommentService } from '../../../services/ticket-comment.service';
+import { CommonModule } from '@angular/common';
+import { TicketComment } from '../../../models/ticket-comment';
 
 @Component({
   selector: 'app-ticket-comment-list',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './ticket-comment-list.component.html',
   styleUrl: './ticket-comment-list.component.scss',
 })
 export class TicketCommentListComponent {
-  constructor(private readonly ticketCommentService: TicketCommentService) {}
+  comments: TicketComment[] = [];
+  loading = false;
+  errorMessage = '';
 }

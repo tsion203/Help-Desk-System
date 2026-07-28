@@ -1,15 +1,20 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TicketRequest } from '../../../models/ticket';
+import { TicketCategory } from '../../../models/ticket-category';
+import { User } from '../../../models/user';
 
 @Component({
   selector: 'app-ticket-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './ticket-form.component.html',
   styleUrl: './ticket-form.component.scss',
 })
 export class TicketFormComponent {
+  categories: TicketCategory[] = [];
+  users: User[] = [];
   readonly ticketForm = new FormGroup({
     subject: new FormControl('', { nonNullable: true }),
     description: new FormControl('', { nonNullable: true }),
