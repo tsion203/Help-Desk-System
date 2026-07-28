@@ -1,5 +1,60 @@
-<main class="page"><header class="page-header"><div><h1>Admin dashboard</h1><p>System activity and support performance at a glance.</p></div></header>
-  <p *ngIf="loading">Loading dashboard...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <section class="grid grid-4" *ngIf="!loading && !errorMessage"><article class="metric" *ngFor="let metric of metrics"><small>{{ metric.label }}</small><strong>{{ metric.value }}</strong><span class="muted">{{ metric.detail }}</span></article></section>
-  <section class="card" *ngIf="isAdmin"><h2>Restricted management hub</h2><p class="muted">Administrator access only</p></section>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Admin dashboard</h1>
+      <p>System activity and support performance at a glance.</p>
+    </div>
+    <a class="btn btn-primary" href="/tickets/new">New ticket</a>
+  </header>
+  <p *ngIf="loading">Loading ticket totals...</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <section class="grid grid-4" aria-label="Ticket metrics">
+    <article class="metric">
+      <small>Total tickets</small><strong>{{ totalTickets }}</strong><span class="muted">+8% this month</span>
+    </article>
+    <article class="metric">
+      <small>Open</small><strong>{{ openTickets }}</strong><span class="badge status-open">Needs attention</span>
+    </article>
+    <article class="metric">
+      <small>In progress</small><strong>{{ inProgressTickets }}</strong
+      ><span class="badge status-progress">Active work</span>
+    </article>
+    <article class="metric">
+      <small>Resolved</small><strong>{{ resolvedTickets }}</strong
+      ><span class="badge status-resolved">88% resolution</span>
+    </article>
+  </section>
+  <section class="grid grid-2" style="margin-top: 18px">
+    <article class="card">
+      <div class="card-header">
+        <h2>Ticket volume</h2>
+        <span class="muted">Last 30 days</span>
+      </div>
+      <div class="chart">KPI chart placeholder</div>
+    </article>
+    <article class="card">
+      <div class="card-header">
+        <h2>Service health</h2>
+        <span class="badge status-resolved">On target</span>
+      </div>
+      <p><strong>4.2 hrs</strong><br /><span class="muted">Average first response</span></p>
+      <p><strong>96%</strong><br /><span class="muted">SLA compliance</span></p>
+    </article>
+  </section>
+  <section class="card" style="margin-top: 18px">
+    <h2>Restricted management hub</h2>
+    <p class="muted">Administrator access only</p>
+    <div class="grid grid-3">
+      <a class="hub-card" href="/departments"
+        ><strong>Department management</strong>
+        <p class="muted">Organize teams and ownership</p></a
+      ><a class="hub-card" href="/users"
+        ><strong>User management</strong>
+        <p class="muted">Provision accounts and access</p></a
+      ><a class="hub-card" href="/roles"
+        ><strong>Role management</strong>
+        <p class="muted">Configure permissions</p></a
+      >
+    </div>
+  </section>
 </main>

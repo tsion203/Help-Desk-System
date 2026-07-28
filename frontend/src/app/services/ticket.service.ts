@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 
 import { Ticket, TicketRequest, TicketUpdateRequest } from '../models/ticket';
 import { TicketAssignmentHistory } from '../models/ticket-assignment-history';
@@ -14,6 +14,8 @@ export class TicketService {
   private readonly apiUrl = `${environment.apiUrl}/tickets`;
   private readonly assignmentHistoryUrl = `${environment.apiUrl}/ticket-assignment-history`;
   private readonly statusHistoryUrl = `${environment.apiUrl}/ticket-status-history`;
+  private readonly ticketsChanged = new Subject<void>();
+  readonly ticketsChanged$ = this.ticketsChanged.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -26,15 +28,21 @@ export class TicketService {
   }
 
   create(ticket: TicketRequest): Observable<Ticket> {
-    return this.http.post<Ticket>(this.apiUrl, ticket);
+    return this.http.post<Ticket>(this.apiUrl, ticket).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
   }
 
   update(id: number, ticket: TicketUpdateRequest): Observable<Ticket> {
-    return this.http.put<Ticket>(`${this.apiUrl}/${id}`, ticket);
+    return this.http.put<Ticket>(`${this.apiUrl}/${id}`, ticket).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
   }
 
   getAssignmentHistory(ticketId: number): Observable<TicketAssignmentHistory[]> {

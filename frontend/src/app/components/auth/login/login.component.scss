@@ -1,12 +1,12 @@
 :host {
-  --primary: #000066;
+  --primary: #2d5986;
   position: relative;
   display: grid;
   min-height: 100vh;
   padding: 24px;
   overflow: hidden;
   place-items: center;
-  background: linear-gradient(125deg, #0000409a 0%, #000066 48%, #1a1a8c 100%);
+  background: linear-gradient(125deg, #24486dcc 0%, #2d5986 48%, #3970a8 100%);
 }
 
 :host::before,
@@ -36,16 +36,16 @@
 
 .auth-card {
   z-index: 1;
-  width: min(100%, 430px);
+  width: min(100%, 390px);
   overflow: hidden;
   box-shadow: 0 24px 55px rgb(0 0 32 / 32%);
   animation: card-enter 500ms ease-out;
 }
 
 .auth-head {
-  padding: 28px;
+  padding: 18px 24px;
   color: #fff;
-  background: rgb(0 0 64 / 88%);
+  background: rgb(36 72 109 / 92%);
 }
 
 .auth-head h1 {
@@ -53,7 +53,7 @@
 }
 
 .auth-body {
-  padding: 28px;
+  padding: 24px;
 }
 
 .remember {
@@ -62,8 +62,15 @@
   gap: 8px;
 }
 
-.btn {
+.auth-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.auth-actions .btn {
   width: 100%;
+  text-align: center;
 }
 
 @keyframes drift {

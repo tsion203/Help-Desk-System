@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root { --navy:#000066; --navy-dark:#000040; --navy-hover:#1a1a8c; --open:#2563eb; --progress:#f59e0b; --resolved:#10b981; --closed:#6b7280; --critical:#ef4444; --ink:#172033; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fc; }
+:root { --navy:#2d5986; --navy-dark:#24486d; --navy-hover:#3970a8; --open:#2d5986; --progress:#f59e0b; --resolved:#10b981; --closed:#6b7280; --critical:#ef4444; --ink:#172033; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fc; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--page); color:var(--ink); font:14px/1.5 Inter,Arial,sans-serif; }
 button,input,select,textarea { font:inherit; }

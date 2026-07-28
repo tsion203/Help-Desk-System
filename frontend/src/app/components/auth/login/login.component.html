@@ -2,7 +2,6 @@
   <header class="auth-head">
     <p>HELP DESK</p>
     <h1 id="login-title">Welcome back</h1>
-    <span>Sign in to manage your tickets</span>
   </header>
   <form class="auth-body stack" [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <div class="field">
@@ -27,7 +26,10 @@
         required
       /><span class="error" aria-live="polite"></span>
     </div>
-    <button class="btn btn-primary" type="submit">Sign in</button>
+    <div class="auth-actions">
+      <button class="btn btn-primary" type="submit">Sign in</button>
+      <a class="btn btn-secondary" routerLink="/register">Create account</a>
+    </div>
     <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </form>
 </main>

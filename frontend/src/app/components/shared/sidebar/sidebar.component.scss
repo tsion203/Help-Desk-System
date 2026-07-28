@@ -1,5 +1,5 @@
 :host {
-  --primary: #000066;
+  --primary: #2d5986;
   display: block;
   flex: 0 0 240px;
   transition: flex-basis 220ms ease;
@@ -14,7 +14,7 @@
   padding: 16px 12px;
   overflow: hidden;
   color: #c7d2fe;
-  background: #000040;
+  background: #24486d;
   transition: padding 220ms ease;
 }
 
@@ -42,16 +42,16 @@
 .collapse-button {
   width: 30px;
   height: 30px;
-  border: 1px solid #4f46e5;
+  border: 1px solid #6190bd;
   border-radius: 7px;
   color: #fff;
-  background: #1a1a8c;
+  background: #2d5986;
   cursor: pointer;
 }
 
 .collapse-button:hover,
 .collapse-button:focus-visible {
-  background: #3030a6;
+  background: #3970a8;
   outline: 2px solid #c7d2fe;
   outline-offset: 2px;
 }
@@ -78,7 +78,7 @@
 .nav-link:hover,
 .nav-link.active {
   color: #fff;
-  background: #1a1a8c;
+  background: #2d5986;
 }
 
 .nav-link.active {
