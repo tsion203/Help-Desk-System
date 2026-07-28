@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { Department } from '../models/department';
+import { Department, DepartmentRequest } from '../models/department';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class DepartmentService {
     return this.http.get<Department>(`${this.apiUrl}/${id}`);
   }
 
-  create(department: Department): Observable<Department> {
+  create(department: DepartmentRequest): Observable<Department> {
     return this.http.post<Department>(this.apiUrl, department);
   }
 

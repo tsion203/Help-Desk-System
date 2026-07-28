@@ -1,4 +1,3 @@
-import { Department } from './department';
 import { Role } from './role';
 
 export interface User {
@@ -9,7 +8,8 @@ export interface User {
   lastName: string;
   phoneNumber: string;
   active: boolean;
-  department: Department;
+  departmentId: number;
+  departmentName: string;
   roles: Role[];
 }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { Ticket } from '../models/ticket';
+import { Ticket, TicketRequest, TicketUpdateRequest } from '../models/ticket';
 import { TicketAssignmentHistory } from '../models/ticket-assignment-history';
 import { TicketStatusHistory } from '../models/ticket-status-history';
 import { environment } from '../../environments/environment';
@@ -25,11 +25,11 @@ export class TicketService {
     return this.http.get<Ticket>(`${this.apiUrl}/${id}`);
   }
 
-  create(ticket: Ticket): Observable<Ticket> {
+  create(ticket: TicketRequest): Observable<Ticket> {
     return this.http.post<Ticket>(this.apiUrl, ticket);
   }
 
-  update(id: number, ticket: Ticket): Observable<Ticket> {
+  update(id: number, ticket: TicketUpdateRequest): Observable<Ticket> {
     return this.http.put<Ticket>(`${this.apiUrl}/${id}`, ticket);
   }
 

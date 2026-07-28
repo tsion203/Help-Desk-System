@@ -1,8 +1,8 @@
 <main class="page">
   <header class="page-header"><div><h1>Tickets</h1><p>Track and manage support requests.</p></div></header>
   <section class="table-card">
-    <table><thead><tr><th>ID</th><th>Subject</th><th>Requester</th><th>Status</th><th>Priority</th><th>Updated</th></tr></thead>
-      <tbody><tr *ngFor="let ticket of tickets"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td></tr></tbody>
+    <table><thead><tr><th>ID</th><th>Subject</th><th>Requester</th><th>Status</th><th>Priority</th><th>Updated</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let ticket of tickets"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td><td><button type="button" (click)="deleteTicket(ticket.id)">Delete</button></td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading tickets...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p><p *ngIf="!loading && !errorMessage && tickets.length === 0">No tickets found.</p>
     <footer class="pagination" *ngIf="tickets.length > 0"><span>Showing {{ tickets.length }} tickets</span></footer>

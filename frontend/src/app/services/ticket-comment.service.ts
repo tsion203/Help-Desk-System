@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { TicketComment } from '../models/ticket-comment';
+import { TicketComment, TicketCommentRequest } from '../models/ticket-comment';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class TicketCommentService {
     return this.http.get<TicketComment>(`${this.apiUrl}/${id}`);
   }
 
-  create(comment: TicketComment): Observable<TicketComment> {
+  create(comment: TicketCommentRequest): Observable<TicketComment> {
     return this.http.post<TicketComment>(this.apiUrl, comment);
   }
 

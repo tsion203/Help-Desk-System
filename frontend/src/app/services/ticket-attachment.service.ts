@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { TicketAttachment } from '../models/ticket-attachment';
+import { TicketAttachment, TicketAttachmentRequest } from '../models/ticket-attachment';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -21,11 +21,11 @@ export class TicketAttachmentService {
     return this.http.get<TicketAttachment>(`${this.apiUrl}/${id}`);
   }
 
-  create(attachment: TicketAttachment): Observable<TicketAttachment> {
+  create(attachment: TicketAttachmentRequest): Observable<TicketAttachment> {
     return this.http.post<TicketAttachment>(this.apiUrl, attachment);
   }
 
-  update(id: number, attachment: TicketAttachment): Observable<TicketAttachment> {
+  update(id: number, attachment: TicketAttachmentRequest): Observable<TicketAttachment> {
     return this.http.put<TicketAttachment>(`${this.apiUrl}/${id}`, attachment);
   }
 

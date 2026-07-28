@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TicketRequest } from '../../../models/ticket';
 import { TicketCategory } from '../../../models/ticket-category';
 import { User } from '../../../models/user';
+import { TicketService } from '../../../services/ticket.service';
+import { UserService } from '../../../services/user.service';
+import { Ticket } from '../../../models/ticket';
 
 @Component({
   selector: 'app-ticket-form',
@@ -12,9 +15,20 @@ import { User } from '../../../models/user';
   templateUrl: './ticket-form.component.html',
   styleUrl: './ticket-form.component.scss',
 })
-export class TicketFormComponent {
+export class TicketFormComponent implements OnInit {
   categories: TicketCategory[] = [];
   users: User[] = [];
+  createdTicket: Ticket | null = null;
+  errorMessage = '';
+
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly cdr: ChangeDetectorRef) {}
+
+  ngOnInit(): void {
+    this.userService.getAll().subscribe({
+      next: (users) => { this.users = users; this.cdr.markForCheck(); },
+      error: () => { this.errorMessage = 'Unable to load users.'; this.cdr.markForCheck(); },
+    });
+  }
   readonly ticketForm = new FormGroup({
     subject: new FormControl('', { nonNullable: true }),
     description: new FormControl('', { nonNullable: true }),
@@ -35,5 +49,9 @@ export class TicketFormComponent {
       assignedToId: Number(value.assignedToId),
       categoryId: Number(value.categoryId),
     };
+    this.ticketService.create(this.ticketRequest).subscribe({
+      next: (ticket) => (this.createdTicket = ticket),
+      error: () => (this.errorMessage = 'Unable to create ticket.'),
+    });
   }
 }
