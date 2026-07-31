@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { LoginRequest } from '../../../models/auth-request';
 import { LoginResponse } from '../../../models/auth-response';
 import { AuthService } from '../../../services/auth.service';
@@ -23,14 +24,44 @@ export class LoginComponent {
   loginResponse: LoginResponse | null = null;
   errorMessage = '';
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   onLogin(): void {
     this.loginRequest = this.loginForm.getRawValue();
     this.errorMessage = '';
     this.authService.login(this.loginRequest).subscribe({
-      next: (response) => (this.loginResponse = response),
-      error: () => (this.errorMessage = 'Unable to sign in.'),
+      next: (response) => {
+        this.loginResponse = response;
+        this.authService.saveToken(response.token);
+        void this.router.navigate(['/dashboard']);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = this.getErrorMessage(error);
+        this.loginForm.controls.password.reset('');
+      },
     });
+  }
+
+  private getErrorMessage(error: HttpErrorResponse): string {
+    if (
+      error.status === 401 ||
+      (typeof error.error === 'string' &&
+        error.error.toLowerCase().includes('unexpected error'))
+    ) {
+      return 'Invalid login credentials. Please try again.';
+    }
+
+    if (typeof error.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error.error && typeof error.error.message === 'string') {
+      return error.error.message;
+    }
+
+    return error.message || 'Unable to sign in.';
   }
 }

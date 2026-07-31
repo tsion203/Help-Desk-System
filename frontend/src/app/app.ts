@@ -15,6 +15,7 @@ export class App {
   readonly router = inject(Router);
 
   get showApplicationShell(): boolean {
-    return this.router.url !== '/';
+    const path = this.router.url.split('?')[0];
+    return !['/', '/login', '/register'].includes(path);
   }
 }

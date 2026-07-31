@@ -30,42 +30,44 @@ import { TicketAttachmentFormComponent } from './components/tickets/ticket-attac
 import { TicketAssignmentHistoryComponent } from './components/tickets/ticket-assignment-history/ticket-assignment-history.component';
 import { TicketStatusHistoryComponent } from './components/tickets/ticket-status-history/ticket-status-history.component';
 import { NotificationListComponent } from './components/notifications/notification-list/notification-list.component';
+import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
 
-  { path: '', component: LoginComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  { path: 'home', component: HomeComponent, },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: 'home', component: HomeComponent, canActivate: [authGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
 
-  { path: 'users', component: UserListComponent },
-  { path: 'users/new', component: UserFormComponent },
-  { path: 'users/:id', component: UserDetailsComponent },
+  { path: 'users', component: UserListComponent, canActivate: [authGuard] },
+  { path: 'users/new', component: UserFormComponent, canActivate: [authGuard] },
+  { path: 'users/:id', component: UserDetailsComponent, canActivate: [authGuard] },
 
-  { path: 'departments', component: DepartmentListComponent },
-  { path: 'departments/new', component: DepartmentFormComponent },
+  { path: 'departments', component: DepartmentListComponent, canActivate: [authGuard] },
+  { path: 'departments/new', component: DepartmentFormComponent, canActivate: [authGuard] },
 
-  { path: 'roles', component: RoleListComponent },
-  { path: 'roles/new', component: RoleFormComponent },
+  { path: 'roles', component: RoleListComponent, canActivate: [authGuard] },
+  { path: 'roles/new', component: RoleFormComponent, canActivate: [authGuard] },
 
-  { path: 'tickets', component: TicketListComponent },
-  { path: 'tickets/new', component: TicketFormComponent },
-  { path: 'tickets/:id', component: TicketDetailsComponent },
-  { path: 'tickets/:id/edit', component: TicketUpdateComponent },
+  { path: 'tickets', component: TicketListComponent, canActivate: [authGuard] },
+  { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard] },
+  { path: 'tickets/:id', component: TicketDetailsComponent, canActivate: [authGuard] },
+  { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard] },
 
-  { path: 'tickets/:id/comments', component: TicketCommentListComponent },
-  { path: 'tickets/:id/comments/new', component: TicketCommentFormComponent },
+  { path: 'tickets/:id/comments', component: TicketCommentListComponent, canActivate: [authGuard] },
+  { path: 'tickets/:id/comments/new', component: TicketCommentFormComponent, canActivate: [authGuard] },
 
-  { path: 'tickets/:id/attachments', component: TicketAttachmentListComponent },
-  { path: 'tickets/:id/attachments/new', component: TicketAttachmentFormComponent },
+  { path: 'tickets/:id/attachments', component: TicketAttachmentListComponent, canActivate: [authGuard] },
+  { path: 'tickets/:id/attachments/new', component: TicketAttachmentFormComponent, canActivate: [authGuard] },
 
-  { path: 'tickets/:id/assignment-history', component: TicketAssignmentHistoryComponent },
+  { path: 'tickets/:id/assignment-history', component: TicketAssignmentHistoryComponent, canActivate: [authGuard] },
 
-  { path: 'tickets/:id/status-history', component: TicketStatusHistoryComponent },
+  { path: 'tickets/:id/status-history', component: TicketStatusHistoryComponent, canActivate: [authGuard] },
 
-  { path: 'notifications', component: NotificationListComponent },
+  { path: 'notifications', component: NotificationListComponent, canActivate: [authGuard] },
 
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'login' }
 
 ];

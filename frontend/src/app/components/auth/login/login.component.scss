@@ -1,37 +1,12 @@
 :host {
-  --primary: #2d5986;
+  --primary: #1e3a5f ;
   position: relative;
   display: grid;
   min-height: 100vh;
   padding: 24px;
   overflow: hidden;
   place-items: center;
-  background: linear-gradient(125deg, #24486dcc 0%, #2d5986 48%, #3970a8 100%);
-}
-
-:host::before,
-:host::after {
-  position: absolute;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  content: '';
-  opacity: 0.38;
-  filter: blur(4px);
-  animation: drift 14s ease-in-out infinite alternate;
-}
-
-:host::before {
-  top: -160px;
-  left: -110px;
-  background: #38bdf8;
-}
-
-:host::after {
-  right: -140px;
-  bottom: -180px;
-  background: #a78bfa;
-  animation-delay: -6s;
+  background:  #1e3a5f ;
 }
 
 .auth-card {
@@ -46,6 +21,7 @@
   padding: 18px 24px;
   color: #fff;
   background: rgb(36 72 109 / 92%);
+  height: 40px;
 }
 
 .auth-head h1 {
@@ -73,12 +49,6 @@
   text-align: center;
 }
 
-@keyframes drift {
-  to {
-    transform: translate(80px, 55px) scale(1.16);
-  }
-}
-
 @keyframes card-enter {
   from {
     opacity: 0;
@@ -92,8 +62,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host::before,
-  :host::after,
   .auth-card {
     animation: none;
   }
