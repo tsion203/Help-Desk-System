@@ -8,35 +8,33 @@ import { LoginResponse } from '../../../models/auth-response';
 import { AuthService } from '../../../services/auth.service';
 import { DepartmentService } from '../../../services/department.service';
 import { RoleService } from '../../../services/role.service';
+import { RouterLink } from '@angular/router';
+import { ToastService } from '../../../services/toast.service';
 import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
 })
 export class RegisterComponent implements OnInit {
   departments: Department[] = [];
-  roles: Role[] = [];
   errorMessage = '';
   registerResponse: LoginResponse | null = null;
 
   constructor(
     private readonly authService: AuthService,
     private readonly departmentService: DepartmentService,
-    private readonly roleService: RoleService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly toast: ToastService,
   ) {}
 
   ngOnInit(): void {
     this.departmentService.getAll().subscribe({
       next: (departments) => { this.departments = departments; this.cdr.markForCheck(); },
       error: () => { this.errorMessage = 'Unable to load departments.'; this.cdr.markForCheck(); },
-    });
-    this.roleService.getAll().subscribe({
-      next: (roles) => { this.roles = roles; this.cdr.markForCheck(); },
-      error: () => { this.errorMessage = 'Unable to load roles.'; this.cdr.markForCheck(); },
     });
   }
   readonly registerForm = new FormGroup({
@@ -62,8 +60,12 @@ export class RegisterComponent implements OnInit {
     };
     this.errorMessage = '';
     this.authService.register(this.registerRequest).subscribe({
-      next: (response) => (this.registerResponse = response),
-      error: () => (this.errorMessage = 'Unable to register.'),
+      next: (response) => {
+        this.registerResponse = response;
+        this.registerForm.reset({ email: '', password: '', employeeId: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: [] });
+        this.toast.success('Account created successfully. You can now sign in.');
+      },
+      error: (error) => this.toast.error(error, 'Unable to register.'),
     });
   }
 }

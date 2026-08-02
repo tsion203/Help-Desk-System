@@ -29,7 +29,7 @@
           <td>{{ department.description }}</td>
           <td>{{ department.id }}</td>
           <td><span class="badge status-resolved">Available</span></td>
-          <td><button class="btn btn-secondary" type="button" (click)="deleteDepartment(department.id)">Delete</button></td>
+          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id)" (keydown.enter)="deleteDepartment(department.id)">Delete</span></td>
         </tr>
       </tbody>
     </table>

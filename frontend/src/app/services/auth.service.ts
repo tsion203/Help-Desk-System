@@ -12,6 +12,7 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private readonly tokenKey = 'helpdesk_jwt';
   private readonly roleKey = 'helpdesk_role';
+  private readonly emailKey = 'helpdesk_email';
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private readonly http: HttpClient) {}
@@ -40,6 +41,10 @@ export class AuthService {
     return localStorage.getItem(this.roleKey);
   }
 
+  saveEmail(email: string): void { localStorage.setItem(this.emailKey, email); }
+  getEmail(): string { return localStorage.getItem(this.emailKey) ?? '';
+  }
+
   isAdmin(): boolean { return this.getRole() === 'ADMIN'; }
   isSupervisor(): boolean { return this.getRole() === 'SUPERVISOR'; }
   isSupportOfficer(): boolean { return this.getRole() === 'SUPPORT_OFFICER'; }
@@ -52,6 +57,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.roleKey);
+    localStorage.removeItem(this.emailKey);
   }
 
   private normalizeRole(role: string): string {

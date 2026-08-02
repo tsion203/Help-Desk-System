@@ -1,7 +1,7 @@
 <main class="page">
   <header class="page-header">
     <div>
-      <h1>Admin dashboard</h1>
+      <h1>{{ dashboardTitle }}</h1>
       <p>System activity and support performance at a glance.</p>
     </div>
     <a class="btn btn-primary" href="/tickets/new">New ticket</a>
@@ -41,7 +41,7 @@
       <p><strong>96%</strong><br /><span class="muted">SLA compliance</span></p>
     </article>
   </section>
-  <section class="card" style="margin-top: 18px">
+  <section *ngIf="isAdmin" class="card" style="margin-top: 18px">
     <h2>Restricted management hub</h2>
     <p class="muted">Administrator access only</p>
     <div class="grid grid-3">

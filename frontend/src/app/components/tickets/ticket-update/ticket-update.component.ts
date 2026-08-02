@@ -7,6 +7,8 @@ import { User } from '../../../models/user';
 import { TicketService } from '../../../services/ticket.service';
 import { UserService } from '../../../services/user.service';
 import { ActivatedRoute } from '@angular/router';
+import { TicketCategoryService } from '../../../services/ticket-category.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-ticket-update',
@@ -28,19 +30,20 @@ export class TicketUpdateComponent implements OnInit {
   ticketUpdateRequest: TicketUpdateRequest | null = null;
   ticketId = 0;
   errorMessage = '';
-  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly route: ActivatedRoute) {}
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute) {}
   ngOnInit(): void {
     this.ticketId = Number(this.route.snapshot.paramMap.get('id'));
     this.userService.getAll().subscribe({ next: (users) => (this.assignees = users), error: () => (this.errorMessage = 'Unable to load assignees.') });
-    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.categories = [{ id: ticket.categoryId, name: ticket.categoryName, description: '' }]; this.ticketForm.patchValue(ticket); }, error: () => (this.errorMessage = 'Unable to load ticket.') });
+    this.categoryService.getAll().subscribe({ next: (categories) => (this.categories = categories), error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
+    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue(ticket); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
   }
 
   onUpdate(): void {
     const value = this.ticketForm.getRawValue();
     this.ticketUpdateRequest = { ...value, assignedToId: Number(value.assignedToId), categoryId: Number(value.categoryId) };
     this.ticketService.update(this.ticketId, this.ticketUpdateRequest).subscribe({
-      next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; },
-      error: () => (this.errorMessage = 'Unable to update ticket.'),
+      next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.toast.success(`Ticket ${ticket.ticketNumber} updated successfully.`); },
+      error: (error) => this.toast.error(error, 'Unable to update ticket.'),
     });
   }
 }

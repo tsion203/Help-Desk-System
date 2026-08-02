@@ -21,7 +21,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/departments")
-@PreAuthorize("hasRole('ADMIN')")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
@@ -31,6 +30,7 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DepartmentResponseDTO> createDepartment(
             @Valid @RequestBody DepartmentCreateDTO departmentCreateDTO
     ) {
@@ -39,16 +39,19 @@ public class DepartmentController {
     }
 
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<List<DepartmentResponseDTO>> getAllDepartments() {
         return ResponseEntity.ok(departmentService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<DepartmentResponseDTO> getDepartmentById(@PathVariable Long id) {
         return ResponseEntity.ok(departmentService.getById(id));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.delete(id);
         return ResponseEntity.noContent().build();

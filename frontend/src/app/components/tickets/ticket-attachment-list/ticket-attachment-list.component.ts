@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TicketAttachment } from '../../../models/ticket-attachment';
 import { TicketAttachmentService } from '../../../services/ticket-attachment.service';
+import { ToastService } from '../../../services/toast.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -15,7 +16,7 @@ export class TicketAttachmentListComponent implements OnInit {
   attachments: TicketAttachment[] = [];
   loading = false;
   errorMessage = '';
-  constructor(private readonly attachmentService: TicketAttachmentService, private readonly route: ActivatedRoute) {}
+  constructor(private readonly attachmentService: TicketAttachmentService, private readonly toast: ToastService, private readonly route: ActivatedRoute) {}
   ngOnInit(): void { const ticketId = Number(this.route.snapshot.paramMap.get('id')); this.loading = true; this.attachmentService.getAll().subscribe({ next: (items) => { this.attachments = ticketId ? items.filter((item) => item.ticketId === ticketId) : items; this.loading = false; }, error: () => { this.errorMessage = 'Unable to load attachments.'; this.loading = false; } }); }
-  deleteAttachment(id: number): void { this.attachmentService.delete(id).subscribe({ next: () => (this.attachments = this.attachments.filter((item) => item.id !== id)), error: () => (this.errorMessage = 'Unable to delete attachment.') }); }
+  deleteAttachment(id: number): void { this.attachmentService.delete(id).subscribe({ next: () => { this.attachments = this.attachments.filter((item) => item.id !== id); this.toast.success('Attachment deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete attachment.') }); }
 }

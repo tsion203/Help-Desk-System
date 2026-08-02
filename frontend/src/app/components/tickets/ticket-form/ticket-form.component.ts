@@ -8,6 +8,8 @@ import { TicketService } from '../../../services/ticket.service';
 import { UserService } from '../../../services/user.service';
 import { Ticket } from '../../../models/ticket';
 import { AuthService } from '../../../services/auth.service';
+import { TicketCategoryService } from '../../../services/ticket-category.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-ticket-form',
@@ -22,15 +24,16 @@ export class TicketFormComponent implements OnInit {
   createdTicket: Ticket | null = null;
   errorMessage = '';
 
-  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly authService: AuthService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
 
   get isAdmin(): boolean { return this.authService.isAdmin(); }
+  get requesterEmail(): string { return this.authService.getEmail(); }
 
   ngOnInit(): void {
-    if (!this.isAdmin) return;
-    this.userService.getAll().subscribe({
+    this.categoryService.getAll().subscribe({ next: (categories) => { this.categories = categories; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
+    if (this.isAdmin) this.userService.getAll().subscribe({
       next: (users) => { this.users = users; this.cdr.markForCheck(); },
-      error: () => { this.errorMessage = 'Unable to load users.'; this.cdr.markForCheck(); },
+      error: (error) => this.toast.error(error, 'Unable to load users.'),
     });
   }
   readonly ticketForm = new FormGroup({
@@ -54,8 +57,12 @@ export class TicketFormComponent implements OnInit {
       categoryId: Number(value.categoryId),
     };
     this.ticketService.create(this.ticketRequest).subscribe({
-      next: (ticket) => (this.createdTicket = ticket),
-      error: () => (this.errorMessage = 'Unable to create ticket.'),
+      next: (ticket) => {
+        this.createdTicket = ticket;
+        this.ticketForm.reset({ subject: '', description: '', status: 'OPEN', priority: 'MEDIUM', createdById: 0, assignedToId: 0, categoryId: 0 });
+        this.toast.success(`Ticket ${ticket.ticketNumber} created successfully.`);
+      },
+      error: (error) => this.toast.error(error, 'Unable to create ticket.'),
     });
   }
 }

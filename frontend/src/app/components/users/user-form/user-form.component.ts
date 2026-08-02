@@ -8,6 +8,7 @@ import { UserService } from '../../../services/user.service';
 import { DepartmentService } from '../../../services/department.service';
 import { RoleService } from '../../../services/role.service';
 import { ActivatedRoute } from '@angular/router';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-user-form',
@@ -28,6 +29,7 @@ export class UserFormComponent implements OnInit {
     private readonly roleService: RoleService,
     private readonly route: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
+    private readonly toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -67,10 +69,12 @@ export class UserFormComponent implements OnInit {
       : this.userService.create(this.userRequest);
     request.subscribe({
       next: (user) => {
-        this.userId = user.id;
         this.errorMessage = '';
+        this.toast.success(this.userId ? 'User updated successfully.' : 'User created successfully.');
+        if (this.userId) this.userId = user.id;
+        else this.userForm.reset({ email: '', employeeId: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: [] });
       },
-      error: () => (this.errorMessage = 'Unable to save user.'),
+      error: (error) => this.toast.error(error, 'Unable to save user.'),
     });
   }
 }

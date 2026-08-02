@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { merge, switchMap, timer } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TicketService } from '../../../services/ticket.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,12 +17,14 @@ export class DashboardComponent implements OnInit {
   openTickets = 0;
   inProgressTickets = 0;
   resolvedTickets = 0;
-  isAdmin = false;
+  get isAdmin(): boolean { return this.authService.isAdmin(); }
+  get dashboardTitle(): string { return this.authService.isSupervisor() ? 'Supervisor dashboard' : 'Admin dashboard'; }
   loading = false;
   errorMessage = '';
 
   constructor(
     private readonly ticketService: TicketService,
+    private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef,
     private readonly destroyRef: DestroyRef,
   ) {}

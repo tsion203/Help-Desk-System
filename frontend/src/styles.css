@@ -20,3 +20,4 @@ table { width:100%; border-collapse:collapse; } th,td { padding:14px 18px; text-
 .timeline { border-left:2px solid #c7d2fe; margin:8px 0 0 7px; padding-left:20px; } .timeline-item { position:relative; padding:0 0 20px; } .timeline-item:before { content:''; position:absolute; width:10px; height:10px; border-radius:50%; background:var(--navy); left:-26px; top:5px; }
 .dropzone { border:2px dashed #a5b4fc; border-radius:10px; padding:25px; text-align:center; background:#f8faff; color:var(--muted); } .stack { display:grid; gap:14px; }
 @media (max-width:800px) { .page{padding:20px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.page-header,.meta-strip{align-items:flex-start;flex-direction:column} .table-card{overflow:auto} }
+.delete-action{display:inline;color:#c62828;font-weight:400;cursor:pointer;text-decoration:none}.delete-action:hover,.delete-action:focus{color:#8e0000;text-decoration:underline;outline:none}
