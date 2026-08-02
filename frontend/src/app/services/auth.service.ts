@@ -11,6 +11,7 @@ import { environment } from '../../environments/environment';
 })
 export class AuthService {
   private readonly tokenKey = 'helpdesk_jwt';
+  private readonly roleKey = 'helpdesk_role';
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private readonly http: HttpClient) {}
@@ -31,11 +32,29 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  saveRole(role: string): void {
+    localStorage.setItem(this.roleKey, this.normalizeRole(role));
+  }
+
+  getRole(): string | null {
+    return localStorage.getItem(this.roleKey);
+  }
+
+  isAdmin(): boolean { return this.getRole() === 'ADMIN'; }
+  isSupervisor(): boolean { return this.getRole() === 'SUPERVISOR'; }
+  isSupportOfficer(): boolean { return this.getRole() === 'SUPPORT_OFFICER'; }
+  isEmployee(): boolean { return this.getRole() === 'EMPLOYEE'; }
+
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.roleKey);
+  }
+
+  private normalizeRole(role: string): string {
+    return (role || '').replace(/^ROLE_/, '').toUpperCase();
   }
 }

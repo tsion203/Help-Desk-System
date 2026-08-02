@@ -36,7 +36,8 @@ export class LoginComponent {
       next: (response) => {
         this.loginResponse = response;
         this.authService.saveToken(response.token);
-        void this.router.navigate(['/dashboard']);
+        this.authService.saveRole(response.role);
+        void this.router.navigate([this.authService.isEmployee() ? '/tickets' : '/dashboard']);
       },
       error: (error: HttpErrorResponse) => {
         this.errorMessage = this.getErrorMessage(error);

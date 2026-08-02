@@ -17,18 +17,20 @@
   </div>
 
   <nav>
-    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
+    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
       <span class="nav-icon" aria-hidden="true">▦</span>
       <span class="nav-text">Dashboard</span>
     </a>
-    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" title="Tickets">
+    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [title]="isEmployee ? 'My tickets' : 'Tickets'">
       <span class="nav-icon" aria-hidden="true">⌑</span>
-      <span class="nav-text">Tickets</span>
+      <span class="nav-text">{{ isEmployee ? 'My tickets' : (isSupportOfficer ? 'Assigned tickets' : 'Tickets') }}</span>
     </a>
-    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" title="My assigned tickets">
+    <a *ngIf="isSupportOfficer" class="nav-link" routerLink="/tickets" routerLinkActive="active" title="My assigned tickets">
       <span class="nav-icon" aria-hidden="true">✓</span>
       <span class="nav-text">My assigned</span>
     </a>
+    <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="Create ticket"><span class="nav-icon">+</span><span class="nav-text">Create ticket</span></a>
+    <a class="nav-link" routerLink="/notifications" routerLinkActive="active" title="Notifications"><span class="nav-icon">!</span><span class="nav-text">Notifications</span></a>
 
     <ng-container *ngIf="isAdmin">
       <p class="nav-label">Administration</p>

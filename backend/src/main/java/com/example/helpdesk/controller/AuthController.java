@@ -61,9 +61,12 @@ public class AuthController {
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority().replaceFirst("^ROLE_", ""))
+                .toList();
+        String token = jwtUtil.generateToken(userDetails.getUsername(), roles);
 
-        LoginResponseDTO responseDTO = new LoginResponseDTO(token, "Bearer", userDetails.getUsername());
+        LoginResponseDTO responseDTO = new LoginResponseDTO(token, "Bearer", userDetails.getUsername(), primaryRole(roles));
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -88,14 +91,25 @@ public class AuthController {
             user.setDepartment(department);
         }
 
-        if (registerRequestDTO.getRoleIds() != null && !registerRequestDTO.getRoleIds().isEmpty()) {
-            List<Role> roles = roleRepository.findAllById(registerRequestDTO.getRoleIds());
-            user.setRoles(roles);
-        }
+        Role employeeRole = roleRepository.findAll().stream()
+                .filter(role -> "EMPLOYEE".equals(role.getName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("EMPLOYEE role is not configured"));
+        user.setRoles(List.of(employeeRole));
 
         userRepository.save(user);
-        String token = jwtUtil.generateToken(user.getEmail());
+        List<String> roleNames = user.getRoles() == null ? List.of() : user.getRoles().stream()
+                .map(Role::getName).map(this::normalizeRoleName).toList();
+        String token = jwtUtil.generateToken(user.getEmail(), roleNames);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new LoginResponseDTO(token, "Bearer", user.getEmail()));
+                .body(new LoginResponseDTO(token, "Bearer", user.getEmail(), primaryRole(roleNames)));
+    }
+
+    private String primaryRole(List<String> roles) {
+        return roles == null || roles.isEmpty() ? null : normalizeRoleName(roles.get(0));
+    }
+
+    private String normalizeRoleName(String role) {
+        return role == null ? null : role.trim().toUpperCase().replaceFirst("^ROLE_", "");
     }
 }

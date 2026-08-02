@@ -29,14 +29,14 @@
           <option value="CRITICAL">Critical</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" *ngIf="isAdmin">
         <label for="assignee">Assignee</label
         ><select id="assignee" formControlName="assignedToId">
           <option [ngValue]="0">Unassigned</option>
           <option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" *ngIf="isAdmin">
         <label for="createdBy">Created by</label><select id="createdBy" formControlName="createdById"><option [ngValue]="0">Select requester</option><option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option></select>
       </div>
       <div class="field">

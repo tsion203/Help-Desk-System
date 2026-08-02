@@ -1,8 +1,8 @@
 <main class="page">
-  <header class="page-header"><div><h1>Tickets</h1><p>Track and manage support requests.</p></div><a class="btn btn-primary" routerLink="/tickets/new">Add ticket</a></header>
+  <header class="page-header"><div><h1>Tickets</h1><p>Track and manage support requests.</p></div><a *ngIf="canCreate" class="btn btn-primary" routerLink="/tickets/new">Add ticket</a></header>
   <section class="table-card">
     <table><thead><tr><th>ID</th><th>Subject</th><th>Requester</th><th>Status</th><th>Priority</th><th>Updated</th><th>Actions</th></tr></thead>
-      <tbody><tr class="ticket-row" *ngFor="let ticket of tickets" tabindex="0" role="link" (click)="editTicket(ticket.id)" (keydown.enter)="editTicket(ticket.id)"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td><td><button type="button" (click)="deleteTicket(ticket.id, $event)">Delete</button></td></tr></tbody>
+      <tbody><tr class="ticket-row" *ngFor="let ticket of tickets" tabindex="0" role="link" [routerLink]="canUpdate ? ['/tickets', ticket.id, 'edit'] : ['/tickets', ticket.id]"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td><td><button *ngIf="canDelete" type="button" (click)="deleteTicket(ticket.id, $event)">Delete</button></td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading tickets...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p><p *ngIf="!loading && !errorMessage && tickets.length === 0">No tickets found.</p>
     <footer class="pagination" *ngIf="tickets.length > 0"><span>Showing {{ tickets.length }} tickets</span></footer>

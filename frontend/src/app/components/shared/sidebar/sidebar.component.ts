@@ -11,8 +11,12 @@ import { AuthService } from '../../../services/auth.service';
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
-  isAdmin = true; // Replace with the authenticated user's role check.
   isCollapsed = false;
+
+  get isAdmin(): boolean { return this.authService.isAdmin(); }
+  get isSupervisor(): boolean { return this.authService.isSupervisor(); }
+  get isSupportOfficer(): boolean { return this.authService.isSupportOfficer(); }
+  get isEmployee(): boolean { return this.authService.isEmployee(); }
 
   constructor(
     private readonly authService: AuthService,

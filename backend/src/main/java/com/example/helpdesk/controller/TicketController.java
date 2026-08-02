@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,22 +32,26 @@ public class TicketController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     public ResponseEntity<TicketResponseDTO> createTicket(@Valid @RequestBody TicketCreateDTO ticketCreateDTO) {
         TicketResponseDTO createdTicket = ticketService.create(ticketCreateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTicket);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR','SUPPORT_OFFICER','EMPLOYEE')")
     public ResponseEntity<List<TicketResponseDTO>> getAllTickets() {
         return ResponseEntity.ok(ticketService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@rbac.canAccessTicket(#id, authentication)")
     public ResponseEntity<TicketResponseDTO> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getById(id));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@rbac.canUpdateTicket(#id, authentication)")
     public ResponseEntity<TicketResponseDTO> updateTicket(
             @PathVariable Long id,
             @Valid @RequestBody TicketUpdateDTO ticketUpdateDTO
@@ -55,6 +60,7 @@ public class TicketController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();

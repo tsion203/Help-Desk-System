@@ -75,8 +75,9 @@ public class TicketServiceImpl implements TicketService {
         ticket.setPriority(ticketCreateDTO.getPriority());
         ticket.setCreatedAt(LocalDateTime.now());
         ticket.setUpdatedAt(LocalDateTime.now());
-        ticket.setCreatedBy(findUserById(ticketCreateDTO.getCreatedById()));
-        ticket.setAssignedTo(findNullableUserById(ticketCreateDTO.getAssignedToId()));
+        User currentUser = findCurrentUserOrNull();
+        ticket.setCreatedBy(currentUser != null ? currentUser : findUserById(ticketCreateDTO.getCreatedById()));
+        ticket.setAssignedTo(hasAnyCurrentRole("ADMIN") ? findNullableUserById(ticketCreateDTO.getAssignedToId()) : null);
         ticket.setCategory(findNullableCategoryById(ticketCreateDTO.getCategoryId()));
         Ticket savedTicket = ticketRepository.save(ticket);
         createNotificationForTicketCreation(savedTicket);
@@ -92,7 +93,18 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAll() {
-        return ticketRepository.findAll()
+        User currentUser = findCurrentUserOrNull();
+        List<Ticket> visibleTickets;
+        if (hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
+            visibleTickets = ticketRepository.findAll();
+        } else if (currentUser != null && hasAnyCurrentRole("SUPPORT_OFFICER")) {
+            visibleTickets = ticketRepository.findByAssignedToId(currentUser.getId());
+        } else if (currentUser != null) {
+            visibleTickets = ticketRepository.findByCreatedById(currentUser.getId());
+        } else {
+            visibleTickets = List.of();
+        }
+        return visibleTickets
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();
@@ -124,7 +136,7 @@ public class TicketServiceImpl implements TicketService {
         if (ticketUpdateDTO.getPriority() != null) {
             ticket.setPriority(ticketUpdateDTO.getPriority());
         }
-        if (ticketUpdateDTO.getAssignedToId() != null) {
+        if (ticketUpdateDTO.getAssignedToId() != null && hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
             newAssignee = findUserById(ticketUpdateDTO.getAssignedToId());
             assigneeChanged = oldAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
             ticket.setAssignedTo(newAssignee);
@@ -282,6 +294,16 @@ public class TicketServiceImpl implements TicketService {
             return null;
         }
         return userRepository.findByEmail(authentication.getName()).orElse(null);
+    }
+
+    private boolean hasAnyCurrentRole(String... roles) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) return false;
+        for (String role : roles) {
+            if (authentication.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + role))) return true;
+        }
+        return false;
     }
     
     private void createNotificationForTicketCreation(Ticket ticket) {

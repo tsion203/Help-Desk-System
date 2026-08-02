@@ -3,6 +3,7 @@ package com.example.helpdesk.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class TicketAttachmentController {
     }
 
     @PostMapping
+    @PreAuthorize("@rbac.canAccessTicket(#createDTO.ticketId, authentication)")
     @ResponseStatus(HttpStatus.CREATED)
     public TicketAttachmentResponseDTO createTicketAttachment(
             @Valid @RequestBody TicketAttachmentCreateDTO createDTO) {
@@ -38,12 +40,14 @@ public class TicketAttachmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public List<TicketAttachmentResponseDTO> getAllTicketAttachments() {
 
         return ticketAttachmentService.getAllTicketAttachments();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@rbac.canAccessAttachment(#id, authentication)")
     public TicketAttachmentResponseDTO getTicketAttachmentById(
             @PathVariable Long id) {
 
@@ -51,6 +55,7 @@ public class TicketAttachmentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public TicketAttachmentResponseDTO updateTicketAttachment(
             @PathVariable Long id,
             @Valid @RequestBody TicketAttachmentCreateDTO updateDTO) {
@@ -59,6 +64,7 @@ public class TicketAttachmentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTicketAttachment(
             @PathVariable Long id) {

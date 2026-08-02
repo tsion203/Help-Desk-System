@@ -31,6 +31,7 @@ import { TicketAssignmentHistoryComponent } from './components/tickets/ticket-as
 import { TicketStatusHistoryComponent } from './components/tickets/ticket-status-history/ticket-status-history.component';
 import { NotificationListComponent } from './components/notifications/notification-list/notification-list.component';
 import { authGuard } from './auth.guard';
+import { AccessDeniedComponent } from './components/auth/access-denied/access-denied.component';
 
 export const routes: Routes = [
 
@@ -39,22 +40,22 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
 
   { path: 'home', component: HomeComponent, canActivate: [authGuard] },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR'] } },
 
-  { path: 'users', component: UserListComponent, canActivate: [authGuard] },
-  { path: 'users/new', component: UserFormComponent, canActivate: [authGuard] },
-  { path: 'users/:id', component: UserDetailsComponent, canActivate: [authGuard] },
+  { path: 'users', component: UserListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
+  { path: 'users/new', component: UserFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
+  { path: 'users/:id', component: UserDetailsComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'EMPLOYEE'] } },
 
-  { path: 'departments', component: DepartmentListComponent, canActivate: [authGuard] },
-  { path: 'departments/new', component: DepartmentFormComponent, canActivate: [authGuard] },
+  { path: 'departments', component: DepartmentListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
+  { path: 'departments/new', component: DepartmentFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
 
-  { path: 'roles', component: RoleListComponent, canActivate: [authGuard] },
-  { path: 'roles/new', component: RoleFormComponent, canActivate: [authGuard] },
+  { path: 'roles', component: RoleListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
+  { path: 'roles/new', component: RoleFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
 
   { path: 'tickets', component: TicketListComponent, canActivate: [authGuard] },
-  { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard] },
+  { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'EMPLOYEE'] } },
   { path: 'tickets/:id', component: TicketDetailsComponent, canActivate: [authGuard] },
-  { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard] },
+  { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_OFFICER'] } },
 
   { path: 'tickets/:id/comments', component: TicketCommentListComponent, canActivate: [authGuard] },
   { path: 'tickets/:id/comments/new', component: TicketCommentFormComponent, canActivate: [authGuard] },
@@ -67,6 +68,7 @@ export const routes: Routes = [
   { path: 'tickets/:id/status-history', component: TicketStatusHistoryComponent, canActivate: [authGuard] },
 
   { path: 'notifications', component: NotificationListComponent, canActivate: [authGuard] },
+  { path: 'access-denied', component: AccessDeniedComponent, canActivate: [authGuard] },
 
   { path: '**', redirectTo: 'login' }
 

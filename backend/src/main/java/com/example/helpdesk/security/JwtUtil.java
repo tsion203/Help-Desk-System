@@ -2,6 +2,7 @@ package com.example.helpdesk.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
@@ -28,16 +29,25 @@ public class JwtUtil {
         this.expirationTime = expirationTime;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, List<String> roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime * 1000);
 
         return Jwts.builder()
                 .subject(username)
+                .claim("roles", roles == null ? List.of() : roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(signingKey)
                 .compact();
+    }
+
+    public List<String> extractRoles(String token) {
+        Object value = extractClaim(token, claims -> claims.get("roles"));
+        if (!(value instanceof List<?> values)) {
+            return List.of();
+        }
+        return values.stream().filter(String.class::isInstance).map(String.class::cast).toList();
     }
 
     public String extractUsername(String token) {

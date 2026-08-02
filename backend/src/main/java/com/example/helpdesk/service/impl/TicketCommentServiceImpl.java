@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketCommentCreateDTO;
@@ -48,7 +49,8 @@ public class TicketCommentServiceImpl implements TicketCommentService {
         ticketComment.setComment(ticketCommentCreateDTO.getComment());
         ticketComment.setCommentedAt(LocalDateTime.now());
         Ticket ticket = findTicketById(ticketCommentCreateDTO.getTicketId());
-        User commentAuthor = findUserById(ticketCommentCreateDTO.getUserId());
+        User commentAuthor = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
         ticketComment.setTicket(ticket);
         ticketComment.setUser(commentAuthor);
         TicketComment savedComment = ticketCommentRepository.save(ticketComment);

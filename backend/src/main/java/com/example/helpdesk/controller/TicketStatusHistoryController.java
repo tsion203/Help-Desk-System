@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.example.helpdesk.dto.TicketStatusHistoryResponseDTO;
 import com.example.helpdesk.service.TicketService;
@@ -21,6 +22,7 @@ public class TicketStatusHistoryController {
     }
 
     @GetMapping("/ticket/{ticketId}")
+    @PreAuthorize("@rbac.canAccessTicket(#ticketId, authentication)")
     public List<TicketStatusHistoryResponseDTO> getAssignmentHistory(
             @PathVariable Long ticketId) {
 

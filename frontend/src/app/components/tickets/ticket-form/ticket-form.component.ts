@@ -7,6 +7,7 @@ import { User } from '../../../models/user';
 import { TicketService } from '../../../services/ticket.service';
 import { UserService } from '../../../services/user.service';
 import { Ticket } from '../../../models/ticket';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-ticket-form',
@@ -21,9 +22,12 @@ export class TicketFormComponent implements OnInit {
   createdTicket: Ticket | null = null;
   errorMessage = '';
 
-  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
+
+  get isAdmin(): boolean { return this.authService.isAdmin(); }
 
   ngOnInit(): void {
+    if (!this.isAdmin) return;
     this.userService.getAll().subscribe({
       next: (users) => { this.users = users; this.cdr.markForCheck(); },
       error: () => { this.errorMessage = 'Unable to load users.'; this.cdr.markForCheck(); },

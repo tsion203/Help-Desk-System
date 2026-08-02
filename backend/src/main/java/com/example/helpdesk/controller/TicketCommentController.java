@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class TicketCommentController {
     }
 
     @PostMapping
+    @PreAuthorize("@rbac.canAccessTicket(#ticketCommentCreateDTO.ticketId, authentication)")
     public ResponseEntity<TicketCommentResponseDTO> createComment(
             @Valid @RequestBody TicketCommentCreateDTO ticketCommentCreateDTO
     ) {
@@ -37,16 +39,19 @@ public class TicketCommentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<List<TicketCommentResponseDTO>> getAllComments() {
         return ResponseEntity.ok(ticketCommentService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public ResponseEntity<TicketCommentResponseDTO> getCommentById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketCommentService.getById(id));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
         ticketCommentService.delete(id);
         return ResponseEntity.noContent().build();
