@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TicketUpdateRequest } from '../../../models/ticket';
 import { TicketCategory } from '../../../models/ticket-category';
 import { User } from '../../../models/user';
@@ -25,9 +25,9 @@ export class TicketUpdateComponent implements OnInit {
   categories: TicketCategory[] = [];
   assignees: User[] = [];
   readonly ticketForm = new FormGroup({
-    subject: new FormControl('', { nonNullable: true }), description: new FormControl('', { nonNullable: true }),
+    subject: new FormControl('', { nonNullable: true, validators: [Validators.required] }), description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     status: new FormControl('OPEN', { nonNullable: true }), priority: new FormControl('MEDIUM', { nonNullable: true }),
-    assignedToId: new FormControl(0, { nonNullable: true }), categoryId: new FormControl(0, { nonNullable: true }),
+    assignedToId: new FormControl(0, { nonNullable: true }), categoryId: new FormControl(0, { nonNullable: true, validators: [Validators.min(1)] }),
   });
   ticketUpdateRequest: TicketUpdateRequest | null = null;
   ticketId = 0;
@@ -42,6 +42,16 @@ export class TicketUpdateComponent implements OnInit {
   }
 
   onUpdate(): void {
+    if (this.ticketForm.controls.categoryId.invalid) {
+      this.ticketForm.markAllAsTouched();
+      this.toast.error(null, 'Please select a ticket category.');
+      return;
+    }
+    if (this.ticketForm.invalid) {
+      this.ticketForm.markAllAsTouched();
+      this.toast.error(null, 'Please fill in all required fields.');
+      return;
+    }
     const value = this.ticketForm.getRawValue();
     this.ticketUpdateRequest = {
       subject: value.subject,

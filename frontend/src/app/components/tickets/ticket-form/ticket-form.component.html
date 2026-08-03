@@ -17,6 +17,7 @@
           <option [ngValue]="0">Select a category</option>
           <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
         </select>
+        <span class="error" *ngIf="ticketForm.controls.categoryId.touched && ticketForm.controls.categoryId.invalid">Please select a ticket category.</span>
       </div>
       <div class="field">
         <label for="priority">Priority</label
@@ -49,7 +50,7 @@
         rows="7"
         placeholder="Explain what happened, what you expected, and any error messages."
       ></textarea
-      ><span class="error"></span>
+      ><span class="error" *ngIf="ticketForm.controls.description.touched && ticketForm.controls.description.invalid">Description is required.</span>
     </div>
     <div>
       <button class="btn btn-primary" type="submit">Create ticket</button>

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserRequest } from '../../../models/user';
 import { Department } from '../../../models/department';
 import { Role } from '../../../models/role';
@@ -45,26 +45,40 @@ export class UserFormComponent implements OnInit {
     }
   }
   readonly userForm = new FormGroup({
-    email: new FormControl('', { nonNullable: true }),
-    employeeId: new FormControl('', { nonNullable: true }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    employeeId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     temporaryPassword: new FormControl('', { nonNullable: true }),
-    firstName: new FormControl('', { nonNullable: true }),
-    lastName: new FormControl('', { nonNullable: true }),
-    phoneNumber: new FormControl('', { nonNullable: true }),
+    firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     active: new FormControl(true, { nonNullable: true }),
-    departmentId: new FormControl(0, { nonNullable: true }),
+    departmentId: new FormControl(0, { nonNullable: true, validators: [Validators.min(1)] }),
     roleIds: new FormControl<number[]>([], { nonNullable: true }),
   });
 
   userRequest: UserRequest | null = null;
 
   onSave(): void {
+    if (!this.userId && this.userForm.controls.temporaryPassword.value.length < 8) {
+      this.userForm.markAllAsTouched();
+      this.toast.error(null, 'Please fill in all required fields.');
+      return;
+    }
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      this.toast.error(null, 'Please fill in all required fields.');
+      return;
+    }
     const value = this.userForm.getRawValue();
     const selectedRoleIds = Array.isArray(value.roleIds)
       ? value.roleIds
       : value.roleIds
         ? [value.roleIds]
         : [];
+    if (selectedRoleIds.length === 0 || selectedRoleIds.some((id) => Number(id) < 1)) {
+      this.toast.error(null, 'Please fill in all required fields.');
+      return;
+    }
     this.userRequest = {
       ...value,
       departmentId: Number(value.departmentId),

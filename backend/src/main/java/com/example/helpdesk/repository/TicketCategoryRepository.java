@@ -9,4 +9,5 @@ import com.example.helpdesk.model.TicketCategory;
 @Repository
 public interface TicketCategoryRepository extends JpaRepository<TicketCategory, Long> {
     Optional<TicketCategory> findByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

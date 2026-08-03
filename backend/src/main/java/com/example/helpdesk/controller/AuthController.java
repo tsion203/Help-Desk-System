@@ -19,6 +19,7 @@ import com.example.helpdesk.dto.LoginResponseDTO;
 import com.example.helpdesk.dto.ForgotPasswordRequestDTO;
 import com.example.helpdesk.dto.RegisterRequestDTO;
 import com.example.helpdesk.dto.ResetPasswordRequestDTO;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.model.Department;
 import com.example.helpdesk.model.Role;
 import com.example.helpdesk.model.User;
@@ -78,9 +79,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<LoginResponseDTO> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
-        if (userRepository.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        if (userRepository.existsByEmailIgnoreCase(registerRequestDTO.getEmail()))
+            throw new ConflictException("An account with this email already exists.");
+        if (userRepository.existsByEmployeeId(registerRequestDTO.getEmployeeId()))
+            throw new ConflictException("Employee ID already exists.");
 
         User user = new User();
         user.setEmail(registerRequestDTO.getEmail());

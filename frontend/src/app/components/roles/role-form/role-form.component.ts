@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RoleRequest } from '../../../models/role';
 import { Role } from '../../../models/role';
 import { RoleService } from '../../../services/role.service';
@@ -15,8 +15,8 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class RoleFormComponent implements OnInit {
   readonly roleForm = new FormGroup({
-    name: new FormControl('', { nonNullable: true }),
-    description: new FormControl('', { nonNullable: true }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   roleRequest: RoleRequest | null = null;
@@ -29,6 +29,7 @@ export class RoleFormComponent implements OnInit {
   ngOnInit(): void { const id = Number(this.route.snapshot.paramMap.get('id')); if (id) { this.roleId = id; this.roleService.getById(id).subscribe({ next: (role) => this.roleForm.patchValue(role), error: (error) => this.toast.error(error, 'Unable to load role.') }); } }
 
   onSave(): void {
+    if (this.roleForm.invalid) { this.roleForm.markAllAsTouched(); this.toast.error(null, 'Please fill in all required fields.'); return; }
     this.roleRequest = this.roleForm.getRawValue();
     const request = this.roleId ? this.roleService.update(this.roleId, this.roleRequest) : this.roleService.create(this.roleRequest);
     request.subscribe({

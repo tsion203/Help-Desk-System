@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.helpdesk.dto.DepartmentCreateDTO;
 import com.example.helpdesk.dto.DepartmentResponseDTO;
 import com.example.helpdesk.exception.ResourceNotFoundException;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.model.Department;
 import com.example.helpdesk.repository.DepartmentRepository;
 import com.example.helpdesk.service.DepartmentService;
@@ -22,6 +23,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentResponseDTO create(DepartmentCreateDTO departmentCreateDTO) {
+        if (departmentRepository.existsByNameIgnoreCase(departmentCreateDTO.getName()))
+            throw new ConflictException("A department with this name already exists.");
         Department department = new Department();
         department.setName(departmentCreateDTO.getName());
         department.setDescription(departmentCreateDTO.getDescription());
@@ -44,6 +47,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentResponseDTO update(Long id, DepartmentCreateDTO departmentCreateDTO) {
         Department department = findDepartmentById(id);
+        if (departmentRepository.existsByNameIgnoreCaseAndIdNot(departmentCreateDTO.getName(), id))
+            throw new ConflictException("A department with this name already exists.");
         department.setName(departmentCreateDTO.getName());
         department.setDescription(departmentCreateDTO.getDescription());
         return mapToResponseDTO(departmentRepository.save(department));

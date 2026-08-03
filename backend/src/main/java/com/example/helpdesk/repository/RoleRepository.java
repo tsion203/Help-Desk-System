@@ -7,4 +7,6 @@ import com.example.helpdesk.model.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

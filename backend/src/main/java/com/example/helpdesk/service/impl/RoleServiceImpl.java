@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.helpdesk.dto.RoleCreateDTO;
 import com.example.helpdesk.dto.RoleResponseDTO;
 import com.example.helpdesk.exception.ResourceNotFoundException;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.model.Role;
 import com.example.helpdesk.repository.RoleRepository;
 import com.example.helpdesk.service.RoleService;
@@ -22,6 +23,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleResponseDTO create(RoleCreateDTO roleCreateDTO) {
+        if (roleRepository.existsByNameIgnoreCase(roleCreateDTO.getName()))
+            throw new ConflictException("A role with this name already exists.");
         Role role = new Role();
         role.setName(roleCreateDTO.getName());
         role.setDescription(roleCreateDTO.getDescription());
@@ -44,6 +47,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleResponseDTO update(Long id, RoleCreateDTO roleCreateDTO) {
         Role role = findRoleById(id);
+        if (roleRepository.existsByNameIgnoreCaseAndIdNot(roleCreateDTO.getName(), id))
+            throw new ConflictException("A role with this name already exists.");
         role.setName(roleCreateDTO.getName());
         role.setDescription(roleCreateDTO.getDescription());
         return mapToResponseDTO(roleRepository.save(role));

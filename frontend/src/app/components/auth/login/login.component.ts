@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LoginRequest } from '../../../models/auth-request';
@@ -16,8 +16,8 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class LoginComponent {
   readonly loginForm = new FormGroup({
-    email: new FormControl('', { nonNullable: true }),
-    password: new FormControl('', { nonNullable: true }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   loginRequest: LoginRequest | null = null;
@@ -30,6 +30,11 @@ export class LoginComponent {
   ) {}
 
   onLogin(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      this.errorMessage = 'Please fill in all required fields.';
+      return;
+    }
     this.loginRequest = this.loginForm.getRawValue();
     this.errorMessage = '';
     this.authService.login(this.loginRequest).subscribe({
@@ -48,22 +53,14 @@ export class LoginComponent {
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
-    if (
-      error.status === 401 ||
-      (typeof error.error === 'string' &&
-        error.error.toLowerCase().includes('unexpected error'))
-    ) {
+    if (error.status === 401) {
       return 'Invalid login credentials. Please try again.';
-    }
-
-    if (typeof error.error === 'string' && error.error.trim()) {
-      return error.error;
     }
 
     if (error.error && typeof error.error.message === 'string') {
       return error.error.message;
     }
 
-    return error.message || 'Unable to sign in.';
+    return 'Unable to sign in. Please try again.';
   }
 }

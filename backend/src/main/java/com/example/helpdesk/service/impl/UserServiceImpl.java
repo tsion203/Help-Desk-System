@@ -12,6 +12,7 @@ import com.example.helpdesk.dto.AdminUserUpdateDTO;
 import com.example.helpdesk.dto.UserProfileUpdateDTO;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.example.helpdesk.exception.CurrentPasswordException;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.exception.ResourceNotFoundException;
 import com.example.helpdesk.model.Department;
 import com.example.helpdesk.model.Role;
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO create(UserCreateDTO userCreateDTO) {
+        validateUniqueIdentity(userCreateDTO.getEmail(), userCreateDTO.getEmployeeId(), null);
         User user = new User();
         user.setEmail(userCreateDTO.getEmail());
         user.setEmployeeId(userCreateDTO.getEmployeeId());
@@ -72,6 +74,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO updateByAdmin(Long id, AdminUserUpdateDTO userUpdateDTO) {
         User user = findUserById(id);
+        validateUniqueIdentity(userUpdateDTO.getEmail(), userUpdateDTO.getEmployeeId(), id);
 
         if (userUpdateDTO.getEmail() != null) {
             user.setEmail(userUpdateDTO.getEmail());
@@ -109,6 +112,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO updateCurrentProfile(UserProfileUpdateDTO dto) {
         User user = findCurrentUser();
+        if (userRepository.existsByEmailIgnoreCaseAndIdNot(dto.getEmail(), user.getId())) {
+            throw new ConflictException("An account with this email already exists.");
+        }
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
@@ -157,6 +163,17 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("One or more roles were not found");
         }
         return roles;
+    }
+
+    private void validateUniqueIdentity(String email, String employeeId, Long excludedId) {
+        boolean duplicateEmail = excludedId == null
+                ? userRepository.existsByEmailIgnoreCase(email)
+                : userRepository.existsByEmailIgnoreCaseAndIdNot(email, excludedId);
+        if (duplicateEmail) throw new ConflictException("An account with this email already exists.");
+        boolean duplicateEmployeeId = excludedId == null
+                ? userRepository.existsByEmployeeId(employeeId)
+                : userRepository.existsByEmployeeIdAndIdNot(employeeId, excludedId);
+        if (duplicateEmployeeId) throw new ConflictException("Employee ID already exists.");
     }
 
     private UserResponseDTO mapToResponseDTO(User user) {

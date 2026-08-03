@@ -11,6 +11,7 @@ import com.example.helpdesk.model.TicketCategory;
 import com.example.helpdesk.repository.TicketCategoryRepository;
 import com.example.helpdesk.service.TicketCategoryService;
 import com.example.helpdesk.exception.ResourceNotFoundException;
+import com.example.helpdesk.exception.ConflictException;
 
 
 @Service
@@ -24,6 +25,9 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
 
     @Override
     public TicketCategoryResponseDTO createCategory(TicketCategoryCreateDTO dto) {
+
+        if (categoryRepository.findByNameIgnoreCase(dto.getName()).isPresent())
+            throw new ConflictException("A ticket category with this name already exists.");
 
         TicketCategory category = new TicketCategory();
 
@@ -67,6 +71,8 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
     public TicketCategoryResponseDTO updateCategory(Long id, TicketCategoryCreateDTO dto) {
         TicketCategory category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), id))
+            throw new ConflictException("A ticket category with this name already exists.");
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
         TicketCategory saved = categoryRepository.save(category);

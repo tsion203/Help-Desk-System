@@ -66,11 +66,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   private apiError(error: HttpErrorResponse): string {
-    if (typeof error.error === 'string' && error.error.trim()) return error.error;
-    if (error.error && typeof error.error === 'object') {
-      const details = Object.values(error.error).filter((item) => typeof item === 'string').join(', ');
-      if (details) return details;
-    }
+    if (error.error && typeof error.error.message === 'string') return error.error.message;
     return 'Unable to reset the password. The link may be invalid or expired.';
   }
 }

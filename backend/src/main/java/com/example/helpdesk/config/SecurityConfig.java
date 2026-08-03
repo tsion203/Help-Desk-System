@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.helpdesk.security.JwtAuthFilter;
+import com.example.helpdesk.security.ApiErrorWriter;
 import com.example.helpdesk.security.UserDetailsServiceImpl;
 
 @Configuration
@@ -31,10 +32,13 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthFilter jwtAuthFilter;
+    private final ApiErrorWriter errorWriter;
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthFilter jwtAuthFilter,
+            ApiErrorWriter errorWriter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
+        this.errorWriter = errorWriter;
     }
 
     @Bean
@@ -42,9 +46,10 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) ->
-                        response.sendError(401, "Unauthorized"))
+                        errorWriter.write(request, response, 401, "UNAUTHORIZED", "Please sign in to continue."))
                         .accessDeniedHandler((request, response, exception) ->
-                                response.sendError(403, "Access denied")))
+                                errorWriter.write(request, response, 403, "FORBIDDEN",
+                                        "You do not have permission to perform this action.")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register",
                                 "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()

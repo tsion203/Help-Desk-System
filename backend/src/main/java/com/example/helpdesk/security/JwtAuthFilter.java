@@ -11,6 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -20,13 +22,16 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final ApiErrorWriter errorWriter;
 
-    public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+    public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, ApiErrorWriter errorWriter) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.errorWriter = errorWriter;
     }
 
     @Override
@@ -50,7 +55,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (!jwtUtil.isTokenValid(token, userDetails.getUsername())) {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                    errorWriter.write(request, response, HttpServletResponse.SC_UNAUTHORIZED,
+                            "SESSION_EXPIRED", "Your session has expired. Please sign in again.");
                     return;
                 }
                 List<SimpleGrantedAuthority> authorities = Stream.concat(
@@ -70,8 +76,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (UsernameNotFoundException | io.jsonwebtoken.JwtException | IllegalArgumentException ex) {
+            LOGGER.warn("JWT authentication failed for {} {}", request.getMethod(), request.getRequestURI(), ex);
             SecurityContextHolder.clearContext();
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+            errorWriter.write(request, response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "SESSION_EXPIRED", "Your session has expired. Please sign in again.");
             return;
         }
 

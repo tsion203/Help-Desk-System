@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DepartmentRequest } from '../../../models/department';
 import { Department } from '../../../models/department';
 import { DepartmentService } from '../../../services/department.service';
@@ -15,8 +15,8 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class DepartmentFormComponent implements OnInit {
   readonly departmentForm = new FormGroup({
-    name: new FormControl('', { nonNullable: true }),
-    description: new FormControl('', { nonNullable: true }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   departmentRequest: DepartmentRequest | null = null;
@@ -29,6 +29,7 @@ export class DepartmentFormComponent implements OnInit {
   ngOnInit(): void { const id = Number(this.route.snapshot.paramMap.get('id')); if (id) { this.departmentId = id; this.departmentService.getById(id).subscribe({ next: (department) => this.departmentForm.patchValue(department), error: (error) => this.toast.error(error, 'Unable to load department.') }); } }
 
   onSave(): void {
+    if (this.departmentForm.invalid) { this.departmentForm.markAllAsTouched(); this.toast.error(null, 'Please fill in all required fields.'); return; }
     this.departmentRequest = this.departmentForm.getRawValue();
     const request = this.departmentId ? this.departmentService.update(this.departmentId, this.departmentRequest) : this.departmentService.create(this.departmentRequest);
     request.subscribe({

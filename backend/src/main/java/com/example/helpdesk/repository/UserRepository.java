@@ -11,4 +11,8 @@ import com.example.helpdesk.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+    boolean existsByEmployeeId(String employeeId);
+    boolean existsByEmployeeIdAndIdNot(String employeeId, Long id);
 }

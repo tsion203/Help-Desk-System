@@ -7,4 +7,6 @@ import com.example.helpdesk.model.Department;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }
