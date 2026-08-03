@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { LoginRequest, RegisterRequest } from '../models/auth-request';
+import { ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest } from '../models/auth-request';
 import { LoginResponse } from '../models/auth-response';
 import { environment } from '../../environments/environment';
 
@@ -23,6 +23,14 @@ export class AuthService {
 
   register(user: RegisterRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/register`, user);
+  }
+
+  forgotPassword(request: ForgotPasswordRequest): Observable<string> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, request, { responseType: 'text' });
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<string> {
+    return this.http.post(`${this.apiUrl}/reset-password`, request, { responseType: 'text' });
   }
 
   saveToken(token: string): void {

@@ -68,6 +68,18 @@ public class EmailServiceImpl implements EmailService {
                         + "\nComment: " + comment.getComment());
     }
 
+    @Override
+    public void sendPasswordReset(User recipient, String resetLink, long expiryMinutes) {
+        String name = fullName(recipient).trim();
+        String body = "Hello " + name + ",\n\n"
+                + "We received a request to reset the password for your Help Desk account.\n\n"
+                + "Use the link below to choose a new password:\n" + resetLink + "\n\n"
+                + "This link expires in " + expiryMinutes + " minutes and can only be used once. "
+                + "If you did not request a password reset, you can safely ignore this email.\n\n"
+                + "Regards,\nHelp Desk Support";
+        sendMessage(recipient, "Help Desk: Reset your password", body);
+    }
+
     private void send(Ticket ticket, User recipient, String subject, String body) {
         if (recipient == null || !StringUtils.hasText(recipient.getEmail())) {
             LOGGER.warn("Email notification skipped for ticket {} because the recipient has no email address",
@@ -75,6 +87,10 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
 
+        sendMessage(recipient, subject, body);
+    }
+
+    private void sendMessage(User recipient, String subject, String body) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(recipient.getEmail());
@@ -85,8 +101,7 @@ public class EmailServiceImpl implements EmailService {
             }
             mailSender.send(message);
         } catch (Exception exception) {
-            LOGGER.error("Email notification failed for ticket {} and recipient {}",
-                    ticket != null ? ticket.getId() : null, recipient.getEmail(), exception);
+            LOGGER.error("Email notification failed for recipient {}", recipient.getEmail(), exception);
         }
     }
 

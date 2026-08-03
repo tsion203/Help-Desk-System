@@ -17,6 +17,6 @@ export class App {
 
   get showApplicationShell(): boolean {
     const path = this.router.url.split('?')[0];
-    return !['/', '/login', '/register', '/home'].includes(path);
+    return !['/', '/login', '/register', '/forgot-password', '/reset-password', '/home'].includes(path);
   }
 }

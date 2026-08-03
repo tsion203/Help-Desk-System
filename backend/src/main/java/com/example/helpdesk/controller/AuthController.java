@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.helpdesk.dto.LoginRequestDTO;
 import com.example.helpdesk.dto.LoginResponseDTO;
+import com.example.helpdesk.dto.ForgotPasswordRequestDTO;
 import com.example.helpdesk.dto.RegisterRequestDTO;
+import com.example.helpdesk.dto.ResetPasswordRequestDTO;
 import com.example.helpdesk.model.Department;
 import com.example.helpdesk.model.Role;
 import com.example.helpdesk.model.User;
@@ -24,6 +26,7 @@ import com.example.helpdesk.repository.DepartmentRepository;
 import com.example.helpdesk.repository.RoleRepository;
 import com.example.helpdesk.repository.UserRepository;
 import com.example.helpdesk.security.JwtUtil;
+import com.example.helpdesk.service.PasswordResetTokenService;
 
 import jakarta.validation.Valid;
 
@@ -37,6 +40,7 @@ public class AuthController {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenService passwordResetTokenService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
@@ -44,7 +48,8 @@ public class AuthController {
             UserRepository userRepository,
             DepartmentRepository departmentRepository,
             RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PasswordResetTokenService passwordResetTokenService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -52,6 +57,7 @@ public class AuthController {
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordResetTokenService = passwordResetTokenService;
     }
 
     @PostMapping("/login")
@@ -103,6 +109,20 @@ public class AuthController {
         String token = jwtUtil.generateToken(user.getEmail(), roleNames);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new LoginResponseDTO(token, "Bearer", user.getEmail(), primaryRole(roleNames)));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDTO request) {
+        passwordResetTokenService.requestPasswordReset(request);
+        return ResponseEntity.ok("If an account exists for that email, a password reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDTO request) {
+        passwordResetTokenService.resetPassword(request);
+        return ResponseEntity.ok("Password reset successfully.");
     }
 
     private String primaryRole(List<String> roles) {

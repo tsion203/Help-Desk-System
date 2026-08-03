@@ -15,4 +15,6 @@ public interface EmailService {
     void sendTicketResolved(Ticket ticket, User recipient);
 
     void sendCommentAdded(Ticket ticket, TicketComment comment, User recipient);
+
+    void sendPasswordReset(User recipient, String resetLink, long expiryMinutes);
 }
