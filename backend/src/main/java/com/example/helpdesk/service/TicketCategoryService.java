@@ -14,5 +14,7 @@ public interface TicketCategoryService {
 
     TicketCategoryResponseDTO getCategoryById(Long id);
 
+    TicketCategoryResponseDTO updateCategory(Long id, TicketCategoryCreateDTO dto);
+
     void deleteCategory(Long id);
 }

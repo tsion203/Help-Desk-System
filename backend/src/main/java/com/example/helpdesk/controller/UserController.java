@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.helpdesk.dto.UserCreateDTO;
 import com.example.helpdesk.dto.UserResponseDTO;
-import com.example.helpdesk.dto.UserUpdateDTO;
+import com.example.helpdesk.dto.AdminUserUpdateDTO;
+import com.example.helpdesk.dto.UserProfileUpdateDTO;
 import com.example.helpdesk.service.UserService;
 
 import jakarta.validation.Valid;
@@ -51,12 +52,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EMPLOYEE') and @rbac.isCurrentUser(#id, authentication))")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserUpdateDTO userUpdateDTO
+            @Valid @RequestBody AdminUserUpdateDTO userUpdateDTO
     ) {
-        return ResponseEntity.ok(userService.update(id, userUpdateDTO));
+        return ResponseEntity.ok(userService.updateByAdmin(id, userUpdateDTO));
     }
 
     @DeleteMapping("/{id}")
@@ -64,5 +65,18 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponseDTO> getCurrentProfile() {
+        return ResponseEntity.ok(userService.getCurrentProfile());
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponseDTO> updateCurrentProfile(
+            @Valid @RequestBody UserProfileUpdateDTO userProfileUpdateDTO) {
+        return ResponseEntity.ok(userService.updateCurrentProfile(userProfileUpdateDTO));
     }
 }

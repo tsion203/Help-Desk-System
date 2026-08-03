@@ -37,5 +37,5 @@ export interface TicketRequest {
 
 export type TicketUpdateRequest = Pick<
   TicketRequest,
-  'subject' | 'description' | 'status' | 'priority' | 'assignedToId' | 'categoryId'
->;
+  'subject' | 'description' | 'status' | 'priority' | 'categoryId'
+> & { assignedToId?: number };

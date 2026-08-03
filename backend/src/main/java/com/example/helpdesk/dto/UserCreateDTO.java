@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,10 @@ public class UserCreateDTO {
     private String employeeId;
 
     @NotBlank
+    @Size(min = 8, message = "Temporary password must contain at least 8 characters")
+    private String temporaryPassword;
+
+    @NotBlank
     private String firstName;
 
     @NotBlank
@@ -38,4 +43,5 @@ public class UserCreateDTO {
     private Long departmentId;
 
     private List<Long> roleIds;
+
 }

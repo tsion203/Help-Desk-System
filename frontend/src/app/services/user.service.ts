@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { User, UserRequest } from '../models/user';
+import { AdminUserUpdateRequest, User, UserProfileUpdateRequest, UserRequest } from '../models/user';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -25,9 +25,12 @@ export class UserService {
     return this.http.post<User>(this.apiUrl, user);
   }
 
-  update(id: number, user: UserRequest): Observable<User> {
+  update(id: number, user: AdminUserUpdateRequest): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/${id}`, user);
   }
+
+  getCurrentProfile(): Observable<User> { return this.http.get<User>(`${this.apiUrl}/me`); }
+  updateCurrentProfile(profile: UserProfileUpdateRequest): Observable<User> { return this.http.put<User>(`${this.apiUrl}/me`, profile); }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);

@@ -24,12 +24,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let department of departments">
+        <tr *ngFor="let department of departments" [routerLink]="['/departments', department.id, 'edit']" class="clickable-row">
           <td>{{ department.name }}</td>
           <td>{{ department.description }}</td>
           <td>{{ department.id }}</td>
           <td><span class="badge status-resolved">Available</span></td>
-          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id)" (keydown.enter)="deleteDepartment(department.id)">Delete</span></td>
+          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id, $event)" (keydown.enter)="deleteDepartment(department.id, $event)">Delete</span></td>
         </tr>
       </tbody>
     </table>

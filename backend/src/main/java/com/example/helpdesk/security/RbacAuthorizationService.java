@@ -42,9 +42,22 @@ public class RbacAuthorizationService {
 
     public boolean canUpdateTicket(Long ticketId, Authentication authentication) {
         if (hasAnyRole(authentication, "ADMIN", "SUPERVISOR")) return true;
-        if (!hasAnyRole(authentication, "SUPPORT_OFFICER")) return false;
-        return ticketRepository.findById(ticketId).map(ticket -> ticket.getAssignedTo() != null
-                && authentication.getName().equals(ticket.getAssignedTo().getEmail())).orElse(false);
+        if (authentication == null) return false;
+        return ticketRepository.findById(ticketId).map(ticket ->
+                hasAnyRole(authentication, "SUPPORT_OFFICER") && ticket.getAssignedTo() != null
+                        && authentication.getName().equals(ticket.getAssignedTo().getEmail())
+                || hasAnyRole(authentication, "EMPLOYEE") && ticket.getCreatedBy() != null
+                        && authentication.getName().equals(ticket.getCreatedBy().getEmail()))
+                .orElse(false);
+    }
+
+    public boolean canDeleteTicket(Long ticketId, Authentication authentication) {
+        if (hasAnyRole(authentication, "ADMIN")) return true;
+        if (!hasAnyRole(authentication, "EMPLOYEE") || authentication == null) return false;
+        return ticketRepository.findById(ticketId)
+                .map(ticket -> ticket.getCreatedBy() != null
+                        && authentication.getName().equals(ticket.getCreatedBy().getEmail()))
+                .orElse(false);
     }
 
     private boolean hasAnyRole(Authentication authentication, String... roles) {

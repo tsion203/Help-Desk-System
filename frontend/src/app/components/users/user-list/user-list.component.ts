@@ -18,5 +18,5 @@ export class UserListComponent implements OnInit {
   errorMessage = '';
   constructor(private readonly userService: UserService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
   ngOnInit(): void { this.loading = true; this.userService.getAll().subscribe({ next: (items) => { this.users = items; this.loading = false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load users.'; this.loading = false; this.cdr.markForCheck(); } }); }
-  deleteUser(id: number): void { this.userService.delete(id).subscribe({ next: () => { this.users = this.users.filter((item) => item.id !== id); this.toast.success('User deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete user.') }); }
+  deleteUser(id: number, event: Event): void { event.stopPropagation(); this.userService.delete(id).subscribe({ next: () => { this.users = this.users.filter((item) => item.id !== id); this.toast.success('User deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete user.') }); }
 }

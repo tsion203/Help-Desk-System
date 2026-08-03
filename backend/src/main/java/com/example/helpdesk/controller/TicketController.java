@@ -60,7 +60,7 @@ public class TicketController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@rbac.canDeleteTicket(#id, authentication)")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();

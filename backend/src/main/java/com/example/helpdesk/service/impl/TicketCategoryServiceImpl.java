@@ -10,6 +10,7 @@ import com.example.helpdesk.dto.TicketCategoryResponseDTO;
 import com.example.helpdesk.model.TicketCategory;
 import com.example.helpdesk.repository.TicketCategoryRepository;
 import com.example.helpdesk.service.TicketCategoryService;
+import com.example.helpdesk.exception.ResourceNotFoundException;
 
 
 @Service
@@ -54,7 +55,7 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
     public TicketCategoryResponseDTO getCategoryById(Long id) {
 
         TicketCategory category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         return new TicketCategoryResponseDTO(
                 category.getId(),
@@ -63,8 +64,20 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
     }
 
     @Override
+    public TicketCategoryResponseDTO updateCategory(Long id, TicketCategoryCreateDTO dto) {
+        TicketCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
+        TicketCategory saved = categoryRepository.save(category);
+        return new TicketCategoryResponseDTO(saved.getId(), saved.getName(), saved.getDescription());
+    }
+
+    @Override
     public void deleteCategory(Long id) {
 
-        categoryRepository.deleteById(id);
+        TicketCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+        categoryRepository.delete(category);
     }
 }

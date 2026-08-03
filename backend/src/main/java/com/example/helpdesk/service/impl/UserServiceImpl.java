@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import com.example.helpdesk.dto.RoleResponseDTO;
 import com.example.helpdesk.dto.UserCreateDTO;
 import com.example.helpdesk.dto.UserResponseDTO;
-import com.example.helpdesk.dto.UserUpdateDTO;
+import com.example.helpdesk.dto.AdminUserUpdateDTO;
+import com.example.helpdesk.dto.UserProfileUpdateDTO;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.helpdesk.exception.CurrentPasswordException;
 import com.example.helpdesk.exception.ResourceNotFoundException;
 import com.example.helpdesk.model.Department;
 import com.example.helpdesk.model.Role;
@@ -41,26 +44,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO create(UserCreateDTO userCreateDTO) {
         User user = new User();
-        try {
-            user.setEmail(userCreateDTO.getEmail());
-            user.setEmployeeId(userCreateDTO.getEmployeeId());
-            user.setFirstName(userCreateDTO.getFirstName());
-            user.setLastName(userCreateDTO.getLastName());
-            user.setPhoneNumber(userCreateDTO.getPhoneNumber());
-            user.setActive(userCreateDTO.getActive());
-            user.setPassword(passwordEncoder.encode("password123"));
-            user.setDepartment(findDepartmentById(userCreateDTO.getDepartmentId()));
-            user.setRoles(findRolesByIds(userCreateDTO.getRoleIds()));
-            return mapToResponseDTO(userRepository.save(user));
-        } catch (Exception ex) {
-            System.out.println("Error occure:" + ex.getMessage());
-            return null;
-        }
-        finally{
-       
-        }
-
-        
+        user.setEmail(userCreateDTO.getEmail());
+        user.setEmployeeId(userCreateDTO.getEmployeeId());
+        user.setFirstName(userCreateDTO.getFirstName());
+        user.setLastName(userCreateDTO.getLastName());
+        user.setPhoneNumber(userCreateDTO.getPhoneNumber());
+        user.setActive(userCreateDTO.getActive());
+        user.setPassword(passwordEncoder.encode(userCreateDTO.getTemporaryPassword()));
+        user.setDepartment(findDepartmentById(userCreateDTO.getDepartmentId()));
+        user.setRoles(findRolesByIds(userCreateDTO.getRoleIds()));
+        return mapToResponseDTO(userRepository.save(user));
     }
 
     @Override
@@ -77,7 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO update(Long id, UserUpdateDTO userUpdateDTO) {
+    public UserResponseDTO updateByAdmin(Long id, AdminUserUpdateDTO userUpdateDTO) {
         User user = findUserById(id);
 
         if (userUpdateDTO.getEmail() != null) {
@@ -109,6 +102,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO getCurrentProfile() {
+        return mapToResponseDTO(findCurrentUser());
+    }
+
+    @Override
+    public UserResponseDTO updateCurrentProfile(UserProfileUpdateDTO dto) {
+        User user = findCurrentUser();
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            if (dto.getCurrentPassword() == null
+                    || !passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+                throw new CurrentPasswordException("Current password is incorrect");
+            }
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        return mapToResponseDTO(userRepository.save(user));
+    }
+
+    @Override
     public void delete(Long id) {
         User user = findUserById(id);
         userRepository.delete(user);
@@ -117,6 +132,12 @@ public class UserServiceImpl implements UserService {
     private User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    }
+
+    private User findCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
     }
 
     private Department findDepartmentById(Long id) {

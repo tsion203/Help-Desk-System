@@ -9,6 +9,8 @@ import { UserService } from '../../../services/user.service';
 import { ActivatedRoute } from '@angular/router';
 import { TicketCategoryService } from '../../../services/ticket-category.service';
 import { ToastService } from '../../../services/toast.service';
+import { AuthService } from '../../../services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-ticket-update',
@@ -30,17 +32,25 @@ export class TicketUpdateComponent implements OnInit {
   ticketUpdateRequest: TicketUpdateRequest | null = null;
   ticketId = 0;
   errorMessage = '';
-  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute) {}
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
+  get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor(); }
   ngOnInit(): void {
     this.ticketId = Number(this.route.snapshot.paramMap.get('id'));
-    this.userService.getAll().subscribe({ next: (users) => (this.assignees = users), error: () => (this.errorMessage = 'Unable to load assignees.') });
-    this.categoryService.getAll().subscribe({ next: (categories) => (this.categories = categories), error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
-    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue(ticket); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
+    if (this.canAssign) this.userService.getAll().subscribe({ next: (users) => { this.assignees = users; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load assignees.'; this.cdr.markForCheck(); } });
+    this.categoryService.getAll().subscribe({ next: (categories) => { this.categories = categories; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
+    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue(ticket); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
   }
 
   onUpdate(): void {
     const value = this.ticketForm.getRawValue();
-    this.ticketUpdateRequest = { ...value, assignedToId: Number(value.assignedToId), categoryId: Number(value.categoryId) };
+    this.ticketUpdateRequest = {
+      subject: value.subject,
+      description: value.description,
+      status: value.status,
+      priority: value.priority,
+      categoryId: Number(value.categoryId),
+      ...(this.canAssign ? { assignedToId: Number(value.assignedToId) } : {}),
+    };
     this.ticketService.update(this.ticketId, this.ticketUpdateRequest).subscribe({
       next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.toast.success(`Ticket ${ticket.ticketNumber} updated successfully.`); },
       error: (error) => this.toast.error(error, 'Unable to update ticket.'),

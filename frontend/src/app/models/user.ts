@@ -22,4 +22,15 @@ export interface UserRequest {
   active: boolean;
   departmentId: number;
   roleIds: number[];
+  temporaryPassword?: string;
+}
+
+export type AdminUserUpdateRequest = Omit<UserRequest, 'temporaryPassword'>;
+export interface UserProfileUpdateRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  currentPassword?: string;
+  password?: string;
 }

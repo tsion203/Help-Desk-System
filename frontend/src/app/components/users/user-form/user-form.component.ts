@@ -47,6 +47,7 @@ export class UserFormComponent implements OnInit {
   readonly userForm = new FormGroup({
     email: new FormControl('', { nonNullable: true }),
     employeeId: new FormControl('', { nonNullable: true }),
+    temporaryPassword: new FormControl('', { nonNullable: true }),
     firstName: new FormControl('', { nonNullable: true }),
     lastName: new FormControl('', { nonNullable: true }),
     phoneNumber: new FormControl('', { nonNullable: true }),
@@ -59,10 +60,16 @@ export class UserFormComponent implements OnInit {
 
   onSave(): void {
     const value = this.userForm.getRawValue();
+    const selectedRoleIds = Array.isArray(value.roleIds)
+      ? value.roleIds
+      : value.roleIds
+        ? [value.roleIds]
+        : [];
     this.userRequest = {
       ...value,
       departmentId: Number(value.departmentId),
-      roleIds: value.roleIds.map(Number),
+      roleIds: selectedRoleIds.map(Number),
+      temporaryPassword: this.userId ? undefined : value.temporaryPassword,
     };
     const request = this.userId
       ? this.userService.update(this.userId, this.userRequest)
@@ -72,9 +79,11 @@ export class UserFormComponent implements OnInit {
         this.errorMessage = '';
         this.toast.success(this.userId ? 'User updated successfully.' : 'User created successfully.');
         if (this.userId) this.userId = user.id;
-        else this.userForm.reset({ email: '', employeeId: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: [] });
+        else this.userForm.reset({ email: '', employeeId: '', temporaryPassword: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: [] });
       },
       error: (error) => this.toast.error(error, 'Unable to save user.'),
     });
   }
+
+  get pageTitle(): string { return this.userId ? 'Edit user' : 'Create user'; }
 }

@@ -18,11 +18,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let role of roles">
+        <tr *ngFor="let role of roles" [routerLink]="['/roles', role.id, 'edit']" class="clickable-row">
           <td>{{ role.name }}</td>
           <td>{{ role.description }}</td>
           <td>{{ role.id }}</td>
-          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id)" (keydown.enter)="deleteRole(role.id)">Delete</span></td>
+          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id, $event)" (keydown.enter)="deleteRole(role.id, $event)">Delete</span></td>
         </tr>
       </tbody>
     </table>

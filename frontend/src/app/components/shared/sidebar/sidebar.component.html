@@ -1,55 +1,17 @@
-<aside
-  class="sidebar"
-  [class.collapsed]="isCollapsed"
-  aria-label="Primary navigation"
->
-  <div class="sidebar-header">
-    <span class="sidebar-title">Navigation</span>
-    <button
-      class="collapse-button"
-      type="button"
-      (click)="toggleSidebar()"
-      [attr.aria-expanded]="!isCollapsed"
-      [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <span aria-hidden="true">{{ isCollapsed ? '›' : '‹' }}</span>
-    </button>
-  </div>
-
+<aside class="sidebar" [class.collapsed]="isCollapsed" aria-label="Primary navigation">
+  <div class="sidebar-header"><span class="sidebar-title">Navigation</span><button class="collapse-button" type="button" (click)="toggleSidebar()" [attr.aria-expanded]="!isCollapsed" [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"><span aria-hidden="true">{{ isCollapsed ? '›' : '‹' }}</span></button></div>
   <nav>
-    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
-      <span class="nav-icon" aria-hidden="true">▦</span>
-      <span class="nav-text">Dashboard</span>
-    </a>
-    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [title]="isEmployee ? 'My tickets' : 'Tickets'">
-      <span class="nav-icon" aria-hidden="true">⌑</span>
-      <span class="nav-text">{{ isEmployee ? 'My tickets' : (isSupportOfficer ? 'Assigned tickets' : 'Tickets') }}</span>
-    </a>
-    <a *ngIf="isSupportOfficer" class="nav-link" routerLink="/tickets" routerLinkActive="active" title="My assigned tickets">
-      <span class="nav-icon" aria-hidden="true">✓</span>
-      <span class="nav-text">My assigned</span>
-    </a>
-    <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="Create ticket"><span class="nav-icon">+</span><span class="nav-text">Create ticket</span></a>
-    <a class="nav-link" routerLink="/notifications" routerLinkActive="active" title="Notifications"><span class="nav-icon">!</span><span class="nav-text">Notifications</span></a>
-
+    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard"><span class="nav-icon">◇</span><span class="nav-text">Dashboard</span></a>
     <ng-container *ngIf="isAdmin">
       <p class="nav-label">Administration</p>
-      <a class="nav-link" routerLink="/departments" routerLinkActive="active" title="Departments">
-        <span class="nav-icon" aria-hidden="true">⌂</span>
-        <span class="nav-text">Departments</span>
-      </a>
-      <a class="nav-link" routerLink="/users" routerLinkActive="active" title="Users">
-        <span class="nav-icon" aria-hidden="true">♙</span>
-        <span class="nav-text">Users</span>
-      </a>
-      <a class="nav-link" routerLink="/roles" routerLinkActive="active" title="Roles">
-        <span class="nav-icon" aria-hidden="true">⚿</span>
-        <span class="nav-text">Roles</span>
-      </a>
+      <a class="nav-link" routerLink="/departments" routerLinkActive="active"><span class="nav-icon">D</span><span class="nav-text">Departments</span></a>
+      <a class="nav-link" routerLink="/users" routerLinkActive="active"><span class="nav-icon">U</span><span class="nav-text">Users</span></a>
+      <a class="nav-link" routerLink="/roles" routerLinkActive="active"><span class="nav-icon">R</span><span class="nav-text">Roles</span></a>
+      <a class="nav-link" routerLink="/categories" routerLinkActive="active"><span class="nav-icon">#</span><span class="nav-text">Categories</span></a>
     </ng-container>
+    <a class="nav-link" routerLink="/tickets" routerLinkActive="active"><span class="nav-icon">T</span><span class="nav-text">{{ isEmployee ? 'My tickets' : (isSupportOfficer ? 'Assigned tickets' : 'Tickets') }}</span></a>
+    <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active"><span class="nav-icon">+</span><span class="nav-text">Create ticket</span></a>
+    <a class="nav-link" routerLink="/notifications" routerLinkActive="active"><span class="nav-icon">!</span><span class="nav-text">Notifications</span></a>
   </nav>
-  <button class="logout-button" type="button" (click)="logout()" title="Log out">
-    <span class="nav-icon" aria-hidden="true">&#x21AA;</span>
-    <span class="nav-text">Log out</span>
-  </button>
+  <button class="logout-button" type="button" (click)="logout()"><span class="nav-icon">↪</span><span class="nav-text">Log out</span></button>
 </aside>
