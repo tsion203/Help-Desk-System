@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.example.helpdesk.dto.RoleResponseDTO;
 import com.example.helpdesk.dto.UserCreateDTO;
@@ -65,7 +66,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDTO> getAll() {
-        return userRepository.findAll()
+        return getAll(null);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAll(String role) {
+        Specification<User> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        if (role != null && !role.isBlank()) {
+            String normalizedRole = role.trim().toUpperCase();
+            specification = specification.and((root, query, criteriaBuilder) -> {
+                query.distinct(true);
+                return criteriaBuilder.equal(criteriaBuilder.upper(root.join("roles").get("name")), normalizedRole);
+            });
+        }
+        return userRepository.findAll(specification)
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();

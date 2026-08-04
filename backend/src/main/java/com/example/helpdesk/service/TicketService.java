@@ -8,6 +8,7 @@ import com.example.helpdesk.dto.TicketResponseDTO;
 import com.example.helpdesk.dto.TicketStatusHistoryResponseDTO;
 import com.example.helpdesk.dto.TicketUpdateDTO;
 import com.example.helpdesk.model.TicketStatus;
+import com.example.helpdesk.model.TicketPriority;
 
 public interface TicketService {
 
@@ -16,6 +17,8 @@ public interface TicketService {
     TicketResponseDTO getById(Long id);
 
     List<TicketResponseDTO> getAll();
+
+    List<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority);
 
     TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO);
 

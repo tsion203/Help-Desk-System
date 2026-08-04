@@ -1,5 +1,7 @@
 <main class="page"><header class="page-header"><h1>Users</h1><a class="btn btn-primary" routerLink="/users/new">Add user</a></header>
   <p *ngIf="loading">Loading users...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <section class="table-card" *ngIf="!loading && !errorMessage"><table><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead>
+  <section class="table-card" *ngIf="!errorMessage">
+    <div class="filter-toolbar"><label><select [formControl]="roleFilter"><option value="">All roles</option><option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option></select></label><button class="clear-filter" type="button" (click)="clearRoleFilter()" [disabled]="!roleFilter.value">Clear Filter</button></div>
+    <table><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody><tr *ngFor="let user of users | globalSearch: globalSearch.term()" [routerLink]="['/users', user.id, 'edit']" class="clickable-row"><td>{{ user.employeeId }}</td><td>{{ user.firstName }} {{ user.lastName }}</td><td>{{ user.email }}</td><td>{{ user.departmentName }}</td><td><span *ngFor="let role of user.roles; let last = last">{{ role.name }}<span *ngIf="!last">, </span></span></td><td>{{ user.active ? 'Active' : 'Inactive' }}</td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteUser(user.id, $event)" (keydown.enter)="deleteUser(user.id, $event)">Delete</span></td></tr></tbody></table>
     <p *ngIf="(users | globalSearch: globalSearch.term()).length === 0">No users found.</p></section></main>

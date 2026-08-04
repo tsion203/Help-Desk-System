@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.helpdesk.dto.TicketCreateDTO;
 import com.example.helpdesk.dto.TicketResponseDTO;
 import com.example.helpdesk.dto.TicketUpdateDTO;
 import com.example.helpdesk.service.TicketService;
+import com.example.helpdesk.model.TicketPriority;
+import com.example.helpdesk.model.TicketStatus;
 
 import jakarta.validation.Valid;
 
@@ -40,8 +43,11 @@ public class TicketController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR','SUPPORT_OFFICER','EMPLOYEE')")
-    public ResponseEntity<List<TicketResponseDTO>> getAllTickets() {
-        return ResponseEntity.ok(ticketService.getAll());
+    public ResponseEntity<List<TicketResponseDTO>> getAllTickets(
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) TicketPriority priority) {
+        return ResponseEntity.ok(ticketService.getAll(status, category, priority));
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,12 @@
 <main class="page">
   <header class="page-header"><div><h1>Tickets</h1><p>Track and manage support requests.</p></div><a *ngIf="canCreate" class="btn btn-primary" routerLink="/tickets/new">Add ticket</a></header>
   <section class="table-card">
+    <form class="filter-toolbar" [formGroup]="filterForm" aria-label="Ticket filters">
+      <label><select formControlName="status"><option value="">All statuses</option><option *ngFor="let status of statuses" [value]="status">{{ status.replace('_', ' ') }}</option></select></label>
+      <label><select formControlName="category"><option value="">All categories</option><option *ngFor="let category of categories" [value]="category.name">{{ category.name }}</option></select></label>
+      <label><select formControlName="priority"><option value="">All priorities</option><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select></label>
+      <button class="clear-filter" type="button" (click)="clearFilters()" [disabled]="!filterForm.controls.status.value && !filterForm.controls.category.value && !filterForm.controls.priority.value">Clear Filters</button>
+    </form>
     <table><thead><tr><th>ID</th><th>Subject</th><th>Requester</th><th>Status</th><th>Priority</th><th>Updated</th><th>Actions</th></tr></thead>
       <tbody><tr class="ticket-row" *ngFor="let ticket of tickets | globalSearch: globalSearch.term()" tabindex="0" role="link" [routerLink]="canUpdate ? ['/tickets', ticket.id, 'edit'] : ['/tickets', ticket.id]"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td><td><span *ngIf="canDelete" class="delete-action" role="button" tabindex="0" (click)="deleteTicket(ticket.id, $event)" (keydown.enter)="deleteTicket(ticket.id, $event)">Delete</span></td></tr></tbody>
     </table>

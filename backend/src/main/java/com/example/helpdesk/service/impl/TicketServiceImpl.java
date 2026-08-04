@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
@@ -24,6 +25,7 @@ import com.example.helpdesk.model.TicketAttachment;
 import com.example.helpdesk.model.TicketCategory;
 import com.example.helpdesk.model.TicketComment;
 import com.example.helpdesk.model.TicketStatus;
+import com.example.helpdesk.model.TicketPriority;
 import com.example.helpdesk.model.TicketStatusHistory;
 import com.example.helpdesk.model.User;
 import com.example.helpdesk.repository.TicketAssignmentHistoryRepository;
@@ -93,18 +95,42 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAll() {
+        return getAll(null, null, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority) {
         User currentUser = findCurrentUserOrNull();
-        List<Ticket> visibleTickets;
-        if (hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
-            visibleTickets = ticketRepository.findAll();
-        } else if (currentUser != null && hasAnyCurrentRole("SUPPORT_OFFICER")) {
-            visibleTickets = ticketRepository.findByAssignedToId(currentUser.getId());
-        } else if (currentUser != null) {
-            visibleTickets = ticketRepository.findByCreatedById(currentUser.getId());
-        } else {
-            visibleTickets = List.of();
+        Specification<Ticket> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        if (status != null) {
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
-        return visibleTickets
+        if (priority != null) {
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("priority"), priority));
+        }
+        if (category != null && !category.isBlank()) {
+            String normalizedCategory = category.trim().toLowerCase();
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(criteriaBuilder.lower(root.join("category").get("name")), normalizedCategory));
+        }
+
+        if (hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
+            // Administrators and supervisors retain visibility of all filtered tickets.
+        } else if (currentUser != null && hasAnyCurrentRole("SUPPORT_OFFICER")) {
+            Long currentUserId = currentUser.getId();
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("assignedTo").get("id"), currentUserId));
+        } else if (currentUser != null) {
+            Long currentUserId = currentUser.getId();
+            specification = specification.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("createdBy").get("id"), currentUserId));
+        } else {
+            return List.of();
+        }
+
+        return ticketRepository.findAll(specification)
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();

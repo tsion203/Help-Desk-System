@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { AdminUserUpdateRequest, User, UserProfileUpdateRequest, UserRequest } from '../models/user';
@@ -13,8 +13,9 @@ export class UserService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getAll(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl);
+  getAll(role?: string): Observable<User[]> {
+    const params = role ? new HttpParams().set('role', role) : undefined;
+    return this.http.get<User[]>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<User> {

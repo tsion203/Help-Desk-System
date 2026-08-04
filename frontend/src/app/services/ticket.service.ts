@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject, tap } from 'rxjs';
 
 import { Ticket, TicketRequest, TicketUpdateRequest } from '../models/ticket';
@@ -19,8 +19,12 @@ export class TicketService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getAll(): Observable<Ticket[]> {
-    return this.http.get<Ticket[]>(this.apiUrl);
+  getAll(filters: TicketFilters = {}): Observable<Ticket[]> {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.category) params = params.set('category', filters.category);
+    if (filters.priority) params = params.set('priority', filters.priority);
+    return this.http.get<Ticket[]>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<Ticket> {
@@ -52,4 +56,10 @@ export class TicketService {
   getStatusHistory(ticketId: number): Observable<TicketStatusHistory[]> {
     return this.http.get<TicketStatusHistory[]>(`${this.statusHistoryUrl}/ticket/${ticketId}`);
   }
+}
+
+export interface TicketFilters {
+  status?: string;
+  category?: string;
+  priority?: string;
 }

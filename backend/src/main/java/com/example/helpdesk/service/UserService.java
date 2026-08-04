@@ -15,6 +15,8 @@ public interface UserService {
 
     List<UserResponseDTO> getAll();
 
+    List<UserResponseDTO> getAll(String role);
+
     UserResponseDTO updateByAdmin(Long id, AdminUserUpdateDTO userUpdateDTO);
 
     UserResponseDTO getCurrentProfile();
