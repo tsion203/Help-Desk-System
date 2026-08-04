@@ -1,15 +1,16 @@
 <app-toast />
 @if (showApplicationShell) {
-  <app-navbar />
-
   <div class="application-layout">
     <app-sidebar />
-    <main class="application-content">
-      <router-outlet />
-    </main>
+    <div class="application-workspace">
+      <app-navbar />
+      <main class="application-content">
+        <router-outlet />
+      </main>
+    </div>
   </div>
 
-  <app-footer />
 } @else {
   <router-outlet />
 }
+<app-footer />

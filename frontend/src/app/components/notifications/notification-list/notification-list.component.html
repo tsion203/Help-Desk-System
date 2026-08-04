@@ -1,3 +1,51 @@
-<section class="page"><h2>Notifications <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span></h2><p *ngIf="loading">Loading notifications...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }} <button type="button" (click)="loadNotifications()">Retry</button></p>
-  <article class="card notification" *ngFor="let notification of notifications" [class.unread]="!notification.isRead"><strong>{{ notification.title }}</strong><p>{{ notification.message }}</p><small>{{ notification.createdAt }}<span *ngIf="notification.ticketNumber"> · {{ notification.ticketNumber }}</span></small><button *ngIf="!notification.isRead" type="button" (click)="markAsRead(notification.id)">Mark as read</button></article>
-  <p *ngIf="!loading && !errorMessage && notifications.length === 0">No notifications available.</p></section>
+<section class="page notifications-page" aria-labelledby="notifications-title">
+  <header class="notifications-header">
+    <div>
+      <h1 id="notifications-title">Notifications</h1>
+      <p>Stay updated on your help desk requests.</p>
+    </div>
+    <button class="mark-all-button" type="button" (click)="markAllAsRead()" [disabled]="unreadCount === 0 || markingAllRead">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM4 7l8 6 8-6"/><path d="m14 17 2 2 4-5"/></svg>
+      <span>{{ markingAllRead ? 'Marking as read…' : 'Mark all as read' }}</span>
+    </button>
+  </header>
+
+  <p class="loading-state" *ngIf="loading">Loading notifications…</p>
+  <div class="error-state" *ngIf="errorMessage" role="alert">
+    <span>{{ errorMessage }}</span><button type="button" (click)="loadNotifications()">Retry</button>
+  </div>
+
+  <div class="notification-list" *ngIf="!loading">
+    <article
+      class="notification-card"
+      *ngFor="let notification of notifications | globalSearch: globalSearch.term()"
+      [ngClass]="{'is-unread': !notification.isRead, 'is-read': notification.isRead, 'is-resolved': isResolved(notification)}"
+      [class.can-mark-read]="!notification.isRead"
+      [attr.tabindex]="notification.isRead ? null : 0"
+      (click)="!notification.isRead && markAsRead(notification.id)"
+      (keydown.enter)="!notification.isRead && markAsRead(notification.id)"
+    >
+      <span class="type-icon" aria-hidden="true">
+        <svg *ngIf="!isResolved(notification)" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 12v6M9 15h6"/></svg>
+        <svg *ngIf="isResolved(notification)" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+      </span>
+
+      <div class="notification-content">
+        <div class="title-row">
+          <h2><span class="status-dot" *ngIf="!notification.isRead" aria-hidden="true"></span>{{ notification.title }}</h2>
+          <span class="read-state">{{ notification.isRead ? 'READ' : 'UNREAD' }}</span>
+        </div>
+        <p>{{ notification.message }}</p>
+        <div class="notification-meta">
+          <time [attr.datetime]="notification.createdAt">{{ notification.createdAt | date:'yyyy-MM-dd HH:mm:ss' }}</time>
+          <span *ngIf="notification.ticketNumber">{{ notification.ticketNumber }}</span>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !errorMessage && (notifications | globalSearch: globalSearch.term()).length === 0">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM4 7l8 6 8-6"/></svg>
+    <h2>You're all caught up</h2><p>No notifications are available.</p>
+  </div>
+</section>

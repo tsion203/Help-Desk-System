@@ -1,40 +1,10 @@
 <main class="page">
-  <header class="page-header">
-    <div>
-      <h1>Departments</h1>
-      <p>Manage service teams and ownership.</p>
-    </div>
-    <a class="btn btn-primary" href="/departments/new">Add department</a>
-  </header>
+  <header class="page-header"><div><h1>Departments</h1><p>Manage service teams and ownership.</p></div><a class="btn btn-primary" routerLink="/departments/new">Add department</a></header>
   <section class="table-card">
-    <form class="toolbar" [formGroup]="filterForm">
-      <input class="search" type="search" formControlName="search" placeholder="Search departments" /><select formControlName="status">
-        <option value="all">All statuses</option>
-        <option value="active">Active</option>
-      </select>
-    </form>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-          <th>ID</th>
-          <th>Availability</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let department of departments" [routerLink]="['/departments', department.id, 'edit']" class="clickable-row">
-          <td>{{ department.name }}</td>
-          <td>{{ department.description }}</td>
-          <td>{{ department.id }}</td>
-          <td><span class="badge status-resolved">Available</span></td>
-          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id, $event)" (keydown.enter)="deleteDepartment(department.id, $event)">Delete</span></td>
-        </tr>
-      </tbody>
+    <table><thead><tr><th>Name</th><th>Description</th><th>ID</th><th>Availability</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let department of departments | globalSearch: globalSearch.term()" [routerLink]="['/departments', department.id, 'edit']" class="clickable-row"><td>{{ department.name }}</td><td>{{ department.description }}</td><td>{{ department.id }}</td><td><span class="badge status-resolved">Available</span></td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id, $event)" (keydown.enter)="deleteDepartment(department.id, $event)">Delete</span></td></tr></tbody>
     </table>
-    <p *ngIf="loading">Loading departments...</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <p *ngIf="!loading && !errorMessage && departments.length === 0">No departments found.</p>
+    <p *ngIf="loading">Loading departments...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p *ngIf="!loading && !errorMessage && (departments | globalSearch: globalSearch.term()).length === 0">No departments found.</p>
   </section>
 </main>

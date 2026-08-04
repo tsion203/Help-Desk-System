@@ -6,11 +6,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { LoginRequest } from '../../../models/auth-request';
 import { LoginResponse } from '../../../models/auth-response';
 import { AuthService } from '../../../services/auth.service';
+import { BrandLogoComponent } from '../../shared/brand-logo/brand-logo.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

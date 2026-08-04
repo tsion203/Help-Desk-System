@@ -1,33 +1,10 @@
 <main class="page">
-  <header class="page-header">
-    <div>
-      <h1>Roles</h1>
-      <p>Control system permissions.</p>
-    </div>
-    <a class="btn btn-primary" href="/roles/new">Add role</a>
-  </header>
+  <header class="page-header"><div><h1>Roles</h1><p>Control system permissions.</p></div><a class="btn btn-primary" routerLink="/roles/new">Add role</a></header>
   <section class="table-card">
-    <form class="toolbar" [formGroup]="filterForm"><input class="search" type="search" formControlName="search" placeholder="Search roles" /></form>
-    <table>
-      <thead>
-        <tr>
-          <th>Role</th>
-          <th>Description</th>
-          <th>ID</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let role of roles" [routerLink]="['/roles', role.id, 'edit']" class="clickable-row">
-          <td>{{ role.name }}</td>
-          <td>{{ role.description }}</td>
-          <td>{{ role.id }}</td>
-          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id, $event)" (keydown.enter)="deleteRole(role.id, $event)">Delete</span></td>
-        </tr>
-      </tbody>
+    <table><thead><tr><th>Role</th><th>Description</th><th>ID</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()" [routerLink]="['/roles', role.id, 'edit']" class="clickable-row"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>{{ role.id }}</td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id, $event)" (keydown.enter)="deleteRole(role.id, $event)">Delete</span></td></tr></tbody>
     </table>
-    <p *ngIf="loading">Loading roles...</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <p *ngIf="!loading && !errorMessage && roles.length === 0">No roles found.</p>
+    <p *ngIf="loading">Loading roles...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p *ngIf="!loading && !errorMessage && (roles | globalSearch: globalSearch.term()).length === 0">No roles found.</p>
   </section>
 </main>

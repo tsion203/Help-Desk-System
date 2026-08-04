@@ -1,17 +1,41 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed" aria-label="Primary navigation">
-  <div class="sidebar-header"><span class="sidebar-title">Navigation</span><button class="collapse-button" type="button" (click)="toggleSidebar()" [attr.aria-expanded]="!isCollapsed" [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"><span aria-hidden="true">{{ isCollapsed ? '›' : '‹' }}</span></button></div>
-  <nav>
-    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" title="Dashboard"><span class="nav-icon">◇</span><span class="nav-text">Dashboard</span></a>
+  <header class="sidebar-header">
+    <a class="sidebar-brand" routerLink="/dashboard" aria-label="Help Desk dashboard"><app-brand-logo /><strong class="nav-text">Help Desk</strong></a>
+    <button class="collapse-button" type="button" (click)="toggleSidebar()" [attr.aria-expanded]="!isCollapsed" [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="isCollapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'"/></svg>
+    </button>
+  </header>
+
+  <nav aria-label="Help Desk menu">
+    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Dashboard">
+      <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 1 1 16 0v5H4v-5Z"/><path d="m12 13 4-4M7 16h10"/></svg><span class="nav-text">Dashboard</span>
+    </a>
+    <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Tickets">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M9 9h6M9 13h4"/></svg><span class="nav-text">{{ isEmployee ? 'My Tickets' : (isSupportOfficer ? 'Assigned Tickets' : 'Tickets') }}</span>
+    </a>
+    <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="New Ticket">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="nav-text">New Ticket</span>
+    </a>
+
     <ng-container *ngIf="isAdmin">
-      <p class="nav-label">Administration</p>
-      <a class="nav-link" routerLink="/departments" routerLinkActive="active"><span class="nav-icon">D</span><span class="nav-text">Departments</span></a>
-      <a class="nav-link" routerLink="/users" routerLinkActive="active"><span class="nav-icon">U</span><span class="nav-text">Users</span></a>
-      <a class="nav-link" routerLink="/roles" routerLinkActive="active"><span class="nav-icon">R</span><span class="nav-text">Roles</span></a>
-      <a class="nav-link" routerLink="/categories" routerLinkActive="active"><span class="nav-icon">#</span><span class="nav-text">Categories</span></a>
+      <p class="nav-label nav-text">Admin</p>
+      <a class="nav-link" routerLink="/users" routerLinkActive="active"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c.5-3.3 2.5-5 6-5s5.5 1.7 6 5M16 6a3 3 0 0 1 0 6M17 14c2.3.4 3.6 2 4 5"/></svg><span class="nav-text">Users</span></a>
+      <a class="nav-link" routerLink="/departments" routerLinkActive="active"><svg viewBox="0 0 24 24"><path d="M5 21V4h11v17M16 9h3v12M8 8h2M8 12h2M8 16h2M3 21h18"/></svg><span class="nav-text">Departments</span></a>
+      <a class="nav-link" routerLink="/roles" routerLinkActive="active"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-5"/></svg><span class="nav-text">Roles</span></a>
+      <a class="nav-link" routerLink="/categories" routerLinkActive="active"><svg viewBox="0 0 24 24"><path d="m3 12 9 9 9-9-9-9H5a2 2 0 0 0-2 2v7Z"/><circle cx="8" cy="8" r="1"/></svg><span class="nav-text">Categories</span></a>
     </ng-container>
-    <a class="nav-link" routerLink="/tickets" routerLinkActive="active"><span class="nav-icon">T</span><span class="nav-text">{{ isEmployee ? 'My tickets' : (isSupportOfficer ? 'Assigned tickets' : 'Tickets') }}</span></a>
-    <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active"><span class="nav-icon">+</span><span class="nav-text">Create ticket</span></a>
-    <a class="nav-link" routerLink="/notifications" routerLinkActive="active"><span class="nav-icon">!</span><span class="nav-text">Notifications</span></a>
+
+    <a class="nav-link" routerLink="/notifications" routerLinkActive="active"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg><span class="nav-text">Notifications</span></a>
+    <a *ngIf="isEmployee" class="nav-link" routerLink="/profile" routerLinkActive="active"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-5 3.2-7 8-7s7.5 2 8 7"/></svg><span class="nav-text">Profile</span></a>
   </nav>
-  <button class="logout-button" type="button" (click)="logout()"><span class="nav-icon">↪</span><span class="nav-text">Log out</span></button>
+
+  <div class="sidebar-footer">
+    <div class="user-card" [title]="userName + ' — ' + userEmail">
+      <span class="avatar">{{ userInitials }}</span>
+      <span class="user-copy nav-text"><strong>{{ userName }}</strong><small>{{ userEmail }}</small></span>
+    </div>
+    <button class="logout-button" type="button" (click)="logout()">
+      <svg viewBox="0 0 24 24"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg><span class="nav-text">Logout</span>
+    </button>
+  </div>
 </aside>

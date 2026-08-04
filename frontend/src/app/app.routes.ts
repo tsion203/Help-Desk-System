@@ -40,13 +40,13 @@ import { CategoryFormComponent } from './components/categories/category-form/cat
 
 export const routes: Routes = [
 
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
-  { path: 'home', component: HomeComponent, canActivate: [authGuard] },
+  { path: 'home', pathMatch: 'full', redirectTo: '' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR'] } },
 
   { path: 'users', component: UserListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
@@ -85,6 +85,6 @@ export const routes: Routes = [
   { path: 'notifications', component: NotificationListComponent, canActivate: [authGuard] },
   { path: 'access-denied', component: AccessDeniedComponent, canActivate: [authGuard] },
 
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
 
 ];

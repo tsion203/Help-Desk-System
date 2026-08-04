@@ -1,1 +1,89 @@
-<main class="page"><section class="home-hero"><p class="badge status-open">{{ portalLabel }}</p><h1>{{ heading }}</h1><p class="muted">{{ description }}</p></section></main>
+<div class="landing-page">
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Help Desk System home">
+      <app-brand-logo />
+      <span>Help Desk <strong>System</strong></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a class="login-link" routerLink="/login">Login</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <p class="eyebrow"><span></span> Bank-wide support, simplified</p>
+        <h1 id="hero-title">Support that keeps <em>work moving.</em></h1>
+        <p class="hero-subtitle">A faster, clearer way to manage every internal request.</p>
+        <p class="hero-description">Give bank employees one secure place to report issues, follow progress, and get the help they need—without losing time or context.</p>
+        <div class="hero-actions">
+          <a class="primary-action" routerLink="/login">Get Started <span aria-hidden="true">→</span></a>
+          <a class="secondary-action" href="#features">Learn More <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="trust-row" aria-label="Portal benefits">
+          <span>✓ Secure by design</span><span>✓ Built for bank teams</span><span>✓ Easy to track</span>
+        </div>
+      </div>
+
+      <div class="ticket-visual" aria-label="Example support ticket">
+        <div class="visual-glow"></div>
+        <article class="ticket-card">
+          <div class="ticket-top"><span class="mini-brand"><svg viewBox="0 0 24 24"><path d="M5 13v-2a7 7 0 0 1 14 0v5M5 12H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2v-6H5Zm14 0h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2v-6h1Z"/></svg></span><span class="status-dot">●</span></div>
+          <div class="ticket-heading">
+            <div><small>TICKET #HD-2847</small><h2>Unable to access core banking</h2></div>
+            <span class="priority">High priority</span>
+          </div>
+          <p class="ticket-copy">Access request received and assigned to the technical support team.</p>
+          <div class="progress-track"><span></span></div>
+          <div class="steps"><span class="done">✓<small>Submitted</small></span><span class="active">2<small>In progress</small></span><span>3<small>Resolved</small></span></div>
+          <div class="ticket-meta">
+            <div class="agent-avatar">AM</div><div><small>ASSIGNED TO</small><strong>Abel M.</strong></div>
+            <div class="updated"><small>LAST UPDATED</small><strong>2 min ago</strong></div>
+          </div>
+        </article>
+        <div class="floating-note"><span>✓</span><div><strong>Ticket updated</strong><small>Your request is in progress</small></div></div>
+      </div>
+    </section>
+
+    <section class="features section" id="features" aria-labelledby="features-title">
+      <div class="section-heading">
+        <p class="eyebrow centered"><span></span> Everything in one place</p>
+        <h2 id="features-title">Built for better support</h2>
+        <p>Simple tools that help employees get answers and support teams deliver them.</p>
+      </div>
+      <div class="feature-grid">
+        @for (feature of features; track feature.title) {
+          <article class="feature-card">
+            <span class="feature-icon" [attr.data-icon]="feature.icon" aria-hidden="true">
+              @switch (feature.icon) {
+                @case ('ticket') { <svg viewBox="0 0 24 24"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M9 9h6M9 13h4"/></svg> }
+                @case ('mail') { <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> }
+                @case ('team') { <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c.4-3.3 2.4-5 6-5s5.6 1.7 6 5M16 6a3 3 0 0 1 0 6M17 14c2.3.4 3.6 2 4 5"/></svg> }
+                @case ('lock') { <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg> }
+                @case ('audit') { <svg viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 5H4v16h16V5h-1M8 12h8M8 16h5"/></svg> }
+                @default { <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg> }
+              }
+            </span>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="about section" id="about" aria-labelledby="about-title">
+      <div class="about-intro">
+        <p class="eyebrow"><span></span> About the portal</p>
+        <h2 id="about-title">One reliable path from issue to resolution.</h2>
+        <p>The Help Desk System is the bank's internal support hub, designed to replace scattered requests with a clear, secure, and accountable process.</p>
+      </div>
+      <div class="about-details">
+        <article><span>01</span><div><h3>Purpose-built for support</h3><p>Centralize technology and operational requests so the right team can respond with the full context.</p></div></article>
+        <article><span>02</span><div><h3>Less waiting, more clarity</h3><p>Employees can see ownership and progress at every step, reducing follow-ups and helping everyone stay productive.</p></div></article>
+        <article><span>03</span><div><h3>Accountability that scales</h3><p>Dashboards and complete history help support leaders improve response times and service quality across the bank.</p></div></article>
+      </div>
+    </section>
+  </main>
+</div>

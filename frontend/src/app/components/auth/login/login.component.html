@@ -1,7 +1,7 @@
 <main class="auth-card" aria-labelledby="login-title">
   <header class="auth-head">
-    <p>HELP DESK</p>
-    <h1 id="login-title">Welcome back</h1>
+    <app-brand-logo />
+    <div><p>HELP DESK SYSTEM</p><h1 id="login-title">Welcome back</h1></div>
   </header>
   <form class="auth-body stack" [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <div class="field">

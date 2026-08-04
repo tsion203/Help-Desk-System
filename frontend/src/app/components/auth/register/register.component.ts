@@ -11,11 +11,12 @@ import { RoleService } from '../../../services/role.service';
 import { RouterLink } from '@angular/router';
 import { ToastService } from '../../../services/toast.service';
 import { OnInit } from '@angular/core';
+import { BrandLogoComponent } from '../../shared/brand-logo/brand-logo.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })

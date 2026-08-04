@@ -1,2 +1,1 @@
-:host { --primary:#2d5986; display:block; } 
-footer{border-top:1px solid #e2e8f0;background:#fff;padding:16px 28px;color:#64748b; height:3px}.status{color:#047857;font-weight:600}.status:before{content:'●';margin-right:5px}
+:host{display:block}footer{padding:9px max(5vw,24px);background:#153451;color:#c8d3de}.footer-inner{max-width:1400px;margin:auto}.footer-brand{display:flex;align-items:center;gap:8px;color:#fff;font-size:13px;font-weight:600}.footer-brand app-brand-logo{width:27px;height:27px;border-radius:7px}.footer-brand strong{color:#a9c7df}p{margin:0;color:#aabac8;font-size:11px}@media(max-width:620px){.footer-inner{gap:7px}.footer-brand{font-size:12px}p{font-size:10px}}

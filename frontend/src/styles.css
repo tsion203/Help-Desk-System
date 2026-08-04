@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-:root { --navy:#2d5986; --navy-dark:#24486d; --navy-hover:#3970a8; --open:#2d5986; --progress:#f59e0b; --resolved:#10b981; --closed:#6b7280; --critical:#ef4444; --ink:#172033; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fc; }
+:root { --navy:#153451; --navy-dark:#0f283d; --navy-hover:#254f70; --open:#153451; --progress:#f59e0b; --resolved:#10b981; --closed:#6b7280; --critical:#ef4444; --ink:#172033; --muted:#64748b; --line:#e2e8f0; --surface:#fff; --page:#f6f8fc; }
 * { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 body { margin:0; background:var(--page); color:var(--ink); font:14px/1.5 Inter,Arial,sans-serif; }
 button,input,select,textarea { font:inherit; }
 a { color:inherit; text-decoration:none; }
@@ -22,3 +23,4 @@ table { width:100%; border-collapse:collapse; } th,td { padding:14px 18px; text-
 @media (max-width:800px) { .page{padding:20px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.page-header,.meta-strip{align-items:flex-start;flex-direction:column} .table-card{overflow:auto} }
 .delete-action{display:inline;color:#c62828;font-weight:400;cursor:pointer;text-decoration:none}.delete-action:hover,.delete-action:focus{color:#8e0000;text-decoration:underline;outline:none}
 .clickable-row{cursor:pointer}.clickable-row:hover{background:#f8fafc}
+.auth-head:has(app-brand-logo){display:flex;align-items:center;gap:13px}.auth-head:has(app-brand-logo) p{margin:0 0 3px;font-size:10px;letter-spacing:.14em}.auth-head:has(app-brand-logo) h1{margin:0}

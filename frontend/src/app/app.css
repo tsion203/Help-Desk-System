@@ -1,12 +1,29 @@
 .application-layout {
   display: flex;
   align-items: stretch;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 56px);
+}
+
+.application-workspace {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .application-content {
   min-width: 0;
   flex: 1;
+}
+
+:host {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+app-footer {
+  margin-top: auto;
 }
 
 @media (max-width: 800px) {
