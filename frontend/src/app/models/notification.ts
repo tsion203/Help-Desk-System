@@ -5,8 +5,8 @@ export interface Notification {
   type: string;
   recipientId: number;
   recipientName: string;
-  ticketId: number;
-  ticketNumber: string;
+  ticketId: number | null;
+  ticketNumber: string | null;
   createdAt: string;
   isRead: boolean;
 }
