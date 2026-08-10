@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.NotificationResponseDTO;
@@ -61,6 +63,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NotificationResponseDTO> getNotificationsForCurrentUser(Pageable pageable) {
+        return notificationRepository.findByRecipientId(getCurrentUser().getId(), pageable).map(this::mapToResponseDTO);
     }
 
     @Override

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.RoleResponseDTO;
 import com.example.helpdesk.dto.UserCreateDTO;
@@ -71,6 +73,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDTO> getAll(String role) {
+        return getAll(role, Pageable.unpaged()).getContent();
+    }
+
+    @Override
+    public Page<UserResponseDTO> getAll(String role, Pageable pageable) {
         Specification<User> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
         if (role != null && !role.isBlank()) {
             String normalizedRole = role.trim().toUpperCase();
@@ -79,10 +86,7 @@ public class UserServiceImpl implements UserService {
                 return criteriaBuilder.equal(criteriaBuilder.upper(root.join("roles").get("name")), normalizedRole);
             });
         }
-        return userRepository.findAll(specification)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .toList();
+        return userRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
     }
 
     @Override

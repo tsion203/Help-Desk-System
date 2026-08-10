@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
@@ -101,6 +103,12 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority) {
+        return getAll(status, category, priority, Pageable.unpaged()).getContent();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority, Pageable pageable) {
         User currentUser = findCurrentUserOrNull();
         Specification<Ticket> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
@@ -127,13 +135,10 @@ public class TicketServiceImpl implements TicketService {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("createdBy").get("id"), currentUserId));
         } else {
-            return List.of();
+            return Page.empty(pageable);
         }
 
-        return ticketRepository.findAll(specification)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .toList();
+        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
     }
 
     @Override

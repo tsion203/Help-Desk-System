@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable, timeout } from 'rxjs';
 
 import { Notification } from '../models/notification';
 import { environment } from '../../environments/environment';
+import { PageRequest, PageResponse } from '../models/page';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +15,13 @@ export class NotificationService {
   constructor(private readonly http: HttpClient) {}
 
   getNotifications(): Observable<Notification[]> {
-    return this.http.get<NotificationResponse[]>(this.apiUrl).pipe(
+    return this.getPage({size:1000}).pipe(map((page)=>page.content));
+  }
+  getPage(request:PageRequest={}):Observable<PageResponse<Notification>> {
+    const params=new HttpParams().set('page',request.page??0).set('size',request.size??5).set('sort',request.sort??'createdAt,desc');
+    return this.http.get<PageResponse<NotificationResponse>>(this.apiUrl,{params}).pipe(
       timeout(15000),
-      map((notifications) => notifications.map((notification) => this.mapNotification(notification)))
+      map((page) => ({...page,content:page.content.map((notification)=>this.mapNotification(notification))}))
     );
   }
 

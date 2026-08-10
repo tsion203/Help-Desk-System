@@ -6,11 +6,12 @@ import { ToastService } from '../../../services/toast.service';
 import { RouterLink } from '@angular/router';
 import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, GlobalSearchPipe],
+  imports: [CommonModule, RouterLink, GlobalSearchPipe, PaginationComponent],
   templateUrl: './role-list.component.html',
   styleUrl: './role-list.component.scss',
 })
@@ -19,7 +20,10 @@ export class RoleListComponent implements OnInit {
   loading = false;
   errorMessage = '';
   readonly globalSearch = inject(GlobalSearchService);
+  page=0;readonly pageSize=5;totalElements=0;totalPages=0;
   constructor(private readonly roleService: RoleService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
-  ngOnInit(): void { this.loading = true; this.roleService.getAll().subscribe({ next: (items) => { this.roles = items; this.loading = false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load roles.'; this.loading = false; this.cdr.markForCheck(); } }); }
-  deleteRole(id: number, event: Event): void { event.stopPropagation(); this.roleService.delete(id).subscribe({ next: () => { this.roles = this.roles.filter((item) => item.id !== id); this.toast.success('Role deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete role.') }); }
+  ngOnInit(): void { this.loadPage(); }
+  loadPage():void{this.loading=true;this.roleService.getPage({page:this.page,size:this.pageSize}).subscribe({next:(r)=>{this.roles=r.content;this.totalElements=r.totalElements;this.totalPages=r.totalPages;this.page=r.number;this.loading=false;this.cdr.markForCheck()},error:()=>{this.errorMessage='Unable to load roles.';this.loading=false;this.cdr.markForCheck()}})}
+  changePage(p:number):void{this.page=p;this.loadPage()}
+  deleteRole(id: number, event: Event): void { event.stopPropagation(); this.roleService.delete(id).subscribe({ next: () => {if(this.roles.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Role deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete role.') }); }
 }

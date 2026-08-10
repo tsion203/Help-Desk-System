@@ -1,6 +1,8 @@
 package com.example.helpdesk.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.RoleCreateDTO;
 import com.example.helpdesk.dto.RoleResponseDTO;
@@ -12,6 +14,7 @@ public interface RoleService {
     RoleResponseDTO getById(Long id);
 
     List<RoleResponseDTO> getAll();
+    Page<RoleResponseDTO> getAll(Pageable pageable);
 
     RoleResponseDTO update(Long id, RoleCreateDTO roleCreateDTO);
 

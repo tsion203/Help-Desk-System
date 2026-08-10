@@ -11,6 +11,6 @@
       <tbody><tr class="ticket-row" *ngFor="let ticket of tickets | globalSearch: globalSearch.term()" tabindex="0" role="link" [routerLink]="canUpdate ? ['/tickets', ticket.id, 'edit'] : ['/tickets', ticket.id]"><td>{{ ticket.ticketNumber }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.createdByName }}</td><td><span class="badge">{{ ticket.status }}</span></td><td><span class="badge">{{ ticket.priority }}</span></td><td>{{ ticket.updatedAt }}</td><td><span *ngIf="canDelete" class="delete-action" role="button" tabindex="0" (click)="deleteTicket(ticket.id, $event)" (keydown.enter)="deleteTicket(ticket.id, $event)">Delete</span></td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading tickets...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p><p *ngIf="!loading && !errorMessage && (tickets | globalSearch: globalSearch.term()).length === 0">No tickets found.</p>
-    <footer class="pagination" *ngIf="(tickets | globalSearch: globalSearch.term()).length > 0"><span>Showing {{ (tickets | globalSearch: globalSearch.term()).length }} tickets</span></footer>
+    <app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)" />
   </section>
 </main>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+import { PageRequest, PageResponse } from '../models/page';
 
 import { AdminUserUpdateRequest, User, UserProfileUpdateRequest, UserRequest } from '../models/user';
 import { environment } from '../../environments/environment';
@@ -14,8 +15,11 @@ export class UserService {
   constructor(private readonly http: HttpClient) {}
 
   getAll(role?: string): Observable<User[]> {
-    const params = role ? new HttpParams().set('role', role) : undefined;
-    return this.http.get<User[]>(this.apiUrl, { params });
+    return this.getPage(role, { size: 1000 }).pipe(map((page) => page.content));
+  }
+  getPage(role?: string, request:PageRequest={}):Observable<PageResponse<User>> {
+    let params=new HttpParams().set('page',request.page??0).set('size',request.size??5).set('sort',request.sort??'firstName,asc'); if(role) params=params.set('role',role);
+    return this.http.get<PageResponse<User>>(this.apiUrl,{params});
   }
 
   getById(id: number): Observable<User> {

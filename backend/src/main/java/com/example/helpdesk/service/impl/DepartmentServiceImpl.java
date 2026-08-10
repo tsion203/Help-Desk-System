@@ -3,6 +3,8 @@ package com.example.helpdesk.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.DepartmentCreateDTO;
 import com.example.helpdesk.dto.DepartmentResponseDTO;
@@ -42,6 +44,11 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();
+    }
+
+    @Override
+    public Page<DepartmentResponseDTO> getAll(Pageable pageable) {
+        return departmentRepository.findAll(pageable).map(this::mapToResponseDTO);
     }
 
     @Override

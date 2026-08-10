@@ -3,6 +3,8 @@ package com.example.helpdesk.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.RoleCreateDTO;
 import com.example.helpdesk.dto.RoleResponseDTO;
@@ -42,6 +44,11 @@ public class RoleServiceImpl implements RoleService {
                 .stream()
                 .map(this::mapToResponseDTO)
                 .toList();
+    }
+
+    @Override
+    public Page<RoleResponseDTO> getAll(Pageable pageable) {
+        return roleRepository.findAll(pageable).map(this::mapToResponseDTO);
     }
 
     @Override

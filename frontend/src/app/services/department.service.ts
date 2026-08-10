@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
+import { PageRequest, PageResponse } from '../models/page';
 
 import { Department, DepartmentRequest } from '../models/department';
 import { environment } from '../../environments/environment';
@@ -14,8 +15,9 @@ export class DepartmentService {
   constructor(private readonly http: HttpClient) {}
 
   getAll(): Observable<Department[]> {
-    return this.http.get<Department[]>(this.apiUrl);
+    return this.getPage({size:1000}).pipe(map((page)=>page.content));
   }
+  getPage(request:PageRequest={}):Observable<PageResponse<Department>> { const params=new HttpParams().set('page',request.page??0).set('size',request.size??5).set('sort',request.sort??'name,asc'); return this.http.get<PageResponse<Department>>(this.apiUrl,{params}); }
 
   getById(id: number): Observable<Department> {
     return this.http.get<Department>(`${this.apiUrl}/${id}`);

@@ -1,0 +1,5 @@
+<footer class="pager" *ngIf="totalElements > 0">
+  <span class="record-count">Showing {{ startRecord }}–{{ endRecord }} of {{ totalElements }} records</span>
+  <nav aria-label="Pagination"><button type="button" (click)="pageChange.emit(page-1)" [disabled]="page===0">Previous</button><button *ngFor="let item of pages" type="button" [class.active]="item===page" (click)="pageChange.emit(item)" [attr.aria-current]="item===page?'page':null">{{ item+1 }}</button><button type="button" (click)="pageChange.emit(page+1)" [disabled]="page>=totalPages-1">Next</button></nav>
+  <span class="fixed-size">5 rows per page</span>
+</footer>

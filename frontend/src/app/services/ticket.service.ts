@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, Subject, tap } from 'rxjs';
+import { map, Observable, Subject, tap } from 'rxjs';
+import { PageRequest, PageResponse } from '../models/page';
 
 import { Ticket, TicketRequest, TicketUpdateRequest } from '../models/ticket';
 import { TicketAssignmentHistory } from '../models/ticket-assignment-history';
@@ -20,11 +21,15 @@ export class TicketService {
   constructor(private readonly http: HttpClient) {}
 
   getAll(filters: TicketFilters = {}): Observable<Ticket[]> {
+    return this.getPage(filters, { size: 1000 }).pipe(map((page) => page.content));
+  }
+  getPage(filters: TicketFilters = {}, pageRequest: PageRequest = {}): Observable<PageResponse<Ticket>> {
     let params = new HttpParams();
     if (filters.status) params = params.set('status', filters.status);
     if (filters.category) params = params.set('category', filters.category);
     if (filters.priority) params = params.set('priority', filters.priority);
-    return this.http.get<Ticket[]>(this.apiUrl, { params });
+    params=params.set('page',pageRequest.page??0).set('size',pageRequest.size??5).set('sort',pageRequest.sort??'updatedAt,desc');
+    return this.http.get<PageResponse<Ticket>>(this.apiUrl, { params });
   }
 
   getById(id: number): Observable<Ticket> {

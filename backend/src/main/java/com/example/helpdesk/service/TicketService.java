@@ -1,6 +1,8 @@
 package com.example.helpdesk.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
 import com.example.helpdesk.dto.TicketCreateDTO;
@@ -19,6 +21,7 @@ public interface TicketService {
     List<TicketResponseDTO> getAll();
 
     List<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority);
+    Page<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority, Pageable pageable);
 
     TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO);
 

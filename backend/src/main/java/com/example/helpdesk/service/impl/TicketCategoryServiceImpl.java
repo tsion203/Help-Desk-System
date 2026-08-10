@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.TicketCategoryCreateDTO;
 import com.example.helpdesk.dto.TicketCategoryResponseDTO;
@@ -65,6 +67,12 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
                 category.getId(),
                 category.getName(),
                 category.getDescription());
+    }
+
+    @Override
+    public Page<TicketCategoryResponseDTO> getAllCategories(Pageable pageable) {
+        return categoryRepository.findAll(pageable).map(category -> new TicketCategoryResponseDTO(
+                category.getId(), category.getName(), category.getDescription()));
     }
 
     @Override
