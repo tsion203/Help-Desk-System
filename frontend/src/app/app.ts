@@ -4,10 +4,11 @@ import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { SidebarComponent } from './components/shared/sidebar/sidebar.component';
 import { FooterComponent } from './components/shared/footer/footer.component';
 import { ToastComponent } from './components/shared/toast/toast.component';
+import { LoadingComponent } from './components/shared/loading/loading.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, SidebarComponent, FooterComponent, ToastComponent],
+  imports: [RouterOutlet, NavbarComponent, SidebarComponent, FooterComponent, ToastComponent, LoadingComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
