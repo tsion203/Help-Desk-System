@@ -5,6 +5,6 @@
       <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()" [routerLink]="['/roles', role.id, 'edit']" class="clickable-row"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>{{ role.id }}</td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id, $event)" (keydown.enter)="deleteRole(role.id, $event)">Delete</span></td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading roles...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <p *ngIf="!loading && !errorMessage && (roles | globalSearch: globalSearch.term()).length === 0">No roles found.</p><app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)" />
+    <p *ngIf="!loading && !errorMessage && (roles | globalSearch: globalSearch.term()).length === 0">No roles found.</p><app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination>
   </section>
 </main>

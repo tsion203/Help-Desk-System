@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +21,6 @@ import com.example.helpdesk.model.Notification;
 import com.example.helpdesk.model.Ticket;
 import com.example.helpdesk.model.User;
 import com.example.helpdesk.repository.NotificationRepository;
-import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,8 +32,6 @@ class NotificationServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private TicketRepository ticketRepository;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;

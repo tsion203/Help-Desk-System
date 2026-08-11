@@ -1,7 +1,5 @@
 package com.example.helpdesk.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
@@ -60,7 +58,6 @@ public class TicketController {
     public ResponseEntity<TicketResponseDTO> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getById(id));
     }
-
     @PutMapping("/{id}")
     @PreAuthorize("@rbac.canUpdateTicket(#id, authentication)")
     public ResponseEntity<TicketResponseDTO> updateTicket(

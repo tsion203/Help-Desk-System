@@ -1,11 +1,113 @@
-<main class="page"><p *ngIf="loading">Loading ticket...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <ng-container *ngIf="ticket as currentTicket"><header class="page-header"><div><p>{{ currentTicket.ticketNumber }}</p><h1>{{ currentTicket.subject }}</h1></div></header>
-    <section class="card meta-strip"><span>Created {{ currentTicket.createdAt }}</span><span class="badge">{{ currentTicket.status }}</span><span class="badge">{{ currentTicket.priority }}</span><span>Assigned to {{ currentTicket.assignedToName || 'Unassigned' }}</span></section>
-    <section class="card"><h2>Description</h2><p>{{ currentTicket.description }}</p>
-      <section *ngIf="currentTicket.attachments.length > 0"><h2>Attachments</h2><p *ngFor="let attachment of currentTicket.attachments">{{ attachment.fileName }} · {{ attachment.fileSize }} bytes</p></section>
-      <section *ngIf="currentTicket.comments.length > 0"><h2>Conversation</h2><article class="card" *ngFor="let comment of currentTicket.comments"><strong>{{ comment.userName }}</strong><p>{{ comment.comment }}</p><small>{{ comment.commentedAt }}</small></article></section>
-      <form [formGroup]="commentForm" (ngSubmit)="onComment()"><input type="hidden" formControlName="ticketId" /><input type="hidden" formControlName="userId" /><textarea rows="4" formControlName="comment" placeholder="Write a reply..."></textarea><button class="btn btn-primary" type="submit">Post comment</button></form>
-      <section *ngIf="currentTicket.statusHistory.length > 0"><h2>Status history</h2><div *ngFor="let item of currentTicket.statusHistory">{{ item.oldStatus }} → {{ item.newStatus }} · {{ item.changedAt }}</div></section>
-      <section *ngIf="currentTicket.assignmentHistory.length > 0"><h2>Assignment history</h2><div *ngFor="let item of currentTicket.assignmentHistory">{{ item.oldAssigneeName }} → {{ item.newAssigneeName }} · {{ item.assignedAt }}</div></section>
+<main class="page">
+  <p *ngIf="loading">Loading ticket details...</p>
+  <div class="error" *ngIf="errorMessage">
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-secondary" type="button" *ngIf="ticketId !== 0" (click)="retryLoad()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="ticket as currentTicket">
+    <header class="page-header">
+      <div>
+        <p class="ticket-label">{{ currentTicket.ticketNumber }}</p>
+        <h1>{{ currentTicket.subject }}</h1>
+        <p class="page-subtitle">{{ currentTicket.categoryName }} · Requested by {{ currentTicket.createdByName }}</p>
+      </div>
+      <a class="btn btn-secondary" routerLink="/tickets">Back to tickets</a>
+    </header>
+
+    <section class="card ticket-header-card">
+      <div class="ticket-header-main">
+        <div>
+          <span class="ticket-number">{{ currentTicket.ticketNumber }}</span>
+          <h2>{{ currentTicket.subject }}</h2>
+          <p>{{ currentTicket.description }}</p>
+        </div>
+        <div class="ticket-tags">
+          <span class="badge" [ngClass]="formatBadgeStatus(currentTicket.status)">{{ formatLabel(currentTicket.status) }}</span>
+          <span class="badge" [ngClass]="formatBadgePriority(currentTicket.priority)">{{ currentTicket.priority }}</span>
+        </div>
+      </div>
+      <div class="ticket-meta-grid">
+        <div>
+          <label>Category</label>
+          <p>{{ currentTicket.categoryName }}</p>
+        </div>
+        <div>
+          <label>Created By</label>
+          <p>{{ currentTicket.createdByName }}</p>
+        </div>
+        <div>
+          <label>Assigned To</label>
+          <p>{{ currentTicket.assignedToName || 'Unassigned' }}</p>
+        </div>
+        <div>
+          <label>Created At</label>
+          <p>{{ currentTicket.createdAt | date:'medium' }}</p>
+        </div>
+        <div>
+          <label>Updated At</label>
+          <p>{{ currentTicket.updatedAt | date:'medium' }}</p>
+        </div>
+        <div *ngIf="currentTicket.resolvedAt">
+          <label>Resolved At</label>
+          <p>{{ currentTicket.resolvedAt | date:'medium' }}</p>
+        </div>
+      </div>
     </section>
-  </ng-container><p *ngIf="!loading && !errorMessage && !ticket">No ticket selected.</p></main>
+
+    <section class="card ticket-tabs-card">
+      <div class="tab-list" role="tablist" aria-label="Ticket details tabs">
+        <button type="button" class="tab-button" [class.active]="activeTab === 'comments'" (click)="selectTab('comments')">
+          Comments ({{ currentTicket.comments?.length ?? 0 }})
+        </button>
+        <button type="button" class="tab-button" [class.active]="activeTab === 'status'" (click)="selectTab('status')">
+          Status History ({{ currentTicket.statusHistory?.length ?? 0 }})
+        </button>
+        <button type="button" class="tab-button" [class.active]="activeTab === 'assignment'" (click)="selectTab('assignment')">
+          Assignment History ({{ currentTicket.assignmentHistory?.length ?? 0 }})
+        </button>
+      </div>
+
+      <div class="tab-panel">
+        <div *ngIf="activeTab === 'comments'">
+          <div *ngIf="currentTicket.comments?.length; else noComments">
+            <article class="comment-card" *ngFor="let comment of currentTicket.comments">
+              <div class="comment-header">
+                <strong>{{ comment.userName }}</strong>
+                <small>{{ comment.commentedAt | date:'medium' }}</small>
+              </div>
+              <p>{{ comment.comment }}</p>
+            </article>
+          </div>
+          <ng-template #noComments>
+            <p class="empty-state">No comments available for this ticket.</p>
+          </ng-template>
+        </div>
+
+        <div *ngIf="activeTab === 'status'">
+          <div *ngIf="currentTicket.statusHistory?.length; else noStatusHistory">
+            <article class="history-item" *ngFor="let item of currentTicket.statusHistory">
+              <strong>{{ formatLabel(item.oldStatus || 'Created') }} → {{ formatLabel(item.newStatus) }}</strong>
+              <p>{{ item.changedByName }} · {{ item.changedAt | date:'medium' }}</p>
+            </article>
+          </div>
+          <ng-template #noStatusHistory>
+            <p class="empty-state">No status history available yet.</p>
+          </ng-template>
+        </div>
+
+        <div *ngIf="activeTab === 'assignment'">
+          <div *ngIf="currentTicket.assignmentHistory?.length; else noAssignmentHistory">
+            <article class="history-item" *ngFor="let item of currentTicket.assignmentHistory">
+              <strong>{{ item.oldAssigneeName || 'Unassigned' }} → {{ item.newAssigneeName }}</strong>
+              <p>{{ item.assignedAt | date:'medium' }}</p>
+            </article>
+          </div>
+          <ng-template #noAssignmentHistory>
+            <p class="empty-state">No assignment history available yet.</p>
+          </ng-template>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</main>

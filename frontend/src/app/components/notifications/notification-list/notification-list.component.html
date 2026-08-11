@@ -44,7 +44,7 @@
     </article>
   </div>
 
-  <app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)" />
+  <app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination>
 
   <div class="empty-state" *ngIf="!loading && !errorMessage && (notifications | globalSearch: globalSearch.term()).length === 0">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM4 7l8 6 8-6"/></svg>
