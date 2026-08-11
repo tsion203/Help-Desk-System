@@ -72,6 +72,23 @@
   margin-bottom: 24px;
 }
 
+.ticket-header-card-clickable {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ticket-header-card-clickable:hover,
+.ticket-header-card-clickable:focus-visible {
+  border-color: rgba(21, 52, 81, 0.35);
+  box-shadow: 0 12px 28px rgba(21, 52, 81, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.ticket-header-card-clickable:active {
+  transform: translateY(0);
+}
+
 .ticket-header-main {
   display: flex;
   justify-content: space-between;

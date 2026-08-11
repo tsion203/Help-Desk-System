@@ -1,3 +1,12 @@
 :host { --primary:#153451; display:block; }
 .ticket-row { cursor:pointer; }
 .ticket-row:focus-visible { outline:3px solid rgb(45 89 134 / 35%); outline-offset:-3px; }
+.ticket-actions { display:flex; align-items:center; gap:7px; }
+.icon-action { display:grid; place-items:center; width:32px; height:32px; padding:0; border:1px solid transparent; border-radius:8px; background:transparent; cursor:pointer; transition:background-color .18s ease, border-color .18s ease, transform .18s ease; }
+.icon-action svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.icon-action:hover { transform:translateY(-1px); }
+.icon-action:focus-visible { outline:3px solid rgb(45 89 134 / 25%); outline-offset:1px; }
+.edit-action { color:#27834a; }
+.edit-action:hover { border-color:#b9dfc7; background:#edf9f1; }
+.delete-action { color:#d32f2f; }
+.delete-action:hover { border-color:#f1bcbc; background:#fff1f1; }

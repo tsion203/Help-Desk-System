@@ -15,7 +15,14 @@
       <a class="btn btn-secondary" routerLink="/tickets">Back to tickets</a>
     </header>
 
-    <section class="card ticket-header-card">
+    <section
+      class="card ticket-header-card ticket-header-card-clickable"
+      [routerLink]="['/tickets', currentTicket.id, 'edit']"
+      role="link"
+      tabindex="0"
+      [attr.aria-label]="'Update ticket ' + currentTicket.ticketNumber"
+      title="Click to update this ticket"
+    >
       <div class="ticket-header-main">
         <div>
           <span class="ticket-number">{{ currentTicket.ticketNumber }}</span>

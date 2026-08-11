@@ -51,6 +51,6 @@ export class TicketListComponent implements OnInit {
   }
   clearFilters(): void { this.filterForm.reset({ status: '', category: '', priority: '' }); }
   changePage(page:number):void { this.page=page; this.loadTickets(); }
-  editTicket(id: number): void { void this.router.navigate(['/tickets', id, 'edit']); }
+  editTicket(id: number, event: Event): void { event.stopPropagation(); void this.router.navigate(['/tickets', id, 'edit']); }
   deleteTicket(id: number, event: Event): void { event.stopPropagation(); this.ticketService.delete(id).subscribe({ next: () => { if(this.tickets.length===1&&this.page>0)this.page--; this.loadTickets(); this.toast.success('Ticket deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete ticket.') }); }
 }

@@ -6,7 +6,7 @@ import { TicketCategory } from '../../../models/ticket-category';
 import { User } from '../../../models/user';
 import { TicketService } from '../../../services/ticket.service';
 import { UserService } from '../../../services/user.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TicketCategoryService } from '../../../services/ticket-category.service';
 import { ToastService } from '../../../services/toast.service';
 import { AuthService } from '../../../services/auth.service';
@@ -32,7 +32,7 @@ export class TicketUpdateComponent implements OnInit {
   ticketUpdateRequest: TicketUpdateRequest | null = null;
   ticketId = 0;
   errorMessage = '';
-  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
   get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor(); }
   ngOnInit(): void {
     this.ticketId = Number(this.route.snapshot.paramMap.get('id'));
@@ -62,7 +62,12 @@ export class TicketUpdateComponent implements OnInit {
       ...(this.canAssign ? { assignedToId: Number(value.assignedToId) } : {}),
     };
     this.ticketService.update(this.ticketId, this.ticketUpdateRequest).subscribe({
-      next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.toast.success(`Ticket ${ticket.ticketNumber} updated successfully.`); },
+      next: (ticket) => {
+        this.ticketNumber = ticket.ticketNumber;
+        this.ticketSubject = ticket.subject;
+        this.toast.success(`Ticket ${ticket.ticketNumber} updated successfully.`);
+        void this.router.navigate(['/tickets', ticket.id]);
+      },
       error: (error) => this.toast.error(error, 'Unable to update ticket.'),
     });
   }
