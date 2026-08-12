@@ -5,6 +5,7 @@ import { User } from '../../../models/user';
 import { UserService } from '../../../services/user.service';
 import { ToastService } from '../../../services/toast.service';
 import { GlobalSearchService } from '../../../services/global-search.service';
+import { AuthService } from '../../../services/auth.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,7 +29,9 @@ export class UserListComponent implements OnInit {
   roles: Role[] = [];
   readonly roleFilter = new FormControl('', { nonNullable: true });
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
-  constructor(private readonly userService: UserService, private readonly roleService: RoleService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly userService: UserService, private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  get canUpdate(): boolean { return this.authService.isAdmin(); }
+  get canDelete(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void {
     this.loadUsers();
     this.roleService.getAll().subscribe({ next: (items) => { this.roles = items; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load roles.') });

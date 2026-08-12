@@ -7,9 +7,13 @@
     <table>
       <thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
       <tbody>
-        <tr *ngFor="let category of categories | globalSearch: globalSearch.term()" [routerLink]="['/categories', category.id, 'edit']" class="clickable-row">
+        <tr *ngFor="let category of categories | globalSearch: globalSearch.term()">
           <td>{{ category.name }}</td><td>{{ category.description }}</td>
-          <td><span class="delete-action" role="button" tabindex="0" (click)="deleteCategory(category.id, $event)" (keydown.enter)="deleteCategory(category.id, $event)">Delete</span></td>
+          <td><div class="table-actions"><button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update category" aria-label="Update category" [routerLink]="['/categories', category.id, 'edit']">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
+            </button><button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete category" aria-label="Delete category" (click)="deleteCategory(category.id, $event)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+            </button></div></td>
         </tr>
       </tbody>
     </table>

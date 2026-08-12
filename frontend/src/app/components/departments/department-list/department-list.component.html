@@ -1,8 +1,12 @@
 <main class="page">
   <header class="page-header"><div><h1>Departments</h1><p>Manage service teams and ownership.</p></div><a class="btn btn-primary" routerLink="/departments/new">Add department</a></header>
   <section class="table-card">
-    <table><thead><tr><th>Name</th><th>Description</th><th>ID</th><th>Availability</th><th>Actions</th></tr></thead>
-      <tbody><tr *ngFor="let department of departments | globalSearch: globalSearch.term()" [routerLink]="['/departments', department.id, 'edit']" class="clickable-row"><td>{{ department.name }}</td><td>{{ department.description }}</td><td>{{ department.id }}</td><td><span class="badge status-resolved">Available</span></td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteDepartment(department.id, $event)" (keydown.enter)="deleteDepartment(department.id, $event)">Delete</span></td></tr></tbody>
+    <table><thead><tr><th>Name</th><th>Description</th><th>Availability</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let department of departments | globalSearch: globalSearch.term()"><td>{{ department.name }}</td><td>{{ department.description }}</td><td><span class="badge status-resolved">Available</span></td><td><div class="table-actions"><button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update department" aria-label="Update department" [routerLink]="['/departments', department.id, 'edit']">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
+            </button><button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete department" aria-label="Delete department" (click)="deleteDepartment(department.id, $event)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+            </button></div></td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading departments...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
     <p *ngIf="!loading && !errorMessage && (departments | globalSearch: globalSearch.term()).length === 0">No departments found.</p><app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination>

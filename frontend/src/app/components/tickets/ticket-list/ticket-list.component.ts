@@ -37,7 +37,7 @@ export class TicketListComponent implements OnInit {
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
   constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly router: Router) {}
   get canCreate(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
-  get canUpdate(): boolean { return true; }
+  get canUpdate(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer() || this.authService.isEmployee(); }
   get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
   ngOnInit(): void {
     this.loadTickets();

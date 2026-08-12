@@ -3,6 +3,15 @@
   <section class="table-card" *ngIf="!errorMessage">
     <div class="filter-toolbar"><label><select [formControl]="roleFilter"><option value="">All roles</option><option *ngFor="let role of roles" [value]="role.name">{{ role.name }}</option></select></label><button class="clear-filter" type="button" (click)="clearRoleFilter()" [disabled]="!roleFilter.value">Clear Filter</button></div>
     <table><thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Roles</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody><tr *ngFor="let user of users | globalSearch: globalSearch.term()" [routerLink]="['/users', user.id, 'edit']" class="clickable-row"><td>{{ user.employeeId }}</td><td>{{ user.firstName }} {{ user.lastName }}</td><td>{{ user.email }}</td><td>{{ user.departmentName }}</td><td><span *ngFor="let role of user.roles; let last = last">{{ role.name }}<span *ngIf="!last">, </span></span></td><td>{{ user.active ? 'Active' : 'Inactive' }}</td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteUser(user.id, $event)" (keydown.enter)="deleteUser(user.id, $event)">Delete</span></td></tr></tbody></table>
+    <tbody><tr *ngFor="let user of users | globalSearch: globalSearch.term()" [routerLink]="['/users', user.id]" class="clickable-row"><td>{{ user.employeeId }}</td><td>{{ user.firstName }} {{ user.lastName }}</td><td>{{ user.email }}</td><td>{{ user.departmentName }}</td><td><span *ngFor="let role of user.roles; let last = last">{{ role.name }}<span *ngIf="!last">, </span></span></td><td>{{ user.active ? 'Active' : 'Inactive' }}</td><td>
+        <div class="table-actions">
+          <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update user" aria-label="Update user" [routerLink]="['/users', user.id, 'edit']" (click)="$event.stopPropagation()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
+          </button>
+          <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete user" aria-label="Delete user" (click)="deleteUser(user.id, $event)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+          </button>
+        </div>
+      </td></tr></tbody></table>
     <p *ngIf="(users | globalSearch: globalSearch.term()).length === 0">No users found.</p>
     <app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination></section></main>

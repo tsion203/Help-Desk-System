@@ -1,8 +1,17 @@
 <main class="page">
   <header class="page-header"><div><h1>Roles</h1><p>Control system permissions.</p></div><a class="btn btn-primary" routerLink="/roles/new">Add role</a></header>
   <section class="table-card">
-    <table><thead><tr><th>Role</th><th>Description</th><th>ID</th><th>Actions</th></tr></thead>
-      <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()" [routerLink]="['/roles', role.id, 'edit']" class="clickable-row"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>{{ role.id }}</td><td><span class="delete-action" role="button" tabindex="0" (click)="deleteRole(role.id, $event)" (keydown.enter)="deleteRole(role.id, $event)">Delete</span></td></tr></tbody>
+    <table><thead><tr><th>Role</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>
+          <div class="table-actions">
+            <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update role" aria-label="Update role" [routerLink]="['/roles', role.id, 'edit']">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
+            </button>
+            <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete role" aria-label="Delete role" (click)="deleteRole(role.id, $event)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+            </button>
+          </div>
+        </td></tr></tbody>
     </table>
     <p *ngIf="loading">Loading roles...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
     <p *ngIf="!loading && !errorMessage && (roles | globalSearch: globalSearch.term()).length === 0">No roles found.</p><app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination>
