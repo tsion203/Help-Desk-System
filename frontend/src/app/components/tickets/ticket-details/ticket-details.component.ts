@@ -1,19 +1,24 @@
 import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EMPTY, catchError, distinctUntilChanged, finalize, map, retry, switchMap, timeout } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Ticket } from '../../../models/ticket';
+import { TicketCommentRequest } from '../../../models/ticket-comment';
 import { TicketService } from '../../../services/ticket.service';
+import { TicketCommentService } from '../../../services/ticket-comment.service';
+import { UserService } from '../../../services/user.service';
+import { ToastService } from '../../../services/toast.service';
 import { TicketAttachmentFormComponent } from '../ticket-attachment-form/ticket-attachment-form.component';
 import { TicketAttachmentListComponent } from '../ticket-attachment-list/ticket-attachment-list.component';
 
 @Component({
   selector: 'app-ticket-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent],
   templateUrl: './ticket-details.component.html',
-  styleUrl: './ticket-details.component.scss',
+  styleUrls: ['./ticket-details.component.scss'],
 })
 export class TicketDetailsComponent implements OnInit {
   ticket: Ticket | null = null;
@@ -21,15 +26,22 @@ export class TicketDetailsComponent implements OnInit {
   errorMessage = '';
   activeTab: 'comments' | 'status' | 'assignment' | 'attachments' = 'comments';
   ticketId = 0;
+  submittingComment = false;
+  commentForm = new FormGroup({ comment: new FormControl('', { nonNullable: true, validators: [Validators.required] }) });
+  private currentUserId = 0;
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private readonly ticketService: TicketService,
+    private readonly commentService: TicketCommentService,
+    private readonly userService: UserService,
+    private readonly toast: ToastService,
     private readonly route: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
+    this.loadCurrentUser();
     this.route.paramMap.pipe(
       map((params) => Number(params.get('id'))),
       distinctUntilChanged(),
@@ -85,6 +97,51 @@ export class TicketDetailsComponent implements OnInit {
 
   selectTab(tab: 'comments' | 'status' | 'assignment' | 'attachments'): void {
     this.activeTab = tab;
+  }
+
+  submitComment(): void {
+    const commentText = this.commentForm.controls.comment.value.trim();
+    if (!commentText) {
+      this.toast.error(null, 'Enter a comment before sending.');
+      return;
+    }
+    if (!this.ticketId || !this.currentUserId) {
+      this.toast.error(null, 'Unable to add a comment at this time.');
+      return;
+    }
+
+    this.submittingComment = true;
+    const request: TicketCommentRequest = {
+      comment: commentText,
+      ticketId: this.ticketId,
+      userId: this.currentUserId,
+    };
+
+    this.commentService.create(request).pipe(finalize(() => {
+      this.submittingComment = false;
+      this.cdr.markForCheck();
+    })).subscribe({
+      next: () => {
+        this.toast.success('Comment added successfully.');
+        this.commentForm.reset({ comment: '' });
+        this.fetchTicket(this.ticketId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      },
+      error: (error) => {
+        this.toast.error(error, 'Unable to add comment.');
+      },
+    });
+  }
+
+  private loadCurrentUser(): void {
+    this.userService.getCurrentProfile().subscribe({
+      next: (user) => {
+        this.currentUserId = user.id;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.toast.error(null, 'Unable to identify the current user.');
+      },
+    });
   }
 
   refreshAttachments(): void {

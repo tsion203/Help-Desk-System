@@ -80,6 +80,28 @@
 
       <div class="tab-panel">
         <div *ngIf="activeTab === 'comments'">
+          <div class="comment-input-panel">
+            <textarea
+              class="comment-input"
+              rows="3"
+              placeholder="Write a comment..."
+              [formControl]="commentForm.controls.comment"
+              aria-label="Write a comment"
+            ></textarea>
+            <button
+              class="comment-send-icon"
+              type="button"
+              (click)="submitComment()"
+              [disabled]="submittingComment || commentForm.invalid"
+              aria-label="Send comment"
+              title="Send comment"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 11.25 21 3 13.5 21l-2.25-7.5L3 11.25Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+
           <div *ngIf="currentTicket.comments?.length; else noComments">
             <article class="comment-card" *ngFor="let comment of currentTicket.comments">
               <div class="comment-header">

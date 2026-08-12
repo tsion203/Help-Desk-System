@@ -179,6 +179,61 @@
   margin-bottom: 0;
 }
 
+.comment-input-panel {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  align-items: flex-end;
+}
+
+.comment-input {
+  flex: 1;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  resize: vertical;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.comment-send-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #22c55e;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.comment-send-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.comment-send-icon:hover:not([disabled]) {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.comment-send-icon[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .comment-header {
   display: flex;
   justify-content: space-between;
