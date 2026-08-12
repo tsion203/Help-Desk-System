@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, HostBinding, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
 import { UserService } from '../../../services/user.service';
 import { BrandLogoComponent } from '../brand-logo/brand-logo.component';
 
@@ -23,14 +25,20 @@ export class SidebarComponent implements OnInit {
   get isSupportOfficer(): boolean { return this.authService.isSupportOfficer(); }
   get isEmployee(): boolean { return this.authService.isEmployee(); }
 
+  readonly notificationCount$ = new Observable<number>();
+
   constructor(
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
     private readonly userService: UserService,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
-  ) {}
+  ) {
+    this.notificationCount$ = this.notificationService.unreadCount$;
+  }
 
   ngOnInit(): void {
+    this.notificationService.refreshUnreadCount();
     this.userEmail = this.authService.getEmail();
     this.setFallbackIdentity();
     this.userService.getCurrentProfile().subscribe({

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable, timeout } from 'rxjs';
+import { BehaviorSubject, map, Observable, timeout, tap } from 'rxjs';
 
 import { Notification } from '../models/notification';
 import { environment } from '../../environments/environment';
@@ -11,6 +11,8 @@ import { PageRequest, PageResponse } from '../models/page';
 })
 export class NotificationService {
   private readonly apiUrl = `${environment.apiUrl}/notifications`;
+  private readonly unreadCountSubject = new BehaviorSubject<number>(0);
+  readonly unreadCount$ = this.unreadCountSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -31,14 +33,24 @@ export class NotificationService {
     );
   }
 
+  refreshUnreadCount(): void {
+    this.getUnreadNotifications().subscribe({
+      next: (notifications) => this.unreadCountSubject.next(notifications.length),
+      error: () => this.unreadCountSubject.next(0),
+    });
+  }
+
   markAsRead(id: number): Observable<Notification> {
     return this.http.patch<NotificationResponse>(`${this.apiUrl}/${id}/read`, {}).pipe(
-      map((notification) => this.mapNotification(notification))
+      map((notification) => this.mapNotification(notification)),
+      tap(() => this.refreshUnreadCount())
     );
   }
 
   markAllAsRead(): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/read-all`, {});
+    return this.http.patch<void>(`${this.apiUrl}/read-all`, {}).pipe(
+      tap(() => this.refreshUnreadCount())
+    );
   }
 
   private mapNotification(response: NotificationResponse): Notification {
