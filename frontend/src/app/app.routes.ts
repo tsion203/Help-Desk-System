@@ -53,7 +53,7 @@ export const routes: Routes = [
   { path: 'users/new', component: UserFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
   { path: 'users/:id/edit', component: UserFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
   { path: 'users/:id', component: UserDetailsComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'EMPLOYEE'] } },
-  { path: 'profile', component: ProfileFormComponent, canActivate: [authGuard], data: { roles: ['EMPLOYEE'] } },
+  { path: 'profile', component: ProfileFormComponent, canActivate: [authGuard] },
 
   { path: 'departments', component: DepartmentListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
   { path: 'departments/new', component: DepartmentFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },

@@ -32,4 +32,5 @@ export class NavbarComponent implements OnInit {
     return { enabled: !!contexts[path], placeholder: contexts[path] ?? 'Search…' };
   }
   get isEmployee(): boolean { return this.auth.isEmployee(); }
+  get isAuthenticated(): boolean { return this.auth.isLoggedIn(); }
 }

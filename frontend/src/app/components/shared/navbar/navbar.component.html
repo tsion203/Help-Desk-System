@@ -1,7 +1,7 @@
 <header class="navbar">
   <form *ngIf="search.enabled()" class="nav-search" [formGroup]="searchForm" role="search"><label><input type="search" formControlName="search" [placeholder]="search.placeholder()" [attr.aria-label]="search.placeholder()" autocomplete="off" /></label></form>
   <div class="nav-actions">
-    <a *ngIf="isEmployee" class="profile-button" routerLink="/profile" routerLinkActive="active" aria-label="Open profile" title="Profile">
+    <a *ngIf="isAuthenticated" class="profile-button" routerLink="/profile" routerLinkActive="active" aria-label="Open profile" title="Profile">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-5 3.2-7 8-7s7.5 2 8 7"/></svg>
     </a>
   </div>
