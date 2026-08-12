@@ -1,11 +1,17 @@
-<main class="page">
-  <header class="page-header"><h1>New ticket attachment</h1></header>
-  <form class="form-card stack" [formGroup]="attachmentForm" (ngSubmit)="onSave()">
-    <div class="field"><label for="fileName">File name</label><input id="fileName" formControlName="fileName" /></div>
-    <div class="field"><label for="filePath">File path</label><input id="filePath" formControlName="filePath" /></div>
-    <div class="field"><label for="fileSize">File size</label><input id="fileSize" type="number" formControlName="fileSize" /></div>
-    <div class="field"><label for="ticketId">Ticket ID</label><input id="ticketId" type="number" formControlName="ticketId" /></div>
-    <div class="field"><label for="uploadedById">Uploaded by</label><input id="uploadedById" type="number" formControlName="uploadedById" /></div>
-    <button class="btn btn-primary" type="submit">Save attachment</button>
-  </form>
-</main>
+<form class="attachment-upload" [formGroup]="attachmentForm" (ngSubmit)="onSave()">
+  <label class="file-picker" for="attachment-file">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 14v6h14v-6"/></svg>
+    <span>{{ selectedFile ? 'Change file' : 'Choose file' }}</span>
+  </label>
+  <input #fileInput id="attachment-file" class="native-file-input" type="file" (change)="onFileSelected($event)" />
+  <div class="selected-file" *ngIf="selectedFile">
+    <span title="{{ selectedFile.name }}">{{ selectedFile.name }}</span>
+    <small>{{ selectedFile.size | number }} bytes</small>
+    <button type="button" title="Clear selected file" aria-label="Clear selected file" (click)="clearFile(fileInput)">&times;</button>
+  </div>
+  <button class="btn btn-primary upload-button" type="submit" [disabled]="uploading || !selectedFile">
+    {{ uploading ? 'Uploading...' : 'Upload' }}
+  </button>
+  <p class="upload-feedback success" *ngIf="savedAttachment">Attachment added successfully.</p>
+  <p class="upload-feedback error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</form>

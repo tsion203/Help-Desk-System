@@ -5,11 +5,13 @@ import { EMPTY, catchError, distinctUntilChanged, finalize, map, retry, switchMa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Ticket } from '../../../models/ticket';
 import { TicketService } from '../../../services/ticket.service';
+import { TicketAttachmentFormComponent } from '../ticket-attachment-form/ticket-attachment-form.component';
+import { TicketAttachmentListComponent } from '../ticket-attachment-list/ticket-attachment-list.component';
 
 @Component({
   selector: 'app-ticket-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent],
   templateUrl: './ticket-details.component.html',
   styleUrl: './ticket-details.component.scss',
 })
@@ -17,7 +19,7 @@ export class TicketDetailsComponent implements OnInit {
   ticket: Ticket | null = null;
   loading = false;
   errorMessage = '';
-  activeTab: 'comments' | 'status' | 'assignment' = 'comments';
+  activeTab: 'comments' | 'status' | 'assignment' | 'attachments' = 'comments';
   ticketId = 0;
   private readonly destroyRef = inject(DestroyRef);
 
@@ -64,6 +66,7 @@ export class TicketDetailsComponent implements OnInit {
         this.ticket = {
           ...ticket,
           comments: ticket.comments ?? [],
+          attachments: ticket.attachments ?? [],
           statusHistory: ticket.statusHistory ?? [],
           assignmentHistory: ticket.assignmentHistory ?? [],
         };
@@ -80,8 +83,14 @@ export class TicketDetailsComponent implements OnInit {
     );
   }
 
-  selectTab(tab: 'comments' | 'status' | 'assignment'): void {
+  selectTab(tab: 'comments' | 'status' | 'assignment' | 'attachments'): void {
     this.activeTab = tab;
+  }
+
+  refreshAttachments(): void {
+    if (this.ticketId > 0) {
+      this.fetchTicket(this.ticketId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    }
   }
 
   formatBadgeStatus(status: string): string {

@@ -3,6 +3,9 @@ package com.example.helpdesk.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.helpdesk.dto.TicketAttachmentCreateDTO;
@@ -39,6 +44,16 @@ public class TicketAttachmentController {
         return ticketAttachmentService.createTicketAttachment(createDTO);
     }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@rbac.canAccessTicket(#ticketId, authentication) and @rbac.isCurrentUser(#uploadedById, authentication)")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TicketAttachmentResponseDTO uploadTicketAttachment(
+            @RequestParam Long ticketId,
+            @RequestParam Long uploadedById,
+            @RequestParam MultipartFile file) {
+        return ticketAttachmentService.uploadTicketAttachment(ticketId, uploadedById, file);
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     public List<TicketAttachmentResponseDTO> getAllTicketAttachments() {
@@ -54,6 +69,16 @@ public class TicketAttachmentController {
         return ticketAttachmentService.getTicketAttachmentById(id);
     }
 
+    @GetMapping("/{id}/download")
+    @PreAuthorize("@rbac.canAccessAttachment(#id, authentication)")
+    public ResponseEntity<byte[]> downloadTicketAttachment(@PathVariable Long id) {
+        TicketAttachmentResponseDTO attachment = ticketAttachmentService.getTicketAttachmentById(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(ticketAttachmentService.getAttachmentContentType(id)))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getFileName().replace("\"", "") + "\"")
+                .body(ticketAttachmentService.getAttachmentData(id));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public TicketAttachmentResponseDTO updateTicketAttachment(
@@ -64,7 +89,7 @@ public class TicketAttachmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@rbac.canDeleteAttachment(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTicketAttachment(
             @PathVariable Long id) {

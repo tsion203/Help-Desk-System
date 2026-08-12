@@ -73,6 +73,9 @@
         <button type="button" class="tab-button" [class.active]="activeTab === 'assignment'" (click)="selectTab('assignment')">
           Assignment History ({{ currentTicket.assignmentHistory?.length ?? 0 }})
         </button>
+        <button type="button" class="tab-button" [class.active]="activeTab === 'attachments'" (click)="selectTab('attachments')">
+          Attachments ({{ currentTicket.attachments?.length ?? 0 }})
+        </button>
       </div>
 
       <div class="tab-panel">
@@ -113,6 +116,11 @@
           <ng-template #noAssignmentHistory>
             <p class="empty-state">No assignment history available yet.</p>
           </ng-template>
+        </div>
+
+        <div class="attachments-panel" *ngIf="activeTab === 'attachments'">
+          <app-ticket-attachment-list [ticketId]="currentTicket.id" [items]="currentTicket.attachments" (attachmentDeleted)="refreshAttachments()"></app-ticket-attachment-list>
+          <app-ticket-attachment-form [ticketId]="currentTicket.id" (attachmentUploaded)="refreshAttachments()"></app-ticket-attachment-form>
         </div>
       </div>
     </section>

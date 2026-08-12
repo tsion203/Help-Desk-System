@@ -198,6 +198,10 @@
   margin: 0;
 }
 
+.attachments-panel app-ticket-attachment-form {
+  margin-top: 16px;
+}
+
 @media (max-width: 800px) {
   .banner-row {
     flex-direction: column;

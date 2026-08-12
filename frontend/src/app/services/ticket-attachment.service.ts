@@ -25,6 +25,18 @@ export class TicketAttachmentService {
     return this.http.post<TicketAttachment>(this.apiUrl, attachment);
   }
 
+  upload(ticketId: number, uploadedById: number, file: File): Observable<TicketAttachment> {
+    const formData = new FormData();
+    formData.append('ticketId', String(ticketId));
+    formData.append('uploadedById', String(uploadedById));
+    formData.append('file', file, file.name);
+    return this.http.post<TicketAttachment>(this.apiUrl, formData);
+  }
+
+  download(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/download`, { responseType: 'blob' });
+  }
+
   update(id: number, attachment: TicketAttachmentRequest): Observable<TicketAttachment> {
     return this.http.put<TicketAttachment>(`${this.apiUrl}/${id}`, attachment);
   }

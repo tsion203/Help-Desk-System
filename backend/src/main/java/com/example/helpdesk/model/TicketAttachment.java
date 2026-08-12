@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -31,11 +32,18 @@ public class TicketAttachment {
     private String fileName;
     
 
-    @Column(name = "filePath", nullable = false)  
+    @Column(name = "file_path", nullable = false)
     private String filePath;
 
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
+
+    @Column(name = "content_type")
+    private String contentType;
+
+    @Lob
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    private byte[] fileData;
 
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;

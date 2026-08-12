@@ -26,6 +26,11 @@ public class RbacAuthorizationService {
                         && canAccessTicket(attachment.getTicket().getId(), authentication)).orElse(false);
     }
 
+    public boolean canDeleteAttachment(Long attachmentId, Authentication authentication) {
+        if (hasAnyRole(authentication, "ADMIN")) return true;
+        return hasAnyRole(authentication, "EMPLOYEE") && canAccessAttachment(attachmentId, authentication);
+    }
+
     public boolean isCurrentUser(Long userId, Authentication authentication) {
         return authentication != null && userId != null && userRepository.findByEmail(authentication.getName())
                 .map(user -> userId.equals(user.getId())).orElse(false);

@@ -1,3 +1,8 @@
-<section class="page"><h2>Ticket Attachments</h2><p *ngIf="loading">Loading attachments...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <article class="card" *ngFor="let attachment of attachments"><strong>{{ attachment.fileName }}</strong><p>{{ attachment.fileSize }} bytes</p><small>Uploaded by {{ attachment.uploadedByName }} on {{ attachment.uploadedAt }}</small><span class="delete-action" role="button" tabindex="0" (click)="deleteAttachment(attachment.id)" (keydown.enter)="deleteAttachment(attachment.id)">Delete</span></article>
-  <p *ngIf="!loading && !errorMessage && attachments.length === 0">No attachments found.</p></section>
+<div class="attachment-list"><p *ngIf="loading">Loading attachments...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <article class="attachment-item" *ngFor="let attachment of attachments">
+    <span class="file-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg></span>
+    <div class="file-details"><strong title="{{ attachment.fileName }}">{{ attachment.fileName }}</strong><span>{{ fileType(attachment) }} &middot; {{ attachment.fileSize | number }} bytes</span><small>Uploaded by {{ attachment.uploadedByName || 'Unknown' }} &middot; {{ attachment.uploadedAt | date:'medium' }}</small></div>
+    <div class="file-actions"><button class="file-action view-action" type="button" title="Download attachment" aria-label="Download attachment" (click)="downloadAttachment(attachment)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg></button><button *ngIf="canDelete" class="file-action delete-action" type="button" title="Delete attachment" aria-label="Delete attachment" (click)="deleteAttachment(attachment.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button></div>
+  </article>
+  <div class="attachment-empty" *ngIf="!loading && !errorMessage && attachments.length === 0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12.5 14.5 6a3 3 0 0 1 4.2 4.2L10 19a5 5 0 0 1-7-7l9-9"/></svg><p>No attachments available.</p></div>
+</div>
