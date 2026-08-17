@@ -1,0 +1,56 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Created by Me</h1>
+      <p>Tickets you have created.</p>
+    </div>
+  </header>
+
+  <section class="table-card">
+    <form class="filter-toolbar" [formGroup]="filterForm" aria-label="Created ticket filters">
+      <label><select formControlName="status"><option value="">All statuses</option><option *ngFor="let status of statuses" [value]="status">{{ status.replace('_', ' ') }}</option></select></label>
+      <label><select formControlName="category"><option value="">All categories</option><option *ngFor="let category of categories" [value]="category.name">{{ category.name }}</option></select></label>
+      <label><select formControlName="priority"><option value="">All priorities</option><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select></label>
+      <button class="clear-filter" type="button" (click)="clearFilters()" [disabled]="!filterForm.controls.status.value && !filterForm.controls.category.value && !filterForm.controls.priority.value">Clear Filters</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Subject</th>
+          <th>Requester</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="ticket-row" *ngFor="let ticket of tickets | globalSearch: globalSearch.term()" tabindex="0" role="link" [routerLink]="['/tickets', ticket.id]">
+          <td>{{ ticket.ticketNumber }}</td>
+          <td>{{ ticket.subject }}</td>
+          <td>{{ ticket.createdByName }}</td>
+          <td><span class="badge">{{ ticket.status }}</span></td>
+          <td><span class="badge">{{ ticket.priority }}</span></td>
+          <td>{{ ticket.updatedAt }}</td>
+          <td>
+            <div class="ticket-actions">
+              <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update ticket" aria-label="Update ticket" [routerLink]="['/tickets', ticket.id, 'edit']" (click)="$event.stopPropagation()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
+              </button>
+              <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete ticket" aria-label="Delete ticket" (click)="deleteTicket(ticket.id, $event)">
+                <svg viewBox="0 0 24 24" aria-hidden="true" stroke-width="0.5"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="loading">Loading tickets...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p *ngIf="!loading && !errorMessage && (tickets | globalSearch: globalSearch.term()).length === 0">No tickets found.</p>
+    <app-pagination [page]="page" [pageSize]="pageSize" [totalElements]="totalElements" [totalPages]="totalPages" (pageChange)="changePage($event)"></app-pagination>
+  </section>
+</main>

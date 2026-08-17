@@ -1,9 +1,12 @@
 package com.example.helpdesk.repository;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.helpdesk.model.User;
@@ -16,4 +19,20 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
     boolean existsByEmployeeId(String employeeId);
     boolean existsByEmployeeIdAndIdNot(String employeeId, Long id);
+
+    @Query(value = """
+            SELECT u.id AS id,
+                   u.first_name AS firstName,
+                   u.last_name AS lastName,
+                   COUNT(t.id) AS activeTicketCount
+            FROM users u
+            LEFT JOIN tickets t ON t.assigned_to = u.id
+                AND t.status NOT IN ('RESOLVED', 'CLOSED')
+            WHERE u.active = 1
+              AND u.id <> :requesterId
+            GROUP BY u.id, u.first_name, u.last_name
+            ORDER BY u.first_name, u.last_name
+            """, nativeQuery = true)
+    List<TicketAssigneeOptionProjection> findTicketAssigneeOptionsExcludingRequester(
+            @Param("requesterId") Long requesterId);
 }

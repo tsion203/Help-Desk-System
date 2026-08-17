@@ -1,0 +1,26 @@
+<form class="assignment-form" [formGroup]="form" (ngSubmit)="updateAssignment()">
+  <div class="field">
+    <label [for]="'assignee-search-' + ticketId">Search assignees</label>
+    <input
+      [id]="'assignee-search-' + ticketId"
+      type="search"
+      formControlName="search"
+      placeholder="Type a name"
+      autocomplete="off"
+    />
+  </div>
+  <div class="field">
+    <label [for]="'ticket-assignee-' + ticketId">Assignee</label>
+    <select [id]="'ticket-assignee-' + ticketId" formControlName="assignedToId" [disabled]="loading">
+      <option [ngValue]="0">Unassigned</option>
+      <option *ngFor="let candidate of filteredCandidates" [ngValue]="candidate.id">
+        {{ optionLabel(candidate) }}
+      </option>
+    </select>
+    <small *ngIf="loading">Loading available assignees...</small>
+    <small *ngIf="!loading && filteredCandidates.length === 0">No assignees match your search.</small>
+  </div>
+  <button class="btn btn-primary" type="submit" [disabled]="loading || submitting">
+    {{ submitting ? 'Saving...' : 'Update assignment' }}
+  </button>
+</form>

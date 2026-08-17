@@ -20,6 +20,7 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './ticket-update.component.scss',
 })
 export class TicketUpdateComponent implements OnInit {
+  readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   ticketNumber = '';
   ticketSubject = '';
   categories: TicketCategory[] = [];
@@ -59,7 +60,7 @@ export class TicketUpdateComponent implements OnInit {
       status: value.status,
       priority: value.priority,
       categoryId: Number(value.categoryId),
-      ...(this.canAssign ? { assignedToId: Number(value.assignedToId) } : {}),
+      ...(this.canAssign ? { assignedToId: Number(value.assignedToId) || 0 } : {}),
     };
     this.ticketService.update(this.ticketId, this.ticketUpdateRequest).subscribe({
       next: (ticket) => {

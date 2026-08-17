@@ -9,14 +9,16 @@ import { TicketCommentRequest } from '../../../models/ticket-comment';
 import { TicketService } from '../../../services/ticket.service';
 import { TicketCommentService } from '../../../services/ticket-comment.service';
 import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
 import { TicketAttachmentFormComponent } from '../ticket-attachment-form/ticket-attachment-form.component';
 import { TicketAttachmentListComponent } from '../ticket-attachment-list/ticket-attachment-list.component';
+import { TicketAssignmentControlComponent } from '../ticket-assignment-control/ticket-assignment-control.component';
 
 @Component({
   selector: 'app-ticket-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent, TicketAssignmentControlComponent],
   templateUrl: './ticket-details.component.html',
   styleUrls: ['./ticket-details.component.scss'],
 })
@@ -35,6 +37,7 @@ export class TicketDetailsComponent implements OnInit {
     private readonly ticketService: TicketService,
     private readonly commentService: TicketCommentService,
     private readonly userService: UserService,
+    private readonly authService: AuthService,
     private readonly toast: ToastService,
     private readonly route: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
@@ -93,6 +96,25 @@ export class TicketDetailsComponent implements OnInit {
         this.cdr.markForCheck();
       }),
     );
+  }
+
+  get canUpdateDetails(): boolean {
+    return this.authService.isEmployee();
+  }
+
+  get canManageAssignment(): boolean {
+    return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer();
+  }
+
+  assignmentUpdated(ticket: Ticket): void {
+    this.ticket = {
+      ...ticket,
+      comments: ticket.comments ?? [],
+      attachments: ticket.attachments ?? [],
+      statusHistory: ticket.statusHistory ?? [],
+      assignmentHistory: ticket.assignmentHistory ?? [],
+    };
+    this.cdr.markForCheck();
   }
 
   selectTab(tab: 'comments' | 'status' | 'assignment' | 'attachments'): void {

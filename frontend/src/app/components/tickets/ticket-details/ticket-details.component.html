@@ -16,12 +16,13 @@
     </header>
 
     <section
-      class="card ticket-header-card ticket-header-card-clickable"
-      [routerLink]="['/tickets', currentTicket.id, 'edit']"
-      role="link"
-      tabindex="0"
-      [attr.aria-label]="'Update ticket ' + currentTicket.ticketNumber"
-      title="Click to update this ticket"
+      class="card ticket-header-card"
+      [class.ticket-header-card-clickable]="canUpdateDetails"
+      [routerLink]="canUpdateDetails ? ['/tickets', currentTicket.id, 'edit'] : null"
+      [attr.role]="canUpdateDetails ? 'link' : null"
+      [attr.tabindex]="canUpdateDetails ? 0 : null"
+      [attr.aria-label]="canUpdateDetails ? 'Update ticket ' + currentTicket.ticketNumber : null"
+      [attr.title]="canUpdateDetails ? 'Click to update this ticket' : null"
     >
       <div class="ticket-header-main">
         <div>
@@ -60,6 +61,14 @@
           <p>{{ currentTicket.resolvedAt | date:'medium' }}</p>
         </div>
       </div>
+    </section>
+
+    <section class="card assignment-card" *ngIf="canManageAssignment">
+      <app-ticket-assignment-control
+        [ticketId]="currentTicket.id"
+        [assignedToId]="currentTicket.assignedToId"
+        (assignmentUpdated)="assignmentUpdated($event)"
+      ></app-ticket-assignment-control>
     </section>
 
     <section class="card ticket-tabs-card">

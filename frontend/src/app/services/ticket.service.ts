@@ -6,6 +6,7 @@ import { PageRequest, PageResponse } from '../models/page';
 import { Ticket, TicketRequest, TicketUpdateRequest } from '../models/ticket';
 import { TicketAssignmentHistory } from '../models/ticket-assignment-history';
 import { TicketStatusHistory } from '../models/ticket-status-history';
+import { TicketAssigneeOption } from '../models/ticket-assignee-option';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -32,6 +33,30 @@ export class TicketService {
     return this.http.get<PageResponse<Ticket>>(this.apiUrl, { params });
   }
 
+  getCreatedTickets(filters: TicketFilters = {}, pageRequest: PageRequest = {}): Observable<PageResponse<Ticket>> {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.category) params = params.set('category', filters.category);
+    if (filters.priority) params = params.set('priority', filters.priority);
+    params=params.set('page',pageRequest.page??0).set('size',pageRequest.size??5).set('sort',pageRequest.sort??'updatedAt,desc');
+    return this.http.get<PageResponse<Ticket>>(`${this.apiUrl}/created-me`, { params });
+  }
+
+  getAssignedTickets(filters: TicketFilters = {}, pageRequest: PageRequest = {}): Observable<PageResponse<Ticket>> {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.category) params = params.set('category', filters.category);
+    if (filters.priority) params = params.set('priority', filters.priority);
+    params=params.set('page',pageRequest.page??0).set('size',pageRequest.size??5).set('sort',pageRequest.sort??'updatedAt,desc');
+    return this.http.get<PageResponse<Ticket>>(`${this.apiUrl}/assigned-me`, { params });
+  }
+
+  reject(ticketId: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.apiUrl}/${ticketId}/reject`, {}).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
+  }
+
   getById(id: number): Observable<Ticket> {
     return this.http.get<Ticket>(`${this.apiUrl}/${id}`);
   }
@@ -46,6 +71,16 @@ export class TicketService {
     return this.http.put<Ticket>(`${this.apiUrl}/${id}`, ticket).pipe(
       tap(() => this.ticketsChanged.next()),
     );
+  }
+
+  updateAssignment(id: number, assignedToId: number): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.apiUrl}/${id}/assignment`, { assignedToId }).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
+  }
+
+  getAssignmentCandidates(id: number): Observable<TicketAssigneeOption[]> {
+    return this.http.get<TicketAssigneeOption[]>(`${this.apiUrl}/${id}/assignees`);
   }
 
   delete(id: number): Observable<void> {

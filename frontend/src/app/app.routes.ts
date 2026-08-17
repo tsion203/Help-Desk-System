@@ -23,6 +23,8 @@ import { TicketListComponent } from './components/tickets/ticket-list/ticket-lis
 import { TicketDetailsComponent } from './components/tickets/ticket-details/ticket-details.component';
 import { TicketFormComponent } from './components/tickets/ticket-form/ticket-form.component';
 import { TicketUpdateComponent } from './components/tickets/ticket-update/ticket-update.component';
+import { AssignedTicketListComponent } from './components/tickets/assigned-ticket-list/assigned-ticket-list.component';
+import { CreatedTicketListComponent } from './components/tickets/created-ticket-list/created-ticket-list.component';
 
 import { TicketCommentListComponent } from './components/tickets/ticket-comment-list/ticket-comment-list.component';
 import { TicketCommentFormComponent } from './components/tickets/ticket-comment-form/ticket-comment-form.component';
@@ -68,9 +70,11 @@ export const routes: Routes = [
   { path: 'categories/:id/edit', component: CategoryFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
 
   { path: 'tickets', component: TicketListComponent, canActivate: [authGuard] },
+  { path: 'tickets/created-me', component: CreatedTicketListComponent, canActivate: [authGuard] },
+  { path: 'tickets/assigned-me', component: AssignedTicketListComponent, canActivate: [authGuard] },
   { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'EMPLOYEE'] } },
   { path: 'tickets/:id', component: TicketDetailsComponent, canActivate: [authGuard] },
-  { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_OFFICER', 'EMPLOYEE'] } },
+  { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard], data: { roles: ['EMPLOYEE'] } },
 
   { path: 'tickets/:id/comments', component: TicketCommentListComponent, canActivate: [authGuard] },
   { path: 'tickets/:id/comments/new', component: TicketCommentFormComponent, canActivate: [authGuard] },

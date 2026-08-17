@@ -28,11 +28,11 @@ public class TicketAssignmentHistory {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "old_assignee_id")
+    @JoinColumn(name = "old_assignee_id", nullable = true)
     private User oldAssignee;
 
     @ManyToOne
-    @JoinColumn(name = "new_assignee_id")
+    @JoinColumn(name = "new_assignee_id", nullable = true)
     private User newAssignee;
 
     @Column(name = "assigned_at")

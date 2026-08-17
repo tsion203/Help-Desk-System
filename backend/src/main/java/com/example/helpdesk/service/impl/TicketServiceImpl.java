@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
+import com.example.helpdesk.dto.TicketAssigneeOptionDTO;
 import com.example.helpdesk.dto.TicketAttachmentResponseDTO;
 import com.example.helpdesk.dto.TicketCommentResponseDTO;
 import com.example.helpdesk.dto.TicketCreateDTO;
@@ -35,6 +36,7 @@ import com.example.helpdesk.repository.TicketCategoryRepository;
 import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.TicketStatusHistoryRepository;
 import com.example.helpdesk.repository.UserRepository;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.service.EmailService;
 import com.example.helpdesk.service.NotificationService;
 import com.example.helpdesk.service.TicketService;
@@ -110,6 +112,64 @@ public class TicketServiceImpl implements TicketService {
     @Transactional(readOnly = true)
     public Page<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority, Pageable pageable) {
         User currentUser = findCurrentUserOrNull();
+        Specification<Ticket> specification = buildTicketSpecification(status, category, priority);
+
+        if (hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
+            // Administrators and supervisors retain visibility of all filtered tickets.
+        } else if (currentUser != null && hasAnyCurrentRole("SUPPORT_OFFICER")) {
+            Long currentUserId = currentUser.getId();
+            specification = specification.and(assignedToIdEquals(currentUserId));
+        } else if (currentUser != null) {
+            Long currentUserId = currentUser.getId();
+            specification = specification.and(createdByIdEquals(currentUserId));
+        } else {
+            return Page.empty(pageable);
+        }
+
+        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TicketResponseDTO> getCreatedTicketsForCurrentUser(TicketStatus status, String category, TicketPriority priority, Pageable pageable) {
+        User currentUser = requireCurrentUser();
+        Specification<Ticket> specification = buildTicketSpecification(status, category, priority)
+                .and(createdByIdEquals(currentUser.getId()));
+        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TicketResponseDTO> getAssignedTicketsForCurrentUser(TicketStatus status, String category, TicketPriority priority, Pageable pageable) {
+        User currentUser = requireCurrentUser();
+        Specification<Ticket> specification = buildTicketSpecification(status, category, priority)
+                .and(assignedToIdEquals(currentUser.getId()));
+        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDTO rejectAssignedTicket(Long ticketId) {
+        Ticket ticket = findTicketById(ticketId);
+        User currentUser = requireCurrentUser();
+        if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getId().equals(currentUser.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Only the assigned user can reject this ticket.");
+        }
+
+        TicketStatus oldStatus = ticket.getStatus();
+        User oldAssignee = ticket.getAssignedTo();
+        ticket.setAssignedTo(null);
+        ticket.setStatus(TicketStatus.OPEN);
+        ticket.setUpdatedAt(LocalDateTime.now());
+        Ticket savedTicket = ticketRepository.save(ticket);
+        saveAssignmentHistory(savedTicket, oldAssignee, null, currentUser);
+        if (oldStatus != TicketStatus.OPEN) {
+            saveStatusHistory(savedTicket, oldStatus, TicketStatus.OPEN, currentUser);
+        }
+        return mapToResponseDTO(savedTicket);
+    }
+
+    private Specification<Ticket> buildTicketSpecification(TicketStatus status, String category, TicketPriority priority) {
         Specification<Ticket> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
@@ -123,22 +183,23 @@ public class TicketServiceImpl implements TicketService {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(criteriaBuilder.lower(root.join("category").get("name")), normalizedCategory));
         }
+        return specification;
+    }
 
-        if (hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
-            // Administrators and supervisors retain visibility of all filtered tickets.
-        } else if (currentUser != null && hasAnyCurrentRole("SUPPORT_OFFICER")) {
-            Long currentUserId = currentUser.getId();
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("assignedTo").get("id"), currentUserId));
-        } else if (currentUser != null) {
-            Long currentUserId = currentUser.getId();
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("createdBy").get("id"), currentUserId));
-        } else {
-            return Page.empty(pageable);
+    private Specification<Ticket> assignedToIdEquals(Long userId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("assignedTo").get("id"), userId);
+    }
+
+    private Specification<Ticket> createdByIdEquals(Long userId) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("createdBy").get("id"), userId);
+    }
+
+    private User requireCurrentUser() {
+        User user = findCurrentUserOrNull();
+        if (user == null) {
+            throw new org.springframework.security.access.AccessDeniedException("Authenticated user required.");
         }
-
-        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+        return user;
     }
 
     @Override
@@ -148,8 +209,6 @@ public class TicketServiceImpl implements TicketService {
         TicketStatus oldStatus = ticket.getStatus();
         User oldAssignee = ticket.getAssignedTo();
         User newAssignee = oldAssignee;
-        boolean statusChanged = ticketUpdateDTO.getStatus() != null
-                && ticketUpdateDTO.getStatus() != oldStatus;
         boolean assigneeChanged = false;
 
         if (ticketUpdateDTO.getSubject() != null) {
@@ -168,9 +227,21 @@ public class TicketServiceImpl implements TicketService {
             ticket.setPriority(ticketUpdateDTO.getPriority());
         }
         if (ticketUpdateDTO.getAssignedToId() != null && hasAnyCurrentRole("ADMIN", "SUPERVISOR")) {
-            newAssignee = findUserById(ticketUpdateDTO.getAssignedToId());
-            assigneeChanged = oldAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
-            ticket.setAssignedTo(newAssignee);
+            if (ticketUpdateDTO.getAssignedToId() == 0) {
+                assigneeChanged = oldAssignee != null;
+                ticket.setAssignedTo(null);
+                newAssignee = null;
+                if (oldAssignee != null && ticket.getStatus() == TicketStatus.ASSIGNED) {
+                    ticket.setStatus(TicketStatus.OPEN);
+                }
+            } else {
+                newAssignee = findUserById(ticketUpdateDTO.getAssignedToId());
+                assigneeChanged = oldAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
+                ticket.setAssignedTo(newAssignee);
+                if (oldAssignee == null && ticket.getStatus() == TicketStatus.OPEN) {
+                    ticket.setStatus(TicketStatus.ASSIGNED);
+                }
+            }
         }
         if (ticketUpdateDTO.getCategoryId() != null) {
             ticket.setCategory(findCategoryById(ticketUpdateDTO.getCategoryId()));
@@ -180,15 +251,75 @@ public class TicketServiceImpl implements TicketService {
         Ticket savedTicket = ticketRepository.save(ticket);
 
         User updatedBy = findCurrentUserOrNull();
+        boolean statusChanged = ticket.getStatus() != oldStatus;
         if (statusChanged) {
-            saveStatusHistory(savedTicket, oldStatus, ticketUpdateDTO.getStatus(), updatedBy);
-            createNotificationForStatusChange(savedTicket, ticketUpdateDTO.getStatus());
+            saveStatusHistory(savedTicket, oldStatus, ticket.getStatus(), updatedBy);
+            createNotificationForStatusChange(savedTicket, ticket.getStatus());
         }
         if (assigneeChanged) {
             saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
+            if (newAssignee != null) {
+                emailService.sendTicketAssigned(savedTicket, newAssignee);
+            }
+        }
+        return mapToResponseDTO(savedTicket);
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDTO updateAssignment(Long ticketId, Long assigneeId) {
+        Ticket ticket = findTicketById(ticketId);
+        User oldAssignee = ticket.getAssignedTo();
+        User newAssignee = assigneeId == 0 ? null : findUserById(assigneeId);
+
+        if (newAssignee != null && ticket.getCreatedBy() != null
+                && newAssignee.getId().equals(ticket.getCreatedBy().getId())) {
+            throw new ConflictException("The ticket requester cannot be assigned to their own ticket.");
+        }
+
+        boolean assigneeChanged = oldAssignee == null
+                ? newAssignee != null
+                : newAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
+        if (!assigneeChanged) {
+            return mapToResponseDTO(ticket);
+        }
+
+        TicketStatus oldStatus = ticket.getStatus();
+        ticket.setAssignedTo(newAssignee);
+        if (oldAssignee == null && newAssignee != null && oldStatus == TicketStatus.OPEN) {
+            ticket.setStatus(TicketStatus.ASSIGNED);
+        } else if (oldAssignee != null && newAssignee == null && oldStatus == TicketStatus.ASSIGNED) {
+            ticket.setStatus(TicketStatus.OPEN);
+        }
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+        User updatedBy = requireCurrentUser();
+        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
+        if (savedTicket.getStatus() != oldStatus) {
+            saveStatusHistory(savedTicket, oldStatus, savedTicket.getStatus(), updatedBy);
+            createNotificationForStatusChange(savedTicket, savedTicket.getStatus());
+        }
+        if (newAssignee != null) {
             emailService.sendTicketAssigned(savedTicket, newAssignee);
         }
         return mapToResponseDTO(savedTicket);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketAssigneeOptionDTO> getAssignmentCandidates(Long ticketId) {
+        Ticket ticket = findTicketById(ticketId);
+        if (ticket.getCreatedBy() == null) {
+            return List.of();
+        }
+        return userRepository.findTicketAssigneeOptionsExcludingRequester(ticket.getCreatedBy().getId()).stream()
+                .map(option -> new TicketAssigneeOptionDTO(
+                        option.getId(),
+                        option.getFirstName(),
+                        option.getLastName(),
+                        option.getActiveTicketCount()))
+                .toList();
     }
 
     @Override

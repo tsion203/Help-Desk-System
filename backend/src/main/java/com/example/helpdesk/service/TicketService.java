@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
+import com.example.helpdesk.dto.TicketAssigneeOptionDTO;
 import com.example.helpdesk.dto.TicketCreateDTO;
 import com.example.helpdesk.dto.TicketResponseDTO;
 import com.example.helpdesk.dto.TicketStatusHistoryResponseDTO;
@@ -23,7 +24,16 @@ public interface TicketService {
     List<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority);
     Page<TicketResponseDTO> getAll(TicketStatus status, String category, TicketPriority priority, Pageable pageable);
 
+    Page<TicketResponseDTO> getCreatedTicketsForCurrentUser(TicketStatus status, String category, TicketPriority priority, Pageable pageable);
+    Page<TicketResponseDTO> getAssignedTicketsForCurrentUser(TicketStatus status, String category, TicketPriority priority, Pageable pageable);
+
     TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO);
+
+    TicketResponseDTO updateAssignment(Long ticketId, Long assigneeId);
+
+    List<TicketAssigneeOptionDTO> getAssignmentCandidates(Long ticketId);
+
+    TicketResponseDTO rejectAssignedTicket(Long ticketId);
 
     void delete(Long id);
 

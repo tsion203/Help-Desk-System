@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.helpdesk.dto.TicketCreateDTO;
+import com.example.helpdesk.dto.TicketAssignmentUpdateDTO;
+import com.example.helpdesk.dto.TicketAssigneeOptionDTO;
+import java.util.List;
 import com.example.helpdesk.dto.TicketResponseDTO;
 import com.example.helpdesk.dto.TicketUpdateDTO;
 import com.example.helpdesk.service.TicketService;
@@ -53,6 +56,26 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getAll(status, category, priority, pageable));
     }
 
+    @GetMapping("/created-me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<TicketResponseDTO>> getMyCreatedTickets(
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) TicketPriority priority,
+            @PageableDefault(size = 5, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ticketService.getCreatedTicketsForCurrentUser(status, category, priority, pageable));
+    }
+
+    @GetMapping("/assigned-me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<TicketResponseDTO>> getMyAssignedTickets(
+            @RequestParam(required = false) TicketStatus status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) TicketPriority priority,
+            @PageableDefault(size = 5, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ticketService.getAssignedTicketsForCurrentUser(status, category, priority, pageable));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("@rbac.canAccessTicket(#id, authentication)")
     public ResponseEntity<TicketResponseDTO> getTicketById(@PathVariable Long id) {
@@ -65,6 +88,26 @@ public class TicketController {
             @Valid @RequestBody TicketUpdateDTO ticketUpdateDTO
     ) {
         return ResponseEntity.ok(ticketService.update(id, ticketUpdateDTO));
+    }
+
+    @PutMapping("/{id}/assignment")
+    @PreAuthorize("@rbac.canManageTicketAssignment(#id, authentication)")
+    public ResponseEntity<TicketResponseDTO> updateTicketAssignment(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketAssignmentUpdateDTO assignmentUpdateDTO) {
+        return ResponseEntity.ok(ticketService.updateAssignment(id, assignmentUpdateDTO.getAssignedToId()));
+    }
+
+    @GetMapping("/{id}/assignees")
+    @PreAuthorize("@rbac.canManageTicketAssignment(#id, authentication)")
+    public ResponseEntity<List<TicketAssigneeOptionDTO>> getTicketAssignees(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.getAssignmentCandidates(id));
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("@rbac.canRejectAssignedTicket(#id, authentication)")
+    public ResponseEntity<TicketResponseDTO> rejectTicket(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.rejectAssignedTicket(id));
     }
 
     @DeleteMapping("/{id}")

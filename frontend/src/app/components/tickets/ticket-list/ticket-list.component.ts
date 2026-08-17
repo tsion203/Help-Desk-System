@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Ticket } from '../../../models/ticket';
 import { TicketService } from '../../../services/ticket.service';
 import { AuthService } from '../../../services/auth.service';
@@ -12,11 +12,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TicketCategory } from '../../../models/ticket-category';
 import { TicketCategoryService } from '../../../services/ticket-category.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { TicketAssignmentControlComponent } from '../ticket-assignment-control/ticket-assignment-control.component';
 
 @Component({
   selector: 'app-ticket-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, GlobalSearchPipe, ReactiveFormsModule, PaginationComponent],
+  imports: [CommonModule, RouterLink, GlobalSearchPipe, ReactiveFormsModule, PaginationComponent, TicketAssignmentControlComponent],
   templateUrl: './ticket-list.component.html',
   styleUrl: './ticket-list.component.scss',
 })
@@ -24,6 +25,7 @@ export class TicketListComponent implements OnInit {
   tickets: Ticket[] = [];
   loading = false;
   errorMessage = '';
+  selectedTicketForAssignment: Ticket | null = null;
   readonly globalSearch = inject(GlobalSearchService);
   private readonly destroyRef = inject(DestroyRef);
   categories: TicketCategory[] = [];
@@ -35,9 +37,10 @@ export class TicketListComponent implements OnInit {
   readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   readonly priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
-  constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly router: Router) {}
+  constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
   get canCreate(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
-  get canUpdate(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer() || this.authService.isEmployee(); }
+  get canUpdate(): boolean { return this.authService.isEmployee(); }
+  get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer(); }
   get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
   ngOnInit(): void {
     this.loadTickets();
@@ -51,6 +54,12 @@ export class TicketListComponent implements OnInit {
   }
   clearFilters(): void { this.filterForm.reset({ status: '', category: '', priority: '' }); }
   changePage(page:number):void { this.page=page; this.loadTickets(); }
-  editTicket(id: number, event: Event): void { event.stopPropagation(); void this.router.navigate(['/tickets', id, 'edit']); }
+  openAssignment(ticket: Ticket, event: Event): void { event.stopPropagation(); this.selectedTicketForAssignment = ticket; }
+  closeAssignment(): void { this.selectedTicketForAssignment = null; }
+  assignmentUpdated(updatedTicket: Ticket): void {
+    this.tickets = this.tickets.map((ticket) => ticket.id === updatedTicket.id ? updatedTicket : ticket);
+    this.closeAssignment();
+    this.cdr.markForCheck();
+  }
   deleteTicket(id: number, event: Event): void { event.stopPropagation(); this.ticketService.delete(id).subscribe({ next: () => { if(this.tickets.length===1&&this.page>0)this.page--; this.loadTickets(); this.toast.success('Ticket deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete ticket.') }); }
 }

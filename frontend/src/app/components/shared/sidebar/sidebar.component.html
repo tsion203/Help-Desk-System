@@ -11,7 +11,14 @@
       <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 1 1 16 0v5H4v-5Z"/><path d="m12 13 4-4M7 16h10"/></svg><span class="nav-text">Dashboard</span>
     </a>
     <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Tickets">
-      <svg viewBox="0 0 24 24"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M9 9h6M9 13h4"/></svg><span class="nav-text">{{ isEmployee ? 'My Tickets' : (isSupportOfficer ? 'Assigned Tickets' : 'Tickets') }}</span>
+      <svg viewBox="0 0 24 24"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M9 9h6M9 13h4"/></svg><span class="nav-text">Tickets</span>
+    </a>
+    <p class="nav-label nav-text">My Tickets</p>
+    <a class="nav-link" routerLink="/tickets/created-me" routerLinkActive="active" title="Created by Me">
+      <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="nav-text">Created by Me</span>
+    </a>
+    <a class="nav-link" routerLink="/tickets/assigned-me" routerLinkActive="active" title="Assigned to Me">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h8M8 15h5"/></svg><span class="nav-text">Assigned to Me</span>
     </a>
     <a *ngIf="isEmployee" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="New Ticket">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="nav-text">New Ticket</span>
