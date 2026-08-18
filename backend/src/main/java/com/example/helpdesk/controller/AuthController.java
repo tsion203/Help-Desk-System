@@ -132,6 +132,6 @@ public class AuthController {
     }
 
     private String normalizeRoleName(String role) {
-        return role == null ? null : role.trim().toUpperCase().replaceFirst("^ROLE_", "");
+        return role == null ? null : role.trim().toUpperCase().replace(' ', '_').replace('-', '_').replaceFirst("^ROLE_", "");
     }
 }

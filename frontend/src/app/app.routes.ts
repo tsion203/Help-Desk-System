@@ -72,7 +72,7 @@ export const routes: Routes = [
   { path: 'tickets', component: TicketListComponent, canActivate: [authGuard] },
   { path: 'tickets/created-me', component: CreatedTicketListComponent, canActivate: [authGuard] },
   { path: 'tickets/assigned-me', component: AssignedTicketListComponent, canActivate: [authGuard] },
-  { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'EMPLOYEE'] } },
+  { path: 'tickets/new', component: TicketFormComponent, canActivate: [authGuard], data: { roles: ['EMPLOYEE'], excludedRoles: ['ADMIN'] } },
   { path: 'tickets/:id', component: TicketDetailsComponent, canActivate: [authGuard] },
   { path: 'tickets/:id/edit', component: TicketUpdateComponent, canActivate: [authGuard], data: { roles: ['EMPLOYEE'] } },
 

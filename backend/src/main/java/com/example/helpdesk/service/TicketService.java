@@ -40,6 +40,7 @@ public interface TicketService {
     TicketResponseDTO assignTicket(Long ticketId, Long assigneeId, Long assignedById);
 
     TicketResponseDTO changeStatus(Long ticketId, TicketStatus newStatus, Long changedById);
+    TicketResponseDTO changeStatusForCurrentUser(Long ticketId, TicketStatus newStatus);
 
     List<TicketResponseDTO> getTicketsByCreator(Long creatorId); 
 

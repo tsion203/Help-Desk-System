@@ -49,14 +49,29 @@ export class AuthService {
     return localStorage.getItem(this.roleKey);
   }
 
+  getRoles(): string[] {
+    const token = this.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (Array.isArray(payload.roles)) return payload.roles.map((role: string) => this.normalizeRole(role));
+      } catch { /* Fall back to the legacy primary role below. */ }
+    }
+    const role = this.getRole();
+    return role ? [this.normalizeRole(role)] : [];
+  }
+
+  hasRole(role: string): boolean { return this.getRoles().includes(this.normalizeRole(role)); }
+  hasAnyRole(...roles: string[]): boolean { return roles.some((role) => this.hasRole(role)); }
+
   saveEmail(email: string): void { localStorage.setItem(this.emailKey, email); }
   getEmail(): string { return localStorage.getItem(this.emailKey) ?? '';
   }
 
-  isAdmin(): boolean { return this.getRole() === 'ADMIN'; }
-  isSupervisor(): boolean { return this.getRole() === 'SUPERVISOR'; }
-  isSupportOfficer(): boolean { return this.getRole() === 'SUPPORT_OFFICER'; }
-  isEmployee(): boolean { return this.getRole() === 'EMPLOYEE'; }
+  isAdmin(): boolean { return this.hasRole('ADMIN'); }
+  isSupervisor(): boolean { return this.hasRole('SUPERVISOR'); }
+  isSupportOfficer(): boolean { return this.hasRole('SUPPORT_OFFICER'); }
+  isEmployee(): boolean { return this.hasRole('EMPLOYEE'); }
 
   isLoggedIn(): boolean {
     return !!this.getToken();
@@ -69,6 +84,6 @@ export class AuthService {
   }
 
   private normalizeRole(role: string): string {
-    return (role || '').replace(/^ROLE_/, '').toUpperCase();
+    return (role || '').trim().toUpperCase().replace(/^ROLE_/, '').replace(/[\s-]+/g, '_');
   }
 }

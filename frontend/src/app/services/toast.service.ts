@@ -23,7 +23,7 @@ export class ToastService {
     window.setTimeout(() => this.dismiss(id), 4500);
   }
 
-  private getErrorMessage(error: unknown, fallback: string): string {
+  getErrorMessage(error: unknown, fallback: string): string {
     if (!(error instanceof HttpErrorResponse)) return fallback;
     const apiError = error.error as ApiError | null;
     if (apiError && typeof apiError.message === 'string' && apiError.message.trim()) return apiError.message;

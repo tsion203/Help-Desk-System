@@ -30,6 +30,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
                 AND t.status NOT IN ('RESOLVED', 'CLOSED')
             WHERE u.active = 1
               AND u.id <> :requesterId
+              AND EXISTS (
+                  SELECT 1 FROM users_roles ur
+                  JOIN roles r ON r.id = ur.role_id
+                  WHERE ur.user_id = u.id
+                    AND REPLACE(REPLACE(REPLACE(UPPER(TRIM(r.name)), 'ROLE_', ''), ' ', '_'), '-', '_') = 'SUPPORT_OFFICER'
+              )
             GROUP BY u.id, u.first_name, u.last_name
             ORDER BY u.first_name, u.last_name
             """, nativeQuery = true)

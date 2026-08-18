@@ -24,7 +24,6 @@ export class TicketAssignmentControlComponent implements OnChanges {
   loading = false;
   submitting = false;
   readonly form = new FormGroup({
-    search: new FormControl('', { nonNullable: true }),
     assignedToId: new FormControl(0, { nonNullable: true }),
   });
 
@@ -43,14 +42,6 @@ export class TicketAssignmentControlComponent implements OnChanges {
     }
   }
 
-  get filteredCandidates(): TicketAssigneeOption[] {
-    const query = this.form.controls.search.value.trim().toLocaleLowerCase();
-    if (!query) return this.candidates;
-    return this.candidates.filter((candidate) =>
-      `${candidate.firstName} ${candidate.lastName}`.toLocaleLowerCase().includes(query),
-    );
-  }
-
   optionLabel(candidate: TicketAssigneeOption): string {
     const suffix = candidate.activeTicketCount === 1 ? 'ticket' : 'tickets';
     return `${candidate.firstName} ${candidate.lastName} [${candidate.activeTicketCount} ${suffix}]`;
@@ -67,7 +58,7 @@ export class TicketAssignmentControlComponent implements OnChanges {
     ).subscribe({
       next: (ticket) => {
         this.assignedToId = ticket.assignedToId ?? null;
-        this.form.patchValue({ search: '', assignedToId: ticket.assignedToId ?? 0 });
+        this.form.controls.assignedToId.setValue(ticket.assignedToId ?? 0);
         this.toast.success('Ticket assignment updated successfully.');
         this.assignmentUpdated.emit(ticket);
         this.loadCandidates();

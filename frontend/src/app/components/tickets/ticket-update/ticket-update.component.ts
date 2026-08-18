@@ -39,7 +39,7 @@ export class TicketUpdateComponent implements OnInit {
     this.ticketId = Number(this.route.snapshot.paramMap.get('id'));
     if (this.canAssign) this.userService.getAll().subscribe({ next: (users) => { this.assignees = users; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load assignees.'; this.cdr.markForCheck(); } });
     this.categoryService.getAll().subscribe({ next: (categories) => { this.categories = categories; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
-    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue(ticket); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
+    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue({ ...ticket, assignedToId: ticket.assignedToId ?? 0 }); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
   }
 
   onUpdate(): void {

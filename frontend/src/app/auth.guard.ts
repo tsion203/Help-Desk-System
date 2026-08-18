@@ -9,6 +9,7 @@ export const authGuard: CanActivateFn = (route) => {
 
   if (!authService.isLoggedIn()) return router.createUrlTree(['/login']);
   const roles = (route.data?.['roles'] as string[] | undefined) ?? [];
-  if (roles.length === 0 || (authService.getRole() && roles.includes(authService.getRole()!))) return true;
+  const excludedRoles = (route.data?.['excludedRoles'] as string[] | undefined) ?? [];
+  if (!authService.hasAnyRole(...excludedRoles) && (roles.length === 0 || authService.hasAnyRole(...roles))) return true;
   return router.createUrlTree(['/access-denied']);
 };

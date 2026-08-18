@@ -55,8 +55,17 @@ public class RbacAuthorizationService {
     }
 
     public boolean canManageTicketAssignment(Long ticketId, Authentication authentication) {
-        return hasAnyRole(authentication, "ADMIN", "SUPERVISOR", "SUPPORT_OFFICER")
+        return hasAnyRole(authentication, "ADMIN", "SUPERVISOR")
                 && canAccessTicket(ticketId, authentication);
+    }
+
+    public boolean canUpdateAssignedTicketStatus(Long ticketId, Authentication authentication) {
+        if (!hasAnyRole(authentication, "SUPPORT_OFFICER") || authentication == null || ticketId == null) return false;
+        return userRepository.findByEmail(authentication.getName())
+                .flatMap(currentUser -> ticketRepository.findById(ticketId)
+                        .map(ticket -> ticket.getAssignedTo() != null
+                                && currentUser.getId().equals(ticket.getAssignedTo().getId())))
+                .orElse(false);
     }
 
     public boolean canRejectAssignedTicket(Long ticketId, Authentication authentication) {

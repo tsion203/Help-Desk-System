@@ -235,7 +235,7 @@ public class TicketServiceImpl implements TicketService {
                     ticket.setStatus(TicketStatus.OPEN);
                 }
             } else {
-                newAssignee = findUserById(ticketUpdateDTO.getAssignedToId());
+                newAssignee = requireSupportOfficer(ticketUpdateDTO.getAssignedToId());
                 assigneeChanged = oldAssignee == null || !oldAssignee.getId().equals(newAssignee.getId());
                 ticket.setAssignedTo(newAssignee);
                 if (oldAssignee == null && ticket.getStatus() == TicketStatus.OPEN) {
@@ -270,7 +270,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketResponseDTO updateAssignment(Long ticketId, Long assigneeId) {
         Ticket ticket = findTicketById(ticketId);
         User oldAssignee = ticket.getAssignedTo();
-        User newAssignee = assigneeId == 0 ? null : findUserById(assigneeId);
+        User newAssignee = assigneeId == 0 ? null : requireSupportOfficer(assigneeId);
 
         if (newAssignee != null && ticket.getCreatedBy() != null
                 && newAssignee.getId().equals(ticket.getCreatedBy().getId())) {
@@ -369,6 +369,19 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
+    public TicketResponseDTO changeStatusForCurrentUser(Long ticketId, TicketStatus newStatus) {
+        Ticket ticket = findTicketById(ticketId);
+        User currentUser = requireCurrentUser();
+        if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getId().equals(currentUser.getId())
+                || !hasRole(currentUser, "SUPPORT_OFFICER")) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Only the assigned Support Officer can update this ticket's status.");
+        }
+        return changeStatus(ticketId, newStatus, currentUser.getId());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getTicketsByCreator(Long creatorId) {
         findUserById(creatorId);
@@ -396,6 +409,22 @@ public class TicketServiceImpl implements TicketService {
     private User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    }
+
+    private User requireSupportOfficer(Long id) {
+        User user = findUserById(id);
+        if (!hasRole(user, "SUPPORT_OFFICER")) {
+            throw new ConflictException("Tickets can only be assigned to Support Officers.");
+        }
+        return user;
+    }
+
+    private boolean hasRole(User user, String expectedRole) {
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .filter(role -> role != null && role.getName() != null)
+                .map(role -> role.getName().trim().toUpperCase()
+                        .replaceFirst("^ROLE_", "").replace(' ', '_').replace('-', '_'))
+                .anyMatch(expectedRole::equals);
     }
 
     private User findNullableUserById(Long id) {

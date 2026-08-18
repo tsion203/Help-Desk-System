@@ -4,7 +4,6 @@
       <h1>{{ dashboardTitle }}</h1>
       <p>System activity and support performance at a glance.</p>
     </div>
-    <a class="btn btn-primary" href="/tickets/new">New ticket</a>
   </header>
   <p *ngIf="loading">Loading ticket totals...</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>

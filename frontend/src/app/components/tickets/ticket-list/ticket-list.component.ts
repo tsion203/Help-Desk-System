@@ -13,11 +13,12 @@ import { TicketCategory } from '../../../models/ticket-category';
 import { TicketCategoryService } from '../../../services/ticket-category.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { TicketAssignmentControlComponent } from '../ticket-assignment-control/ticket-assignment-control.component';
+import { TicketStatusControlComponent } from '../ticket-status-control/ticket-status-control.component';
 
 @Component({
   selector: 'app-ticket-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, GlobalSearchPipe, ReactiveFormsModule, PaginationComponent, TicketAssignmentControlComponent],
+  imports: [CommonModule, RouterLink, GlobalSearchPipe, ReactiveFormsModule, PaginationComponent, TicketAssignmentControlComponent, TicketStatusControlComponent],
   templateUrl: './ticket-list.component.html',
   styleUrl: './ticket-list.component.scss',
 })
@@ -26,6 +27,7 @@ export class TicketListComponent implements OnInit {
   loading = false;
   errorMessage = '';
   selectedTicketForAssignment: Ticket | null = null;
+  selectedTicketForStatus: Ticket | null = null;
   readonly globalSearch = inject(GlobalSearchService);
   private readonly destroyRef = inject(DestroyRef);
   categories: TicketCategory[] = [];
@@ -38,9 +40,9 @@ export class TicketListComponent implements OnInit {
   readonly priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
   constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
-  get canCreate(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
+  get canCreate(): boolean { return this.authService.isEmployee() && !this.authService.isAdmin(); }
   get canUpdate(): boolean { return this.authService.isEmployee(); }
-  get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer(); }
+  get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor(); }
   get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
   ngOnInit(): void {
     this.loadTickets();
@@ -60,6 +62,22 @@ export class TicketListComponent implements OnInit {
     this.tickets = this.tickets.map((ticket) => ticket.id === updatedTicket.id ? updatedTicket : ticket);
     this.closeAssignment();
     this.cdr.markForCheck();
+  }
+  canUpdateStatus(ticket: Ticket): boolean { return this.authService.isSupportOfficer() && ticket.assignedToId != null; }
+  canReject(ticket: Ticket): boolean { return this.authService.isSupportOfficer() && ticket.assignedToId != null; }
+  openStatus(ticket: Ticket, event: Event): void { event.stopPropagation(); this.selectedTicketForStatus = ticket; }
+  closeStatus(): void { this.selectedTicketForStatus = null; }
+  statusUpdated(updatedTicket: Ticket): void { this.tickets = this.tickets.map((ticket) => ticket.id === updatedTicket.id ? updatedTicket : ticket); this.closeStatus(); this.cdr.markForCheck(); }
+  rejectTicket(id: number, event: Event): void {
+    event.stopPropagation();
+    this.ticketService.reject(id).subscribe({
+      next: () => {
+        this.toast.success('Ticket rejected successfully.');
+        if (this.tickets.length === 1 && this.page > 0) this.page--;
+        this.loadTickets();
+      },
+      error: (error) => this.toast.error(error, 'Unable to reject ticket.'),
+    });
   }
   deleteTicket(id: number, event: Event): void { event.stopPropagation(); this.ticketService.delete(id).subscribe({ next: () => { if(this.tickets.length===1&&this.page>0)this.page--; this.loadTickets(); this.toast.success('Ticket deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete ticket.') }); }
 }

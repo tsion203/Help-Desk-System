@@ -79,6 +79,12 @@ export class TicketService {
     );
   }
 
+  updateStatus(id: number, status: string): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.apiUrl}/${id}/status`, { status }).pipe(
+      tap(() => this.ticketsChanged.next()),
+    );
+  }
+
   getAssignmentCandidates(id: number): Observable<TicketAssigneeOption[]> {
     return this.http.get<TicketAssigneeOption[]>(`${this.apiUrl}/${id}/assignees`);
   }

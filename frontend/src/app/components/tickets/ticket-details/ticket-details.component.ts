@@ -14,11 +14,12 @@ import { ToastService } from '../../../services/toast.service';
 import { TicketAttachmentFormComponent } from '../ticket-attachment-form/ticket-attachment-form.component';
 import { TicketAttachmentListComponent } from '../ticket-attachment-list/ticket-attachment-list.component';
 import { TicketAssignmentControlComponent } from '../ticket-assignment-control/ticket-assignment-control.component';
+import { TicketStatusControlComponent } from '../ticket-status-control/ticket-status-control.component';
 
 @Component({
   selector: 'app-ticket-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent, TicketAssignmentControlComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TicketAttachmentFormComponent, TicketAttachmentListComponent, TicketAssignmentControlComponent, TicketStatusControlComponent],
   templateUrl: './ticket-details.component.html',
   styleUrls: ['./ticket-details.component.scss'],
 })
@@ -103,8 +104,12 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   get canManageAssignment(): boolean {
-    return this.authService.isAdmin() || this.authService.isSupervisor() || this.authService.isSupportOfficer();
+    return this.authService.isAdmin() || this.authService.isSupervisor();
   }
+
+  get canUpdateStatus(): boolean { return this.authService.isSupportOfficer() && this.ticket?.assignedToId != null; }
+
+  statusUpdated(ticket: Ticket): void { this.assignmentUpdated(ticket); }
 
   assignmentUpdated(ticket: Ticket): void {
     this.ticket = {

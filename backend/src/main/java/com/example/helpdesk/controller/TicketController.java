@@ -40,7 +40,7 @@ public class TicketController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') and !hasRole('ADMIN')")
     public ResponseEntity<TicketResponseDTO> createTicket(@Valid @RequestBody TicketCreateDTO ticketCreateDTO) {
         TicketResponseDTO createdTicket = ticketService.create(ticketCreateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTicket);
@@ -102,6 +102,18 @@ public class TicketController {
     @PreAuthorize("@rbac.canManageTicketAssignment(#id, authentication)")
     public ResponseEntity<List<TicketAssigneeOptionDTO>> getTicketAssignees(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getAssignmentCandidates(id));
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TicketResponseDTO> updateTicketStatus(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, TicketStatus> request) {
+        TicketStatus status = request.get("status");
+        if (status == null) {
+            throw new IllegalArgumentException("Ticket status is required.");
+        }
+        return ResponseEntity.ok(ticketService.changeStatusForCurrentUser(id, status));
     }
 
     @PostMapping("/{id}/reject")

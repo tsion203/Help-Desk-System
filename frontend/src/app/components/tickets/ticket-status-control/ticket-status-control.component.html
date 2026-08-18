@@ -1,0 +1,5 @@
+<form class="status-form" (submit)="updateStatus($event)">
+  <div class="field"><label [for]="'ticket-status-' + ticketId">Status</label><select [id]="'ticket-status-' + ticketId" [formControl]="statusControl"><option *ngFor="let option of statuses" [value]="option">{{ option.replace('_', ' ') }}</option></select></div>
+  <p class="error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <button class="btn btn-primary" type="submit" [disabled]="submitting || statusControl.value === status">{{ submitting ? 'Saving...' : 'Update status' }}</button>
+</form>

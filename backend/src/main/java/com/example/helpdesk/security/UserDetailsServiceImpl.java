@@ -32,7 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 ? List.<GrantedAuthority>of()
                 : user.getRoles().stream()
                         .filter(role -> role != null && role.getName() != null)
-                        .map(role -> role.getName().trim().toUpperCase())
+                        .map(role -> role.getName().trim().toUpperCase().replace(' ', '_').replace('-', '_'))
                         .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                         .map(role -> (GrantedAuthority) new SimpleGrantedAuthority(role))
                         .toList();

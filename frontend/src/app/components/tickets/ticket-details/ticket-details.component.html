@@ -63,6 +63,11 @@
       </div>
     </section>
 
+    <section class="card status-update-card" *ngIf="canUpdateStatus">
+      <h2>Update status</h2>
+      <app-ticket-status-control [ticketId]="currentTicket.id" [status]="currentTicket.status" (statusUpdated)="statusUpdated($event)"></app-ticket-status-control>
+    </section>
+
     <section class="card assignment-card" *ngIf="canManageAssignment">
       <app-ticket-assignment-control
         [ticketId]="currentTicket.id"

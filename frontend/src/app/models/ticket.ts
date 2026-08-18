@@ -15,8 +15,8 @@ export interface Ticket {
   resolvedAt: string;
   createdById: number;
   createdByName: string;
-  assignedToId: number;
-  assignedToName: string;
+  assignedToId: number | null;
+  assignedToName: string | null;
   categoryId: number;
   categoryName: string;
   comments: TicketComment[];

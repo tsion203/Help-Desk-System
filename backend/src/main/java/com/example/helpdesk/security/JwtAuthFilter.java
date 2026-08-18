@@ -87,7 +87,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String normalizeRole(String role) {
-        String normalized = role.trim().toUpperCase();
+        String normalized = role.trim().toUpperCase().replace(' ', '_').replace('-', '_');
         return normalized.startsWith("ROLE_") ? normalized : "ROLE_" + normalized;
     }
 }

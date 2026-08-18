@@ -46,7 +46,7 @@ export class CreatedTicketListComponent implements OnInit {
     private readonly cdr: ChangeDetectorRef,
   ) {}
 
-  get canCreate(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
+  get canCreate(): boolean { return this.authService.isEmployee() && !this.authService.isAdmin(); }
   get canUpdate(): boolean { return this.authService.isEmployee(); }
   get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
 
