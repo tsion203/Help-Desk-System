@@ -65,7 +65,7 @@
 
     <section class="card status-update-card" *ngIf="canUpdateStatus">
       <h2>Update status</h2>
-      <app-ticket-status-control [ticketId]="currentTicket.id" [status]="currentTicket.status" (statusUpdated)="statusUpdated($event)"></app-ticket-status-control>
+      <app-ticket-status-control [ticketId]="currentTicket.id" [status]="currentTicket.status" [statuses]="statusOptions" (statusUpdated)="statusUpdated($event)"></app-ticket-status-control>
     </section>
 
     <section class="card assignment-card" *ngIf="canManageAssignment">
@@ -94,7 +94,7 @@
 
       <div class="tab-panel">
         <div *ngIf="activeTab === 'comments'">
-          <div class="comment-input-panel">
+          <div class="comment-input-panel" *ngIf="canModifyContent">
             <textarea
               class="comment-input"
               rows="3"
@@ -155,8 +155,8 @@
         </div>
 
         <div class="attachments-panel" *ngIf="activeTab === 'attachments'">
-          <app-ticket-attachment-list [ticketId]="currentTicket.id" [items]="currentTicket.attachments" (attachmentDeleted)="refreshAttachments()"></app-ticket-attachment-list>
-          <app-ticket-attachment-form [ticketId]="currentTicket.id" (attachmentUploaded)="refreshAttachments()"></app-ticket-attachment-form>
+          <app-ticket-attachment-list [ticketId]="currentTicket.id" [items]="currentTicket.attachments" [readOnly]="!canModifyContent" (attachmentDeleted)="refreshAttachments()"></app-ticket-attachment-list>
+          <app-ticket-attachment-form *ngIf="canModifyContent" [ticketId]="currentTicket.id" (attachmentUploaded)="refreshAttachments()"></app-ticket-attachment-form>
         </div>
       </div>
     </section>

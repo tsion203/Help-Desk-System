@@ -17,8 +17,8 @@ import { ToastService } from '../../../services/toast.service';
 export class TicketStatusControlComponent implements OnChanges {
   @Input({ required: true }) ticketId = 0;
   @Input({ required: true }) status = '';
+  @Input() statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED'];
   @Output() statusUpdated = new EventEmitter<Ticket>();
-  readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   readonly statusControl = new FormControl('', { nonNullable: true });
   submitting = false;
   errorMessage = '';
@@ -26,7 +26,9 @@ export class TicketStatusControlComponent implements OnChanges {
   constructor(private readonly ticketService: TicketService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['status']) this.statusControl.setValue(this.status);
+    if (changes['status'] || (changes['statuses'] && !this.statuses.includes(this.statusControl.value))) {
+      this.statusControl.setValue(this.statuses.includes(this.status) ? this.status : (this.statuses[0] ?? this.status));
+    }
   }
 
   updateStatus(event: SubmitEvent): void {

@@ -100,14 +100,26 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   get canUpdateDetails(): boolean {
-    return this.authService.isEmployee();
+    return this.authService.isEmployee() && this.ticket?.status !== 'CLOSED';
   }
 
   get canManageAssignment(): boolean {
-    return this.authService.isAdmin() || this.authService.isSupervisor();
+    return (this.authService.isAdmin() || this.authService.isSupervisor()) && this.ticket?.status !== 'CLOSED';
   }
 
-  get canUpdateStatus(): boolean { return this.authService.isSupportOfficer() && this.ticket?.assignedToId != null; }
+  get statusOptions(): string[] {
+    if (!this.ticket) return [];
+    const requester = this.ticket.createdById === this.currentUserId;
+    if (this.ticket.status === 'CLOSED') return requester ? ['REOPENED'] : [];
+    if (requester) return ['CLOSED'];
+    if (this.authService.isSupportOfficer() && this.ticket.assignedToId === this.currentUserId) {
+      return ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED'];
+    }
+    return [];
+  }
+
+  get canUpdateStatus(): boolean { return this.statusOptions.length > 0; }
+  get canModifyContent(): boolean { return this.ticket?.status !== 'CLOSED'; }
 
   statusUpdated(ticket: Ticket): void { this.assignmentUpdated(ticket); }
 

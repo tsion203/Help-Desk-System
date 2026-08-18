@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '../../../models/user';
 import { UserService } from '../../../services/user.service';
@@ -15,6 +15,6 @@ export class UserDetailsComponent implements OnInit {
   user: User | null = null;
   loading = false;
   errorMessage = '';
-  constructor(private readonly userService: UserService, private readonly route: ActivatedRoute) {}
-  ngOnInit(): void { const id = Number(this.route.snapshot.paramMap.get('id')); this.loading = true; this.userService.getById(id).subscribe({ next: (user) => { this.user = user; this.loading = false; }, error: () => { this.errorMessage = 'Unable to load user.'; this.loading = false; } }); }
+  constructor(private readonly userService: UserService, private readonly route: ActivatedRoute, private readonly cdr: ChangeDetectorRef) {}
+  ngOnInit(): void { const id = Number(this.route.snapshot.paramMap.get('id')); this.loading = true; this.userService.getById(id).subscribe({ next: (user) => { this.user = user; this.loading = false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load user.'; this.loading = false; this.cdr.markForCheck(); } }); }
 }

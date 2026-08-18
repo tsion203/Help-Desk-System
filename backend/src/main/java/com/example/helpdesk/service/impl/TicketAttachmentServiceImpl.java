@@ -11,8 +11,10 @@ import java.io.IOException;
 import com.example.helpdesk.dto.TicketAttachmentCreateDTO;
 import com.example.helpdesk.dto.TicketAttachmentResponseDTO;
 import com.example.helpdesk.exception.ResourceNotFoundException;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.model.Ticket;
 import com.example.helpdesk.model.TicketAttachment;
+import com.example.helpdesk.model.TicketStatus;
 import com.example.helpdesk.model.User;
 import com.example.helpdesk.repository.TicketAttachmentRepository;
 import com.example.helpdesk.repository.TicketRepository;
@@ -48,6 +50,7 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
 
         Ticket ticket = ticketRepository.findById(createDTO.getTicketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+        requireMutable(ticket);
 
         User user = userRepository.findById(createDTO.getUploadedById())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -74,6 +77,7 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
         }
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+        requireMutable(ticket);
         User user = userRepository.findById(uploadedById)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         TicketAttachment attachment = new TicketAttachment();
@@ -136,9 +140,11 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
         TicketAttachment attachment = ticketAttachmentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Ticket Attachment not found"));
+        requireMutable(attachment.getTicket());
 
         Ticket ticket = ticketRepository.findById(updateDTO.getTicketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found"));
+        requireMutable(ticket);
 
         User user = userRepository.findById(updateDTO.getUploadedById())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -160,8 +166,15 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
         TicketAttachment attachment = ticketAttachmentRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Ticket Attachment not found"));
+        requireMutable(attachment.getTicket());
 
         ticketAttachmentRepository.delete(attachment);
+    }
+
+    private void requireMutable(Ticket ticket) {
+        if (ticket != null && ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ConflictException("Closed tickets cannot be modified.");
+        }
     }
 
     private TicketAttachment findAttachment(Long id) {

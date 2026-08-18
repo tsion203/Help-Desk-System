@@ -10,8 +10,10 @@ import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketCommentCreateDTO;
 import com.example.helpdesk.dto.TicketCommentResponseDTO;
 import com.example.helpdesk.exception.ResourceNotFoundException;
+import com.example.helpdesk.exception.ConflictException;
 import com.example.helpdesk.model.Ticket;
 import com.example.helpdesk.model.TicketComment;
+import com.example.helpdesk.model.TicketStatus;
 import com.example.helpdesk.model.User;
 import com.example.helpdesk.repository.TicketCommentRepository;
 import com.example.helpdesk.repository.TicketRepository;
@@ -49,6 +51,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
         ticketComment.setComment(ticketCommentCreateDTO.getComment());
         ticketComment.setCommentedAt(LocalDateTime.now());
         Ticket ticket = findTicketById(ticketCommentCreateDTO.getTicketId());
+        requireMutable(ticket);
         User commentAuthor = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
         ticketComment.setTicket(ticket);
@@ -74,6 +77,7 @@ public class TicketCommentServiceImpl implements TicketCommentService {
     @Override
     public TicketCommentResponseDTO update(Long id, TicketCommentCreateDTO ticketCommentCreateDTO) {
         TicketComment ticketComment = findTicketCommentById(id);
+        requireMutable(ticketComment.getTicket());
         ticketComment.setComment(ticketCommentCreateDTO.getComment());
         ticketComment.setTicket(findTicketById(ticketCommentCreateDTO.getTicketId()));
         ticketComment.setUser(findUserById(ticketCommentCreateDTO.getUserId()));
@@ -83,7 +87,14 @@ public class TicketCommentServiceImpl implements TicketCommentService {
     @Override
     public void delete(Long id) {
         TicketComment ticketComment = findTicketCommentById(id);
+        requireMutable(ticketComment.getTicket());
         ticketCommentRepository.delete(ticketComment);
+    }
+
+    private void requireMutable(Ticket ticket) {
+        if (ticket != null && ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ConflictException("Closed tickets cannot be modified.");
+        }
     }
 
     private TicketComment findTicketCommentById(Long id) {

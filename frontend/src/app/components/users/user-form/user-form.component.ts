@@ -39,7 +39,7 @@ export class UserFormComponent implements OnInit {
     if (id) {
       this.userId = id;
       this.userService.getById(id).subscribe({
-        next: (user) => { this.userForm.patchValue({ ...user, roleIds: user.roles.map((role) => role.id) }); this.cdr.markForCheck(); },
+        next: (user) => { this.userForm.patchValue({ ...user, roleIds: user.roles[0]?.id ?? 0 }); this.cdr.markForCheck(); },
         error: () => { this.errorMessage = 'Unable to load user.'; this.cdr.markForCheck(); },
       });
     }
@@ -53,7 +53,7 @@ export class UserFormComponent implements OnInit {
     phoneNumber: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     active: new FormControl(true, { nonNullable: true }),
     departmentId: new FormControl(0, { nonNullable: true, validators: [Validators.min(1)] }),
-    roleIds: new FormControl<number[]>([], { nonNullable: true }),
+    roleIds: new FormControl(0, { nonNullable: true, validators: [Validators.min(1)] }),
   });
 
   userRequest: UserRequest | null = null;
@@ -61,7 +61,7 @@ export class UserFormComponent implements OnInit {
   onSave(): void {
     if (!this.userId && this.userForm.controls.temporaryPassword.value.length < 8) {
       this.userForm.markAllAsTouched();
-      this.toast.error(null, 'Please fill in all required fields.');
+      this.toast.error(null, 'Temporary password must be at least 8 characters.');
       return;
     }
     if (this.userForm.invalid) {
@@ -70,15 +70,7 @@ export class UserFormComponent implements OnInit {
       return;
     }
     const value = this.userForm.getRawValue();
-    const selectedRoleIds = Array.isArray(value.roleIds)
-      ? value.roleIds
-      : value.roleIds
-        ? [value.roleIds]
-        : [];
-    if (selectedRoleIds.length === 0 || selectedRoleIds.some((id) => Number(id) < 1)) {
-      this.toast.error(null, 'Please fill in all required fields.');
-      return;
-    }
+    const selectedRoleIds = [Number(value.roleIds)];
     this.userRequest = {
       ...value,
       departmentId: Number(value.departmentId),
@@ -93,7 +85,7 @@ export class UserFormComponent implements OnInit {
         this.errorMessage = '';
         this.toast.success(this.userId ? 'User updated successfully.' : 'User created successfully.');
         if (this.userId) this.userId = user.id;
-        else this.userForm.reset({ email: '', employeeId: '', temporaryPassword: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: [] });
+        else this.userForm.reset({ email: '', employeeId: '', temporaryPassword: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: 0 });
       },
       error: (error) => this.toast.error(error, 'Unable to save user.'),
     });

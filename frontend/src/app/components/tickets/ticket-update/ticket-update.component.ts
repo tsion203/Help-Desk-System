@@ -33,16 +33,30 @@ export class TicketUpdateComponent implements OnInit {
   ticketUpdateRequest: TicketUpdateRequest | null = null;
   ticketId = 0;
   errorMessage = '';
+  closed = false;
   constructor(private readonly ticketService: TicketService, private readonly userService: UserService, private readonly categoryService: TicketCategoryService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
   get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor(); }
   ngOnInit(): void {
     this.ticketId = Number(this.route.snapshot.paramMap.get('id'));
     if (this.canAssign) this.userService.getAll().subscribe({ next: (users) => { this.assignees = users; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load assignees.'; this.cdr.markForCheck(); } });
     this.categoryService.getAll().subscribe({ next: (categories) => { this.categories = categories; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket categories.') });
-    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => { this.ticketNumber = ticket.ticketNumber; this.ticketSubject = ticket.subject; this.ticketForm.patchValue({ ...ticket, assignedToId: ticket.assignedToId ?? 0 }); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
+    this.ticketService.getById(this.ticketId).subscribe({ next: (ticket) => {
+      this.ticketNumber = ticket.ticketNumber;
+      this.ticketSubject = ticket.subject;
+      this.closed = ticket.status === 'CLOSED';
+      this.ticketForm.patchValue({ ...ticket, assignedToId: ticket.assignedToId ?? 0 });
+      this.ticketForm.controls.status.disable();
+      if (ticket.statusHistory?.some((item) => item.newStatus === 'REOPENED')) this.ticketForm.controls.subject.disable();
+      if (this.closed) this.ticketForm.disable();
+      this.cdr.markForCheck();
+    }, error: (error) => this.toast.error(error, 'Unable to load ticket.') });
   }
 
   onUpdate(): void {
+    if (this.closed) {
+      this.toast.error(null, 'Closed tickets cannot be modified.');
+      return;
+    }
     if (this.ticketForm.controls.categoryId.invalid) {
       this.ticketForm.markAllAsTouched();
       this.toast.error(null, 'Please select a ticket category.');

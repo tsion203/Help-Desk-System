@@ -2,6 +2,7 @@ package com.example.helpdesk.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -73,6 +74,10 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public TicketResponseDTO create(TicketCreateDTO ticketCreateDTO) {
+        if (ticketCreateDTO.getStatus() == TicketStatus.CLOSED
+                || ticketCreateDTO.getStatus() == TicketStatus.REOPENED) {
+            throw new ConflictException("New tickets cannot be created as closed or reopened.");
+        }
         Ticket ticket = new Ticket();
         ticket.setTicketNumber(generateTicketNumber());
         ticket.setSubject(ticketCreateDTO.getSubject());
@@ -151,6 +156,7 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketResponseDTO rejectAssignedTicket(Long ticketId) {
         Ticket ticket = findTicketById(ticketId);
+        requireMutable(ticket);
         User currentUser = requireCurrentUser();
         if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getId().equals(currentUser.getId())) {
             throw new org.springframework.security.access.AccessDeniedException("Only the assigned user can reject this ticket.");
@@ -206,7 +212,22 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketResponseDTO update(Long id, TicketUpdateDTO ticketUpdateDTO) {
         Ticket ticket = findTicketById(id);
+        requireMutable(ticket);
+        if (hasBeenReopened(ticket)
+                && ticketUpdateDTO.getSubject() != null
+                && !Objects.equals(ticket.getSubject(), ticketUpdateDTO.getSubject())) {
+            throw new ConflictException("The subject cannot be changed after a ticket has been reopened.");
+        }
         TicketStatus oldStatus = ticket.getStatus();
+        if (ticketUpdateDTO.getStatus() == TicketStatus.REOPENED) {
+            throw new ConflictException("Closed tickets must be reopened through the status action.");
+        }
+        if (ticketUpdateDTO.getStatus() == TicketStatus.CLOSED && oldStatus != TicketStatus.CLOSED) {
+            requireRequester(ticket, requireCurrentUser(), "Only the ticket requester can close this ticket.");
+        } else if (ticketUpdateDTO.getStatus() != null && ticketUpdateDTO.getStatus() != oldStatus) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Use the ticket status action to change this status.");
+        }
         User oldAssignee = ticket.getAssignedTo();
         User newAssignee = oldAssignee;
         boolean assigneeChanged = false;
@@ -269,6 +290,7 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketResponseDTO updateAssignment(Long ticketId, Long assigneeId) {
         Ticket ticket = findTicketById(ticketId);
+        requireMutable(ticket);
         User oldAssignee = ticket.getAssignedTo();
         User newAssignee = assigneeId == 0 ? null : requireSupportOfficer(assigneeId);
 
@@ -286,7 +308,8 @@ public class TicketServiceImpl implements TicketService {
 
         TicketStatus oldStatus = ticket.getStatus();
         ticket.setAssignedTo(newAssignee);
-        if (oldAssignee == null && newAssignee != null && oldStatus == TicketStatus.OPEN) {
+        if (oldAssignee == null && newAssignee != null
+                && (oldStatus == TicketStatus.OPEN || oldStatus == TicketStatus.REOPENED)) {
             ticket.setStatus(TicketStatus.ASSIGNED);
         } else if (oldAssignee != null && newAssignee == null && oldStatus == TicketStatus.ASSIGNED) {
             ticket.setStatus(TicketStatus.OPEN);
@@ -326,6 +349,7 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public void delete(Long id) {
         Ticket ticket = findTicketById(id);
+        requireMutable(ticket);
         ticketRepository.delete(ticket);
     }
 
@@ -333,6 +357,7 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketResponseDTO assignTicket(Long ticketId, Long assigneeId, Long assignedById) {
         Ticket ticket = findTicketById(ticketId);
+        requireMutable(ticket);
         User oldAssignee = ticket.getAssignedTo();
         User newAssignee = findUserById(assigneeId);
         User assignedBy = findUserById(assignedById);
@@ -351,14 +376,24 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public TicketResponseDTO changeStatus(Long ticketId, TicketStatus newStatus, Long changedById) {
+        User currentUser = requireCurrentUser();
+        if (changedById == null || !currentUser.getId().equals(changedById)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "The authenticated user must perform the status change.");
+        }
+        return changeStatusForCurrentUser(ticketId, newStatus);
+    }
+
+    private TicketResponseDTO persistStatusChange(Long ticketId, TicketStatus newStatus, User changedBy) {
         Ticket ticket = findTicketById(ticketId);
         TicketStatus oldStatus = ticket.getStatus();
-        User changedBy = findUserById(changedById);
 
         ticket.setStatus(newStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
         if (newStatus == TicketStatus.RESOLVED || newStatus == TicketStatus.CLOSED) {
             ticket.setResolvedAt(LocalDateTime.now());
+        } else if (newStatus == TicketStatus.REOPENED) {
+            ticket.setResolvedAt(null);
         }
         Ticket savedTicket = ticketRepository.save(ticket);
 
@@ -373,12 +408,52 @@ public class TicketServiceImpl implements TicketService {
     public TicketResponseDTO changeStatusForCurrentUser(Long ticketId, TicketStatus newStatus) {
         Ticket ticket = findTicketById(ticketId);
         User currentUser = requireCurrentUser();
-        if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getId().equals(currentUser.getId())
+
+        if (newStatus == TicketStatus.REOPENED) {
+            requireReopenAllowed(ticket, currentUser);
+        } else if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ConflictException("A closed ticket can only be reopened by the requester who closed it.");
+        } else if (newStatus == TicketStatus.CLOSED) {
+            requireRequester(ticket, currentUser, "Only the ticket requester can close this ticket.");
+        } else if (ticket.getAssignedTo() == null
+                || !ticket.getAssignedTo().getId().equals(currentUser.getId())
                 || !hasRole(currentUser, "SUPPORT_OFFICER")) {
             throw new org.springframework.security.access.AccessDeniedException(
                     "Only the assigned Support Officer can update this ticket's status.");
         }
-        return changeStatus(ticketId, newStatus, currentUser.getId());
+        return persistStatusChange(ticketId, newStatus, currentUser);
+    }
+
+    private void requireReopenAllowed(Ticket ticket, User currentUser) {
+        if (ticket.getStatus() != TicketStatus.CLOSED) {
+            throw new ConflictException("Only a closed ticket can be reopened.");
+        }
+        requireRequester(ticket, currentUser, "Only the requester who closed this ticket can reopen it.");
+        TicketStatusHistory closingEntry = ticketStatusHistoryRepository
+                .findFirstByTicketIdAndNewStatusOrderByChangedAtDesc(ticket.getId(), TicketStatus.CLOSED.name())
+                .orElseThrow(() -> new ConflictException("This ticket has no closing audit record and cannot be reopened."));
+        if (closingEntry.getChangedBy() == null
+                || !currentUser.getId().equals(closingEntry.getChangedBy().getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Only the requester who closed this ticket can reopen it.");
+        }
+    }
+
+    private void requireRequester(Ticket ticket, User currentUser, String message) {
+        if (ticket.getCreatedBy() == null || !ticket.getCreatedBy().getId().equals(currentUser.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(message);
+        }
+    }
+
+    private void requireMutable(Ticket ticket) {
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ConflictException("Closed tickets cannot be modified.");
+        }
+    }
+
+    private boolean hasBeenReopened(Ticket ticket) {
+        return ticketStatusHistoryRepository.existsByTicketIdAndNewStatus(
+                ticket.getId(), TicketStatus.REOPENED.name());
     }
 
     @Override

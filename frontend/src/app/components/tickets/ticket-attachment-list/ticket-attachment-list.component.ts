@@ -16,12 +16,13 @@ import { AuthService } from '../../../services/auth.service';
 export class TicketAttachmentListComponent implements OnInit, OnChanges {
   @Input() ticketId = 0;
   @Input() items: TicketAttachment[] | null = null;
+  @Input() readOnly = false;
   @Output() attachmentDeleted = new EventEmitter<number>();
   attachments: TicketAttachment[] = [];
   loading = false;
   errorMessage = '';
   constructor(private readonly attachmentService: TicketAttachmentService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
-  get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
+  get canDelete(): boolean { return !this.readOnly && (this.authService.isAdmin() || this.authService.isEmployee()); }
   ngOnInit(): void {
     this.ticketId = this.ticketId || Number(this.route.snapshot.paramMap.get('id'));
     if (this.items !== null) { this.setItems(this.items); return; }

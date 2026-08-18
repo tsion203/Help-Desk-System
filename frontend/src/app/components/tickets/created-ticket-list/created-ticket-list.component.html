@@ -36,10 +36,10 @@
           <td>{{ ticket.updatedAt }}</td>
           <td>
             <div class="ticket-actions">
-              <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update ticket" aria-label="Update ticket" [routerLink]="['/tickets', ticket.id, 'edit']" (click)="$event.stopPropagation()">
+              <button *ngIf="canUpdate && ticket.status !== 'CLOSED'" class="icon-action edit-action" type="button" title="Update ticket" aria-label="Update ticket" [routerLink]="['/tickets', ticket.id, 'edit']" (click)="$event.stopPropagation()">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
               </button>
-              <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete ticket" aria-label="Delete ticket" (click)="deleteTicket(ticket.id, $event)">
+              <button *ngIf="canDelete && ticket.status !== 'CLOSED'" class="icon-action delete-action" type="button" title="Delete ticket" aria-label="Delete ticket" (click)="deleteTicket(ticket.id, $event)">
                 <svg viewBox="0 0 24 24" aria-hidden="true" stroke-width="0.5"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
               </button>
             </div>
