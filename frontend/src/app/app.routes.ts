@@ -49,7 +49,7 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
 
   { path: 'home', pathMatch: 'full', redirectTo: '' },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR'] } },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPERVISOR', 'SUPPORT_OFFICER', 'EMPLOYEE'] } },
 
   { path: 'users', component: UserListComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
   { path: 'users/new', component: UserFormComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },

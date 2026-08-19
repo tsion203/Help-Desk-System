@@ -2,55 +2,148 @@
   <header class="page-header">
     <div>
       <h1>{{ dashboardTitle }}</h1>
-      <p>System activity and support performance at a glance.</p>
+      <p>{{ dashboardSubtitle }}</p>
     </div>
   </header>
-  <p *ngIf="loading">Loading ticket totals...</p>
+  <p *ngIf="loading">Loading dashboard...</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <section class="grid grid-4" aria-label="Ticket metrics">
-    <article class="metric">
-      <small>Total tickets</small><strong>{{ totalTickets }}</strong>
+  <section class="grid grid-4 metrics" aria-label="Ticket metrics">
+    <article class="metric total-metric">
+      <small>{{ totalLabel }}</small
+      ><strong>{{ data.totalTickets }}</strong>
     </article>
-    <article class="metric">
-      <small>Open</small><strong>{{ openTickets }}</strong><span class="badge status-open">Needs attention</span>
+    <article
+      *ngFor="let status of statuses"
+      class="metric status-metric"
+      [style.--status-color]="statusColors[status]"
+    >
+      <small>{{ label(status) }}</small
+      ><strong>{{ count(status) }}</strong
+      ><span class="status-dot"></span>
     </article>
-    <article class="metric">
-      <small>In progress</small><strong>{{ inProgressTickets }}</strong
-      ><span class="badge status-progress">Active work</span>
+  </section>
+  <section *ngIf="isManager" class="grid grid-2 charts">
+    <article class="card chart-card">
+      <div class="card-header">
+        <h2>Ticket Status</h2>
+        <span class="muted">All statuses</span>
+      </div>
+      <div class="doughnut-layout">
+        <div class="doughnut" [style.background]="'conic-gradient(' + doughnutStyle + ')'">
+          <span
+            ><strong>{{ data.totalTickets }}</strong
+            ><small>Total</small></span
+          >
+        </div>
+        <div class="legend">
+          <span *ngFor="let status of statuses"
+            ><i [style.background]="statusColors[status]"></i>{{ label(status) }}
+            <strong>{{ count(status) }}</strong></span
+          >
+        </div>
+      </div>
     </article>
-    <article class="metric">
-      <small>Resolved</small><strong>{{ resolvedTickets }}</strong
+    <article class="card chart-card">
+      <div class="card-header">
+        <h2>Ticket Priority</h2>
+        <span class="muted">Live distribution</span>
+      </div>
+      <div class="bar-chart">
+        <div *ngFor="let priority of priorities" class="bar-row">
+          <span>{{ priority }}</span>
+          <div>
+            <i
+              [style.width.%]="priorityPercent(priority)"
+              [style.background]="priorityColors[priority]"
+            ></i>
+          </div>
+          <strong>{{ priorityCount(priority) }}</strong>
+        </div>
+      </div>
+    </article>
+  </section>
+  <section *ngIf="isSupervisor" class="card officer-card">
+    <div class="card-header">
+      <h2>Support Officers Overview</h2>
+      <span class="muted">Current workload</span>
+    </div>
+    <div class="officer-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Officer</th>
+            <th>Assigned</th>
+            <th>In progress</th>
+            <th>Pending</th>
+            <th>Resolved</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let officer of data.supportOfficers">
+            <td>
+              <div class="officer">
+                <span class="avatar">{{ officer.name.charAt(0) }}</span
+                ><span
+                  ><strong>{{ officer.name }}</strong
+                  ><small>{{ officer.email }}</small></span
+                >
+              </div>
+            </td>
+            <td>
+              <b class="count assigned">{{ officer.assigned }}</b>
+            </td>
+            <td>
+              <b class="count progress">{{ officer.inProgress }}</b>
+            </td>
+            <td>
+              <b class="count pending">{{ officer.pending }}</b>
+            </td>
+            <td>
+              <b class="count resolved">{{ officer.resolved }}</b>
+            </td>
+            <td>
+              <strong>{{ officer.total }}</strong>
+            </td>
+          </tr>
+          <tr *ngIf="!data.supportOfficers.length">
+            <td colspan="6" class="empty">No active Support Officers found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section *ngIf="!isManager" class="card activity-card">
+    <div class="card-header">
+      <h2>Recent Ticket Activity</h2>
+      <span class="muted">Most recently updated first</span>
+    </div>
+    <div class="activity-list">
+      <a
+        *ngFor="let ticket of data.recentActivity"
+        [routerLink]="['/tickets', ticket.id]"
+        class="activity-item"
+        ><span class="activity-copy"
+          ><strong>{{ ticket.ticketNumber }} — {{ ticket.subject }}</strong
+          ><small>Updated {{ ticket.updatedAt | date: 'medium' }}</small></span
+        ><span class="badge" [ngClass]="statusClass(ticket.status)">{{
+          label(ticket.status)
+        }}</span></a
       >
-    </article>
+      <p *ngIf="!data.recentActivity.length" class="empty">No recent ticket activity.</p>
+    </div>
   </section>
-  <section class="grid grid-2" style="margin-top: 18px">
-    <article class="card">
-      <div class="card-header">
-        <h2>Ticket volume</h2>
-        <span class="muted">Last 30 days</span>
-      </div>
-      <div class="chart">KPI chart placeholder</div>
-    </article>
-    <article class="card">
-      <div class="card-header">
-        <h2>Service health</h2>
-        <span class="badge status-resolved">On target</span>
-      </div>
-      <p><strong>4.2 hrs</strong><br /><span class="muted">Average first response</span></p>
-      <p><strong>96%</strong><br /><span class="muted">SLA compliance</span></p>
-    </article>
-  </section>
-  <section *ngIf="isAdmin" class="card" style="margin-top: 18px">
+  <section *ngIf="isAdmin" class="card management">
     <h2>Restricted management hub</h2>
     <p class="muted">Administrator access only</p>
     <div class="grid grid-3">
-      <a class="hub-card" href="/departments"
+      <a class="hub-card" routerLink="/departments"
         ><strong>Department management</strong>
         <p class="muted">Organize teams and ownership</p></a
-      ><a class="hub-card" href="/users"
+      ><a class="hub-card" routerLink="/users"
         ><strong>User management</strong>
         <p class="muted">Provision accounts and access</p></a
-      ><a class="hub-card" href="/roles"
+      ><a class="hub-card" routerLink="/roles"
         ><strong>Role management</strong>
         <p class="muted">Configure permissions</p></a
       >

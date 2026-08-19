@@ -48,4 +48,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
               AND REPLACE(REPLACE(REPLACE(UPPER(TRIM(r.name)), 'ROLE_', ''), ' ', '_'), '-', '_') = 'SUPERVISOR'
             """)
     List<User> findAllActiveSupervisors();
+
+    @Query("""
+            SELECT DISTINCT u FROM User u JOIN u.roles r
+            WHERE u.active = true
+              AND REPLACE(REPLACE(REPLACE(UPPER(TRIM(r.name)), 'ROLE_', ''), ' ', '_'), '-', '_') = 'SUPPORT_OFFICER'
+            ORDER BY u.firstName, u.lastName
+            """)
+    List<User> findAllActiveSupportOfficers();
 }

@@ -7,7 +7,7 @@
   </header>
 
   <nav aria-label="Help Desk menu">
-    <a *ngIf="isAdmin || isSupervisor" class="nav-link" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Dashboard">
+    <a *ngIf="isAdmin || isSupervisor || isSupportOfficer || isEmployee" class="nav-link" routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Dashboard">
       <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 1 1 16 0v5H4v-5Z"/><path d="m12 13 4-4M7 16h10"/></svg><span class="nav-text">Dashboard</span>
     </a>
     <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Tickets">

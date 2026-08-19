@@ -14,4 +14,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     List<Ticket> findByCreatedById(Long creatorId);
 
     List<Ticket> findByAssignedToId(Long assigneeId);
+
+    List<Ticket> findByAssignedToIdOrderByUpdatedAtDesc(Long assigneeId);
+
+    List<Ticket> findByCreatedByIdOrderByUpdatedAtDesc(Long creatorId);
 }

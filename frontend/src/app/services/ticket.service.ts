@@ -8,6 +8,7 @@ import { TicketAssignmentHistory } from '../models/ticket-assignment-history';
 import { TicketStatusHistory } from '../models/ticket-status-history';
 import { TicketAssigneeOption } from '../models/ticket-assignee-option';
 import { environment } from '../../environments/environment';
+import { DashboardData } from '../models/dashboard';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,10 @@ export class TicketService {
   readonly ticketsChanged$ = this.ticketsChanged.asObservable();
 
   constructor(private readonly http: HttpClient) {}
+
+  getDashboard(): Observable<DashboardData> {
+    return this.http.get<DashboardData>(`${environment.apiUrl}/dashboard`);
+  }
 
   getAll(filters: TicketFilters = {}): Observable<Ticket[]> {
     return this.getPage(filters, { size: 1000 }).pipe(map((page) => page.content));
