@@ -53,6 +53,14 @@ export class NotificationService {
     );
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(tap(() => this.refreshUnreadCount()));
+  }
+
+  deleteAll(): Observable<void> {
+    return this.http.delete<void>(this.apiUrl).pipe(tap(() => this.refreshUnreadCount()));
+  }
+
   private mapNotification(response: NotificationResponse): Notification {
     return {
       ...response,

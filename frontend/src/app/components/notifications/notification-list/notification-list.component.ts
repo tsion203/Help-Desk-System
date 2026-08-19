@@ -6,6 +6,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { ConfirmationService } from '../../../services/confirmation.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-notification-list',
@@ -18,13 +20,17 @@ export class NotificationListComponent implements OnInit {
   notifications: Notification[] = [];
   loading = false;
   markingAllRead = false;
+  deletingAll = false;
+  deletingIds = new Set<number>();
   errorMessage = '';
   readonly globalSearch = inject(GlobalSearchService);
   page=0;readonly pageSize=5;totalElements=0;totalPages=0;
 
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly confirmation: ConfirmationService,
+    private readonly toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -83,6 +89,29 @@ export class NotificationListComponent implements OnInit {
       error: () => {
         this.errorMessage = 'Unable to mark all notifications as read.';
       },
+    });
+  }
+
+  async deleteNotification(notification: Notification, event: Event): Promise<void> {
+    event.stopPropagation();
+    if (this.deletingIds.has(notification.id)) return;
+    const result = await this.confirmation.confirm({ title: 'Delete notification?', message: `Delete “${notification.title}”?`, confirmText: 'Delete notification', danger: true });
+    if (!result.confirmed) return;
+    this.deletingIds.add(notification.id);
+    this.notificationService.delete(notification.id).pipe(finalize(() => { this.deletingIds.delete(notification.id); this.changeDetector.detectChanges(); })).subscribe({
+      next: () => { if (this.notifications.length === 1 && this.page > 0) this.page--; this.loadNotifications(); this.toast.success('Notification deleted successfully.'); },
+      error: (error) => this.toast.error(error, 'Unable to delete notification.'),
+    });
+  }
+
+  async deleteAll(): Promise<void> {
+    if (this.totalElements === 0 || this.deletingAll) return;
+    const result = await this.confirmation.confirm({ title: 'Clear all notifications?', message: 'Delete all of your notifications? This action cannot be undone.', confirmText: 'Clear all', danger: true });
+    if (!result.confirmed) return;
+    this.deletingAll = true;
+    this.notificationService.deleteAll().pipe(finalize(() => { this.deletingAll = false; this.changeDetector.detectChanges(); })).subscribe({
+      next: () => { this.page = 0; this.notifications = []; this.totalElements = 0; this.totalPages = 0; this.toast.success('All notifications cleared.'); },
+      error: (error) => this.toast.error(error, 'Unable to clear notifications.'),
     });
   }
 

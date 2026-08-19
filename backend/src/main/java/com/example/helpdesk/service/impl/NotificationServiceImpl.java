@@ -99,6 +99,20 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.saveAll(unreadNotifications);
     }
 
+    @Override
+    @Transactional
+    public void deleteForCurrentUser(Long notificationId) {
+        Notification notification = findNotificationById(notificationId);
+        ensureOwner(notification);
+        notificationRepository.delete(notification);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllForCurrentUser() {
+        notificationRepository.deleteByRecipientId(getCurrentUser().getId());
+    }
+
     private Notification findNotificationById(Long id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + id));

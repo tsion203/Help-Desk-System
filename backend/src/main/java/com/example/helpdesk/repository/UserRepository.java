@@ -41,4 +41,11 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
             """, nativeQuery = true)
     List<TicketAssigneeOptionProjection> findTicketAssigneeOptionsExcludingRequester(
             @Param("requesterId") Long requesterId);
+
+    @Query("""
+            SELECT DISTINCT u FROM User u JOIN u.roles r
+            WHERE u.active = true
+              AND REPLACE(REPLACE(REPLACE(UPPER(TRIM(r.name)), 'ROLE_', ''), ' ', '_'), '-', '_') = 'SUPERVISOR'
+            """)
+    List<User> findAllActiveSupervisors();
 }

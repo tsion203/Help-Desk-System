@@ -20,6 +20,8 @@ import com.example.helpdesk.repository.TicketAttachmentRepository;
 import com.example.helpdesk.repository.TicketRepository;
 import com.example.helpdesk.repository.UserRepository;
 import com.example.helpdesk.service.TicketAttachmentService;
+import com.example.helpdesk.service.NotificationService;
+import com.example.helpdesk.dto.NotificationCreateDTO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -33,15 +35,18 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
     private final TicketAttachmentRepository ticketAttachmentRepository;
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public TicketAttachmentServiceImpl(
             TicketAttachmentRepository ticketAttachmentRepository,
             TicketRepository ticketRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.ticketAttachmentRepository = ticketAttachmentRepository;
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -65,6 +70,7 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
         attachment.setUploadedBy(user);
 
         attachment = ticketAttachmentRepository.save(attachment);
+        notifyAssignedOfficer(ticket);
 
         return mapToResponseDTO(attachment);
     }
@@ -95,7 +101,9 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
         attachment.setUploadedBy(user);
         TicketAttachment saved = ticketAttachmentRepository.save(attachment);
         saved.setFilePath("/api/ticket-attachments/" + saved.getId() + "/download");
-        return mapToResponseDTO(ticketAttachmentRepository.save(saved));
+        TicketAttachment updated = ticketAttachmentRepository.save(saved);
+        notifyAssignedOfficer(ticket);
+        return mapToResponseDTO(updated);
     }
 
     @Override
@@ -180,6 +188,17 @@ public class TicketAttachmentServiceImpl implements TicketAttachmentService {
     private TicketAttachment findAttachment(Long id) {
         return ticketAttachmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket Attachment not found"));
+    }
+
+    private void notifyAssignedOfficer(Ticket ticket) {
+        if (ticket.getAssignedTo() == null) return;
+        notificationService.create(new NotificationCreateDTO(
+                "Attachment added",
+                "A new attachment was added to your ticket " + ticket.getTicketNumber() + " — " + ticket.getSubject() + ".",
+                "TICKET_ATTACHMENT_ADDED",
+                ticket.getAssignedTo().getId(),
+                ticket.getId()
+        ));
     }
 
     private TicketAttachmentResponseDTO mapToResponseDTO(

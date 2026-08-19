@@ -164,6 +164,11 @@ public class TicketServiceImpl implements TicketService {
 
         TicketStatus oldStatus = ticket.getStatus();
         User oldAssignee = ticket.getAssignedTo();
+        User assigningSupervisor = ticketAssignmentHistoryRepository
+                .findFirstByTicketIdAndNewAssigneeIdOrderByAssignedAtDesc(ticketId, oldAssignee.getId())
+                .map(TicketAssignmentHistory::getAssignedBy)
+                .filter(user -> hasRole(user, "SUPERVISOR"))
+                .orElse(null);
         ticket.setAssignedTo(null);
         ticket.setStatus(TicketStatus.OPEN);
         ticket.setUpdatedAt(LocalDateTime.now());
@@ -171,6 +176,17 @@ public class TicketServiceImpl implements TicketService {
         saveAssignmentHistory(savedTicket, oldAssignee, null, currentUser, reason.trim());
         if (oldStatus != TicketStatus.OPEN) {
             saveStatusHistory(savedTicket, oldStatus, TicketStatus.OPEN, currentUser);
+            createNotificationForStatusChange(savedTicket, TicketStatus.OPEN);
+        }
+        if (assigningSupervisor != null) {
+            notificationService.create(new NotificationCreateDTO(
+                    "Ticket rejected",
+                    savedTicket.getTicketNumber() + " — " + savedTicket.getSubject() + " was rejected by "
+                            + getUserFullName(currentUser) + ". Reason: " + reason.trim(),
+                    "TICKET_REJECTED",
+                    assigningSupervisor.getId(),
+                    savedTicket.getId()
+            ));
         }
         return mapToResponseDTO(savedTicket);
     }
@@ -231,6 +247,11 @@ public class TicketServiceImpl implements TicketService {
         User oldAssignee = ticket.getAssignedTo();
         User newAssignee = oldAssignee;
         boolean assigneeChanged = false;
+        boolean subjectChanged = ticketUpdateDTO.getSubject() != null && !Objects.equals(ticket.getSubject(), ticketUpdateDTO.getSubject());
+        boolean descriptionChanged = ticketUpdateDTO.getDescription() != null && !Objects.equals(ticket.getDescription(), ticketUpdateDTO.getDescription());
+        boolean priorityChanged = ticketUpdateDTO.getPriority() != null && ticket.getPriority() != ticketUpdateDTO.getPriority();
+        boolean categoryChanged = ticketUpdateDTO.getCategoryId() != null
+                && (ticket.getCategory() == null || !Objects.equals(ticket.getCategory().getId(), ticketUpdateDTO.getCategoryId()));
 
         if (ticketUpdateDTO.getSubject() != null) {
             ticket.setSubject(ticketUpdateDTO.getSubject());
@@ -283,6 +304,7 @@ public class TicketServiceImpl implements TicketService {
                 emailService.sendTicketAssigned(savedTicket, newAssignee);
             }
         }
+        notifyAssignedOfficerOfTicketUpdate(savedTicket, subjectChanged, descriptionChanged, categoryChanged, priorityChanged);
         return mapToResponseDTO(savedTicket);
     }
 
@@ -323,7 +345,9 @@ public class TicketServiceImpl implements TicketService {
             saveStatusHistory(savedTicket, oldStatus, savedTicket.getStatus(), updatedBy);
             createNotificationForStatusChange(savedTicket, savedTicket.getStatus());
         }
-        if (newAssignee != null) {
+        if (newAssignee != null && savedTicket.getStatus() == oldStatus) {
+            createNotificationForAssignment(savedTicket, oldAssignee, newAssignee, updatedBy);
+        } else if (newAssignee != null) {
             emailService.sendTicketAssigned(savedTicket, newAssignee);
         }
         return mapToResponseDTO(savedTicket);
@@ -350,7 +374,18 @@ public class TicketServiceImpl implements TicketService {
     public void delete(Long id) {
         Ticket ticket = findTicketById(id);
         requireMutable(ticket);
+        User assignedOfficer = ticket.getAssignedTo();
+        String reference = ticket.getTicketNumber() + " — " + ticket.getSubject();
         ticketRepository.delete(ticket);
+        if (assignedOfficer != null) {
+            notificationService.create(new NotificationCreateDTO(
+                    "Ticket deleted",
+                    reference + " was deleted.",
+                    "TICKET_DELETED",
+                    assignedOfficer.getId(),
+                    null
+            ));
+        }
     }
 
     @Override
@@ -572,6 +607,31 @@ public class TicketServiceImpl implements TicketService {
         }
         return false;
     }
+
+    private void notifyAssignedOfficerOfTicketUpdate(
+            Ticket ticket,
+            boolean subjectChanged,
+            boolean descriptionChanged,
+            boolean categoryChanged,
+            boolean priorityChanged) {
+        if (ticket.getAssignedTo() == null) return;
+        List<String> changes = new java.util.ArrayList<>();
+        if (subjectChanged) changes.add("subject");
+        if (descriptionChanged) changes.add("description");
+        if (categoryChanged) changes.add("category");
+        if (priorityChanged) changes.add("priority");
+        if (changes.isEmpty()) return;
+
+        String changedFields = String.join(", ", changes);
+        notificationService.create(new NotificationCreateDTO(
+                "Ticket updated",
+                "The " + changedFields + " of your ticket " + ticket.getTicketNumber() + " — "
+                        + ticket.getSubject() + " " + (changes.size() == 1 ? "was" : "were") + " updated.",
+                "TICKET_UPDATED",
+                ticket.getAssignedTo().getId(),
+                ticket.getId()
+        ));
+    }
     
     private void createNotificationForTicketCreation(Ticket ticket) {
         if (ticket.getCreatedBy() == null) {
@@ -587,10 +647,20 @@ public class TicketServiceImpl implements TicketService {
         ));
         emailService.sendTicketCreated(ticket, ticket.getCreatedBy());
 
+        userRepository.findAllActiveSupervisors().stream()
+                .filter(supervisor -> !supervisor.getId().equals(ticket.getCreatedBy().getId()))
+                .forEach(supervisor -> notificationService.create(new NotificationCreateDTO(
+                        "New ticket created",
+                        ticket.getTicketNumber() + " — " + ticket.getSubject() + " was created.",
+                        "TICKET_CREATED_SUPERVISOR",
+                        supervisor.getId(),
+                        ticket.getId()
+                )));
+
         if (ticket.getAssignedTo() != null && !ticket.getAssignedTo().getId().equals(ticket.getCreatedBy().getId())) {
             notificationService.create(new NotificationCreateDTO(
                     "New ticket assigned",
-                    "A new ticket has been assigned to you.",
+                    "This ticket has been assigned to you: " + ticket.getTicketNumber() + " — " + ticket.getSubject() + ".",
                     "TICKET_ASSIGNED",
                     ticket.getAssignedTo().getId(),
                     ticket.getId()
@@ -603,12 +673,23 @@ public class TicketServiceImpl implements TicketService {
         if (newAssignee != null) {
             notificationService.create(new NotificationCreateDTO(
                     "Ticket assigned",
-                    "You have been assigned to ticket " + ticket.getTicketNumber() + ".",
+                    "This ticket has been assigned to you: " + ticket.getTicketNumber() + " — " + ticket.getSubject() + ".",
                     "TICKET_ASSIGNED",
                     newAssignee.getId(),
                     ticket.getId()
             ));
             emailService.sendTicketAssigned(ticket, newAssignee);
+        }
+
+        if (ticket.getCreatedBy() != null && newAssignee != null
+                && !ticket.getCreatedBy().getId().equals(newAssignee.getId())) {
+            notificationService.create(new NotificationCreateDTO(
+                    "Ticket assigned",
+                    "Your ticket " + ticket.getTicketNumber() + " — " + ticket.getSubject() + " has been assigned.",
+                    "TICKET_ASSIGNED",
+                    ticket.getCreatedBy().getId(),
+                    ticket.getId()
+            ));
         }
 
         if (assignedBy != null && oldAssignee != null && (newAssignee == null || !oldAssignee.getId().equals(newAssignee.getId()))) {
@@ -633,13 +714,18 @@ public class TicketServiceImpl implements TicketService {
             default -> "Ticket status updated";
         };
 
-        String message = "Ticket " + ticket.getTicketNumber() + " is now " + newStatus.name() + ".";
+        String officerMessage = newStatus == TicketStatus.ASSIGNED
+                ? "This ticket has been assigned to you: " + ticket.getTicketNumber() + " — " + ticket.getSubject() + "."
+                : "Ticket " + ticket.getTicketNumber() + " is now " + newStatus.name() + ".";
+        String requesterMessage = newStatus == TicketStatus.ASSIGNED
+                ? "Your ticket " + ticket.getTicketNumber() + " — " + ticket.getSubject() + " has been assigned."
+                : "Ticket " + ticket.getTicketNumber() + " is now " + newStatus.name() + ".";
         String type = newStatus == TicketStatus.RESOLVED ? "TICKET_RESOLVED" : "TICKET_STATUS_CHANGED";
 
         if (ticket.getAssignedTo() != null) {
             notificationService.create(new NotificationCreateDTO(
                     title,
-                    message,
+                    officerMessage,
                     type,
                     ticket.getAssignedTo().getId(),
                     ticket.getId()
@@ -650,7 +736,7 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.getCreatedBy() != null && !ticket.getCreatedBy().getId().equals(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getId() : null)) {
             notificationService.create(new NotificationCreateDTO(
                     title,
-                    message,
+                    requesterMessage,
                     type,
                     ticket.getCreatedBy().getId(),
                     ticket.getId()

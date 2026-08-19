@@ -4,10 +4,16 @@
       <h1 id="notifications-title">Notifications</h1>
       <p>Stay updated on your help desk requests.</p>
     </div>
+    <div class="header-actions">
     <button class="mark-all-button" type="button" (click)="markAllAsRead()" [disabled]="unreadCount === 0 || markingAllRead">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM4 7l8 6 8-6"/><path d="m14 17 2 2 4-5"/></svg>
       <span>{{ markingAllRead ? 'Marking as read…' : 'Mark all as read' }}</span>
     </button>
+    <button class="clear-all-button" type="button" (click)="deleteAll()" [disabled]="totalElements === 0 || deletingAll">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg>
+      <span>{{ deletingAll ? 'Clearing…' : 'Clear all' }}</span>
+    </button>
+    </div>
   </header>
 
   <p class="loading-state" *ngIf="loading">Loading notifications…</p>
@@ -25,6 +31,9 @@
       (click)="!notification.isRead && markAsRead(notification.id)"
       (keydown.enter)="!notification.isRead && markAsRead(notification.id)"
     >
+      <button class="delete-notification" type="button" title="Delete notification" aria-label="Delete notification" [disabled]="deletingIds.has(notification.id)" (click)="deleteNotification(notification, $event)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 14h10l1-14M10 11v6m4-6v6"/></svg>
+      </button>
       <span class="type-icon" aria-hidden="true">
         <svg *ngIf="!isResolved(notification)" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 12v6M9 15h6"/></svg>
         <svg *ngIf="isResolved(notification)" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>

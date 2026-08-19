@@ -19,4 +19,8 @@ public interface NotificationService {
     NotificationResponseDTO markAsRead(Long notificationId);
 
     void markAllAsRead();
+
+    void deleteForCurrentUser(Long notificationId);
+
+    void deleteAllForCurrentUser();
 }
