@@ -9,7 +9,7 @@
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   <section class="grid grid-4" aria-label="Ticket metrics">
     <article class="metric">
-      <small>Total tickets</small><strong>{{ totalTickets }}</strong><span class="muted">+8% this month</span>
+      <small>Total tickets</small><strong>{{ totalTickets }}</strong>
     </article>
     <article class="metric">
       <small>Open</small><strong>{{ openTickets }}</strong><span class="badge status-open">Needs attention</span>
@@ -20,7 +20,7 @@
     </article>
     <article class="metric">
       <small>Resolved</small><strong>{{ resolvedTickets }}</strong
-      ><span class="badge status-resolved">88% resolution</span>
+      >
     </article>
   </section>
   <section class="grid grid-2" style="margin-top: 18px">

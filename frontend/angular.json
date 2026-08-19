@@ -52,8 +52,13 @@
           },
           "defaultConfiguration": "production"
         },
-        "serve": {
+           "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "decree-crispy-lyrically.ngrok-free.dev"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
