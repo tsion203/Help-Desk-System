@@ -30,4 +30,6 @@ public class TicketAssignmentHistoryResponseDTO {
     private String assignedByName;
 
     private LocalDateTime assignedAt;
+
+    private String reason;
 }

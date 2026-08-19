@@ -33,7 +33,7 @@ public interface TicketService {
 
     List<TicketAssigneeOptionDTO> getAssignmentCandidates(Long ticketId);
 
-    TicketResponseDTO rejectAssignedTicket(Long ticketId);
+    TicketResponseDTO rejectAssignedTicket(Long ticketId, String reason);
 
     void delete(Long id);
 

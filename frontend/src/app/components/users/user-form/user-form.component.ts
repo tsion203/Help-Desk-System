@@ -9,6 +9,7 @@ import { DepartmentService } from '../../../services/department.service';
 import { RoleService } from '../../../services/role.service';
 import { ActivatedRoute } from '@angular/router';
 import { ToastService } from '../../../services/toast.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-user-form',
@@ -21,6 +22,7 @@ export class UserFormComponent implements OnInit {
   departments: Department[] = [];
   roles: Role[] = [];
   userId: number | null = null;
+  currentRoleId = 0;
   errorMessage = '';
 
   constructor(
@@ -30,6 +32,7 @@ export class UserFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
     private readonly toast: ToastService,
+    private readonly confirmation: ConfirmationService,
   ) {}
 
   ngOnInit(): void {
@@ -39,7 +42,7 @@ export class UserFormComponent implements OnInit {
     if (id) {
       this.userId = id;
       this.userService.getById(id).subscribe({
-        next: (user) => { this.userForm.patchValue({ ...user, roleIds: user.roles[0]?.id ?? 0 }); this.cdr.markForCheck(); },
+        next: (user) => { this.currentRoleId = user.roles[0]?.id ?? 0; this.userForm.patchValue({ ...user, roleIds: this.currentRoleId }); this.cdr.markForCheck(); },
         error: () => { this.errorMessage = 'Unable to load user.'; this.cdr.markForCheck(); },
       });
     }
@@ -58,7 +61,7 @@ export class UserFormComponent implements OnInit {
 
   userRequest: UserRequest | null = null;
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (!this.userId && this.userForm.controls.temporaryPassword.value.length < 8) {
       this.userForm.markAllAsTouched();
       this.toast.error(null, 'Temporary password must be at least 8 characters.');
@@ -77,6 +80,7 @@ export class UserFormComponent implements OnInit {
       roleIds: selectedRoleIds.map(Number),
       temporaryPassword: this.userId ? undefined : value.temporaryPassword,
     };
+    if (this.userId && this.currentRoleId !== Number(value.roleIds)) { const currentRole=this.roles.find(role=>role.id===this.currentRoleId)?.name ?? 'Unknown'; const newRole=this.roles.find(role=>role.id===Number(value.roleIds))?.name ?? 'Unknown'; const result=await this.confirmation.confirm({title:'Change user role?',message:`Change this user's role from ${currentRole} to ${newRole}?`,confirmText:'Change role'}); if(!result.confirmed)return; }
     const request = this.userId
       ? this.userService.update(this.userId, this.userRequest)
       : this.userService.create(this.userRequest);
@@ -84,7 +88,7 @@ export class UserFormComponent implements OnInit {
       next: (user) => {
         this.errorMessage = '';
         this.toast.success(this.userId ? 'User updated successfully.' : 'User created successfully.');
-        if (this.userId) this.userId = user.id;
+        if (this.userId) { this.userId = user.id; this.currentRoleId = user.roles[0]?.id ?? this.currentRoleId; }
         else this.userForm.reset({ email: '', employeeId: '', temporaryPassword: '', firstName: '', lastName: '', phoneNumber: '', active: true, departmentId: 0, roleIds: 0 });
       },
       error: (error) => this.toast.error(error, 'Unable to save user.'),

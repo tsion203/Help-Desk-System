@@ -51,8 +51,8 @@ export class TicketService {
     return this.http.get<PageResponse<Ticket>>(`${this.apiUrl}/assigned-me`, { params });
   }
 
-  reject(ticketId: number): Observable<Ticket> {
-    return this.http.post<Ticket>(`${this.apiUrl}/${ticketId}/reject`, {}).pipe(
+  reject(ticketId: number, reason: string): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.apiUrl}/${ticketId}/reject`, { reason }).pipe(
       tap(() => this.ticketsChanged.next()),
     );
   }

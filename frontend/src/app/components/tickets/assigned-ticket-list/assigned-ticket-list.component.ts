@@ -11,6 +11,7 @@ import { ToastService } from '../../../services/toast.service';
 import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-assigned-ticket-list',
@@ -44,6 +45,7 @@ export class AssignedTicketListComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly toast: ToastService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly confirmation: ConfirmationService,
   ) {}
 
   get canUpdate(): boolean { return this.authService.isEmployee(); }
@@ -83,9 +85,10 @@ export class AssignedTicketListComponent implements OnInit {
 
   changePage(page: number): void { this.page = page; this.loadTickets(); }
 
-  rejectTicket(id: number, event: Event): void {
+  async rejectTicket(id: number, event: Event): Promise<void> {
     event.stopPropagation();
-    this.ticketService.reject(id).subscribe({
+    const ticket=this.tickets.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Reject ticket?',message:`Reject ${ticket?.ticketNumber || `ticket #${id}`} and return it to the unassigned queue?`,confirmText:'Reject ticket',danger:true,inputLabel:'Rejection / escalation reason',inputPlaceholder:'Explain why this ticket is being rejected',inputRequired:true}); if(!result.confirmed)return;
+    this.ticketService.reject(id,result.value).subscribe({
       next: () => {
         this.toast.success('Ticket rejected successfully.');
         this.loadTickets();

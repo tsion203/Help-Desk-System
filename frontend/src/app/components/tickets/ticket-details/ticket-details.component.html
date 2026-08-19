@@ -147,6 +147,7 @@
             <article class="history-item" *ngFor="let item of currentTicket.assignmentHistory">
               <strong>{{ item.oldAssigneeName || 'Unassigned' }} → {{ item.newAssigneeName }}</strong>
               <p>{{ item.assignedAt | date:'medium' }}</p>
+              <p *ngIf="item.reason"><strong>Reason:</strong> {{ item.reason }}</p>
             </article>
           </div>
           <ng-template #noAssignmentHistory>

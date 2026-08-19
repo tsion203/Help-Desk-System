@@ -8,6 +8,7 @@ import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-role-list',
@@ -22,11 +23,11 @@ export class RoleListComponent implements OnInit {
   errorMessage = '';
   readonly globalSearch = inject(GlobalSearchService);
   page=0;readonly pageSize=5;totalElements=0;totalPages=0;
-  constructor(private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
   get canDelete(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void { this.loadPage(); }
   loadPage():void{this.loading=true;this.roleService.getPage({page:this.page,size:this.pageSize}).subscribe({next:(r)=>{this.roles=r.content;this.totalElements=r.totalElements;this.totalPages=r.totalPages;this.page=r.number;this.loading=false;this.cdr.markForCheck()},error:()=>{this.errorMessage='Unable to load roles.';this.loading=false;this.cdr.markForCheck()}})}
   changePage(p:number):void{this.page=p;this.loadPage()}
-  deleteRole(id: number, event: Event): void { event.stopPropagation(); this.roleService.delete(id).subscribe({ next: () => {if(this.roles.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Role deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete role.') }); }
+  async deleteRole(id: number, event: Event): Promise<void> { event.stopPropagation(); const item=this.roles.find(value=>value.id===id); const result=await this.confirmation.confirm({title:'Delete role?',message:`Delete ${item?.name || `role #${id}`}? This action cannot be undone.`,confirmText:'Delete role',danger:true}); if(!result.confirmed)return; this.roleService.delete(id).subscribe({ next: () => {if(this.roles.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Role deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete role.') }); }
 }

@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Role } from '../../../models/role';
 import { RoleService } from '../../../services/role.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-user-list',
@@ -29,7 +30,7 @@ export class UserListComponent implements OnInit {
   roles: Role[] = [];
   readonly roleFilter = new FormControl('', { nonNullable: true });
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
-  constructor(private readonly userService: UserService, private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly userService: UserService, private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
   get canDelete(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void {
@@ -40,5 +41,5 @@ export class UserListComponent implements OnInit {
   loadUsers(): void { this.loading = true; this.errorMessage = ''; this.userService.getPage(this.roleFilter.value || undefined,{page:this.page,size:this.pageSize}).subscribe({ next: (result) => { this.users=result.content; this.totalElements=result.totalElements; this.totalPages=result.totalPages; this.page=result.number; this.loading=false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load users.'; this.loading = false; this.cdr.markForCheck(); } }); }
   clearRoleFilter(): void { this.roleFilter.setValue(''); }
   changePage(page:number):void{this.page=page;this.loadUsers()}
-  deleteUser(id: number, event: Event): void { event.stopPropagation(); this.userService.delete(id).subscribe({ next: () => { if(this.users.length===1&&this.page>0)this.page--; this.loadUsers(); this.toast.success('User deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete user.') }); }
+  async deleteUser(id: number, event: Event): Promise<void> { event.stopPropagation(); const user=this.users.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Delete user?',message:`Delete ${user ? `${user.firstName} ${user.lastName}` : `user #${id}`}? This action cannot be undone.`,confirmText:'Delete user',danger:true}); if(!result.confirmed)return; this.userService.delete(id).subscribe({ next: () => { if(this.users.length===1&&this.page>0)this.page--; this.loadUsers(); this.toast.success('User deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete user.') }); }
 }

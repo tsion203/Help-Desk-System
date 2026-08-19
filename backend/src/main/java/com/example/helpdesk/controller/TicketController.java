@@ -23,6 +23,7 @@ import com.example.helpdesk.dto.TicketAssigneeOptionDTO;
 import java.util.List;
 import com.example.helpdesk.dto.TicketResponseDTO;
 import com.example.helpdesk.dto.TicketUpdateDTO;
+import com.example.helpdesk.dto.TicketRejectionDTO;
 import com.example.helpdesk.service.TicketService;
 import com.example.helpdesk.model.TicketPriority;
 import com.example.helpdesk.model.TicketStatus;
@@ -118,8 +119,8 @@ public class TicketController {
 
     @PostMapping("/{id}/reject")
     @PreAuthorize("@rbac.canRejectAssignedTicket(#id, authentication)")
-    public ResponseEntity<TicketResponseDTO> rejectTicket(@PathVariable Long id) {
-        return ResponseEntity.ok(ticketService.rejectAssignedTicket(id));
+    public ResponseEntity<TicketResponseDTO> rejectTicket(@PathVariable Long id, @Valid @RequestBody TicketRejectionDTO request) {
+        return ResponseEntity.ok(ticketService.rejectAssignedTicket(id, request.getReason()));
     }
 
     @DeleteMapping("/{id}")

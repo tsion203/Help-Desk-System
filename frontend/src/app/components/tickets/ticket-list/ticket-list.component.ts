@@ -15,6 +15,7 @@ import { PaginationComponent } from '../../shared/pagination/pagination.componen
 import { TicketAssignmentControlComponent } from '../ticket-assignment-control/ticket-assignment-control.component';
 import { TicketStatusControlComponent } from '../ticket-status-control/ticket-status-control.component';
 import { UserService } from '../../../services/user.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-ticket-list',
@@ -41,7 +42,7 @@ export class TicketListComponent implements OnInit {
   readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   readonly priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
-  constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly userService: UserService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly ticketService: TicketService, private readonly categoryService: TicketCategoryService, private readonly userService: UserService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canCreate(): boolean { return this.authService.isEmployee() && !this.authService.isAdmin(); }
   get canUpdate(): boolean { return this.authService.isEmployee(); }
   get canAssign(): boolean { return this.authService.isAdmin() || this.authService.isSupervisor(); }
@@ -83,9 +84,10 @@ export class TicketListComponent implements OnInit {
   openStatus(ticket: Ticket, event: Event): void { event.stopPropagation(); this.selectedTicketForStatus = ticket; }
   closeStatus(): void { this.selectedTicketForStatus = null; }
   statusUpdated(updatedTicket: Ticket): void { this.tickets = this.tickets.map((ticket) => ticket.id === updatedTicket.id ? updatedTicket : ticket); this.closeStatus(); this.cdr.markForCheck(); }
-  rejectTicket(id: number, event: Event): void {
+  async rejectTicket(id: number, event: Event): Promise<void> {
     event.stopPropagation();
-    this.ticketService.reject(id).subscribe({
+    const ticket=this.tickets.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Reject ticket?',message:`Reject ${ticket?.ticketNumber || `ticket #${id}`} and return it to the unassigned queue?`,confirmText:'Reject ticket',danger:true,inputLabel:'Rejection / escalation reason',inputPlaceholder:'Explain why this ticket is being rejected',inputRequired:true}); if(!result.confirmed)return;
+    this.ticketService.reject(id,result.value).subscribe({
       next: () => {
         this.toast.success('Ticket rejected successfully.');
         if (this.tickets.length === 1 && this.page > 0) this.page--;
@@ -94,5 +96,5 @@ export class TicketListComponent implements OnInit {
       error: (error) => this.toast.error(error, 'Unable to reject ticket.'),
     });
   }
-  deleteTicket(id: number, event: Event): void { event.stopPropagation(); this.ticketService.delete(id).subscribe({ next: () => { if(this.tickets.length===1&&this.page>0)this.page--; this.loadTickets(); this.toast.success('Ticket deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete ticket.') }); }
+  async deleteTicket(id: number, event: Event): Promise<void> { event.stopPropagation(); const ticket=this.tickets.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Delete ticket?',message:`Delete ${ticket?.ticketNumber || `ticket #${id}`}? This action cannot be undone.`,confirmText:'Delete ticket',danger:true}); if(!result.confirmed)return; this.ticketService.delete(id).subscribe({ next: () => { if(this.tickets.length===1&&this.page>0)this.page--; this.loadTickets(); this.toast.success('Ticket deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete ticket.') }); }
 }

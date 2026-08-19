@@ -1,0 +1,17 @@
+<dialog #dialog class="confirmation-dialog" (cancel)="$event.preventDefault(); cancel()">
+  <ng-container *ngIf="confirmation.request() as request">
+    <form method="dialog" (submit)="$event.preventDefault(); confirm()">
+      <header><h2>{{ request.title }}</h2><button type="button" class="close" aria-label="Cancel" (click)="cancel()">×</button></header>
+      <p>{{ request.message }}</p>
+      <div class="field" *ngIf="request.inputLabel">
+        <label for="confirmation-input">{{ request.inputLabel }} <span *ngIf="request.inputRequired" aria-hidden="true">*</span></label>
+        <textarea id="confirmation-input" rows="4" [formControl]="input" [placeholder]="request.inputPlaceholder || ''" [attr.aria-required]="request.inputRequired"></textarea>
+        <span class="error" *ngIf="input.touched && input.hasError('required')">A reason is required.</span>
+      </div>
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="cancel()">{{ request.cancelText || 'Cancel' }}</button>
+        <button type="submit" class="btn" [class.btn-danger]="request.danger" [class.btn-primary]="!request.danger" [disabled]="request.inputRequired && input.invalid">{{ request.confirmText || 'Confirm' }}</button>
+      </footer>
+    </form>
+  </ng-container>
+</dialog>

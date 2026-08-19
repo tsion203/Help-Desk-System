@@ -8,6 +8,7 @@ import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-department-list',
@@ -22,11 +23,11 @@ export class DepartmentListComponent implements OnInit {
   errorMessage = '';
   readonly globalSearch = inject(GlobalSearchService);
   page=0;readonly pageSize=5;totalElements=0;totalPages=0;
-  constructor(private readonly departmentService: DepartmentService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly departmentService: DepartmentService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
   get canDelete(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void { this.loadPage(); }
   loadPage():void{this.loading=true;this.departmentService.getPage({page:this.page,size:this.pageSize}).subscribe({next:(r)=>{this.departments=r.content;this.totalElements=r.totalElements;this.totalPages=r.totalPages;this.page=r.number;this.loading=false;this.cdr.markForCheck()},error:()=>{this.errorMessage='Unable to load departments.';this.loading=false;this.cdr.markForCheck()}})}
   changePage(p:number):void{this.page=p;this.loadPage()}
-  deleteDepartment(id: number, event: Event): void { event.stopPropagation(); this.departmentService.delete(id).subscribe({ next: () => {if(this.departments.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Department deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete department.') }); }
+  async deleteDepartment(id: number, event: Event): Promise<void> { event.stopPropagation(); const item=this.departments.find(value=>value.id===id); const result=await this.confirmation.confirm({title:'Delete department?',message:`Delete ${item?.name || `department #${id}`}? This action cannot be undone.`,confirmText:'Delete department',danger:true}); if(!result.confirmed)return; this.departmentService.delete(id).subscribe({ next: () => {if(this.departments.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Department deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete department.') }); }
 }

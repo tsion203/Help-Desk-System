@@ -154,7 +154,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional
-    public TicketResponseDTO rejectAssignedTicket(Long ticketId) {
+    public TicketResponseDTO rejectAssignedTicket(Long ticketId, String reason) {
         Ticket ticket = findTicketById(ticketId);
         requireMutable(ticket);
         User currentUser = requireCurrentUser();
@@ -168,7 +168,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setStatus(TicketStatus.OPEN);
         ticket.setUpdatedAt(LocalDateTime.now());
         Ticket savedTicket = ticketRepository.save(ticket);
-        saveAssignmentHistory(savedTicket, oldAssignee, null, currentUser);
+        saveAssignmentHistory(savedTicket, oldAssignee, null, currentUser, reason.trim());
         if (oldStatus != TicketStatus.OPEN) {
             saveStatusHistory(savedTicket, oldStatus, TicketStatus.OPEN, currentUser);
         }
@@ -278,7 +278,7 @@ public class TicketServiceImpl implements TicketService {
             createNotificationForStatusChange(savedTicket, ticket.getStatus());
         }
         if (assigneeChanged) {
-            saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
+            saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy, null);
             if (newAssignee != null) {
                 emailService.sendTicketAssigned(savedTicket, newAssignee);
             }
@@ -318,7 +318,7 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
         User updatedBy = requireCurrentUser();
-        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy);
+        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, updatedBy, null);
         if (savedTicket.getStatus() != oldStatus) {
             saveStatusHistory(savedTicket, oldStatus, savedTicket.getStatus(), updatedBy);
             createNotificationForStatusChange(savedTicket, savedTicket.getStatus());
@@ -367,7 +367,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setUpdatedAt(LocalDateTime.now());
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, assignedBy);
+        saveAssignmentHistory(savedTicket, oldAssignee, newAssignee, assignedBy, null);
 
         createNotificationForAssignment(savedTicket, oldAssignee, newAssignee, assignedBy);
         return mapToResponseDTO(savedTicket);
@@ -544,12 +544,13 @@ public class TicketServiceImpl implements TicketService {
         ticketStatusHistoryRepository.save(history);
     }
 
-    private void saveAssignmentHistory(Ticket ticket, User oldAssignee, User newAssignee, User assignedBy) {
+    private void saveAssignmentHistory(Ticket ticket, User oldAssignee, User newAssignee, User assignedBy, String reason) {
         TicketAssignmentHistory history = new TicketAssignmentHistory();
         history.setTicket(ticket);
         history.setOldAssignee(oldAssignee);
         history.setNewAssignee(newAssignee);
         history.setAssignedBy(assignedBy);
+        history.setReason(reason);
         history.setAssignedAt(LocalDateTime.now());
         ticketAssignmentHistoryRepository.save(history);
     }
@@ -758,7 +759,8 @@ public class TicketServiceImpl implements TicketService {
                         getUserFullName(history.getNewAssignee()),
                         history.getAssignedBy() != null ? history.getAssignedBy().getId() : null,
                         getUserFullName(history.getAssignedBy()),
-                        history.getAssignedAt()
+                        history.getAssignedAt(),
+                        history.getReason()
                 ))
                 .toList();
     }

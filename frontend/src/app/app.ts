@@ -5,10 +5,11 @@ import { SidebarComponent } from './components/shared/sidebar/sidebar.component'
 import { FooterComponent } from './components/shared/footer/footer.component';
 import { ToastComponent } from './components/shared/toast/toast.component';
 import { LoadingComponent } from './components/shared/loading/loading.component';
+import { ConfirmationDialogComponent } from './components/shared/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, SidebarComponent, FooterComponent, ToastComponent, LoadingComponent],
+  imports: [RouterOutlet, NavbarComponent, SidebarComponent, FooterComponent, ToastComponent, LoadingComponent, ConfirmationDialogComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

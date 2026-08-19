@@ -45,4 +45,7 @@ public class TicketAssignmentHistory {
     @ManyToOne
     @JoinColumn(name = "assigned_by")
     private User assignedBy;
+
+    @Column(name = "reason", length = 2000)
+    private String reason;
 }

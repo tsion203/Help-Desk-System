@@ -5,6 +5,7 @@ import { TicketAttachmentService } from '../../../services/ticket-attachment.ser
 import { ToastService } from '../../../services/toast.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-ticket-attachment-list',
@@ -21,7 +22,7 @@ export class TicketAttachmentListComponent implements OnInit, OnChanges {
   attachments: TicketAttachment[] = [];
   loading = false;
   errorMessage = '';
-  constructor(private readonly attachmentService: TicketAttachmentService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly attachmentService: TicketAttachmentService, private readonly toast: ToastService, private readonly route: ActivatedRoute, private readonly authService: AuthService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canDelete(): boolean { return !this.readOnly && (this.authService.isAdmin() || this.authService.isEmployee()); }
   ngOnInit(): void {
     this.ticketId = this.ticketId || Number(this.route.snapshot.paramMap.get('id'));
@@ -30,7 +31,7 @@ export class TicketAttachmentListComponent implements OnInit, OnChanges {
     this.attachmentService.getAll().subscribe({ next: (items) => { this.setItems(items); this.loading = false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load attachments.'; this.loading = false; this.cdr.markForCheck(); } });
   }
   ngOnChanges(changes: SimpleChanges): void { if (changes['items'] && this.items !== null) this.setItems(this.items); }
-  deleteAttachment(id: number): void { this.attachmentService.delete(id).subscribe({ next: () => { this.attachments = this.attachments.filter((item) => item.id !== id); this.attachmentDeleted.emit(id); this.toast.success('Attachment deleted successfully.'); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to delete attachment.') }); }
+  async deleteAttachment(id: number): Promise<void> { const item=this.attachments.find(value=>value.id===id); const result=await this.confirmation.confirm({title:'Delete attachment?',message:`Delete ${item?.fileName || 'this attachment'}? This action cannot be undone.`,confirmText:'Delete attachment',danger:true}); if(!result.confirmed)return; this.attachmentService.delete(id).subscribe({ next: () => { this.attachments = this.attachments.filter((item) => item.id !== id); this.attachmentDeleted.emit(id); this.toast.success('Attachment deleted successfully.'); this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to delete attachment.') }); }
   downloadAttachment(attachment: TicketAttachment): void {
     this.attachmentService.download(attachment.id).subscribe({
       next: (blob) => {

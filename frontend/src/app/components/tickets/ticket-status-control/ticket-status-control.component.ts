@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { Ticket } from '../../../models/ticket';
 import { TicketService } from '../../../services/ticket.service';
 import { ToastService } from '../../../services/toast.service';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-ticket-status-control',
@@ -23,7 +24,7 @@ export class TicketStatusControlComponent implements OnChanges {
   submitting = false;
   errorMessage = '';
 
-  constructor(private readonly ticketService: TicketService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(private readonly ticketService: TicketService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['status'] || (changes['statuses'] && !this.statuses.includes(this.statusControl.value))) {
@@ -31,9 +32,11 @@ export class TicketStatusControlComponent implements OnChanges {
     }
   }
 
-  updateStatus(event: SubmitEvent): void {
+  async updateStatus(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     if (!this.ticketId || !this.statusControl.value || this.submitting) return;
+    const newStatus=this.statusControl.value;
+    if (['RESOLVED','CLOSED','REOPENED'].includes(newStatus)) { const result=await this.confirmation.confirm({title:`Change ticket to ${newStatus.replace('_',' ')}?`,message:`Change ticket #${this.ticketId} from ${this.status.replace('_',' ')} to ${newStatus.replace('_',' ')}?`,confirmText:`Change to ${newStatus.replace('_',' ')}`}); if(!result.confirmed){this.statusControl.setValue(this.status);return;} }
     this.errorMessage = '';
     this.submitting = true;
     this.ticketService.updateStatus(this.ticketId, this.statusControl.value).pipe(finalize(() => {

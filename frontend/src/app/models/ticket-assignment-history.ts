@@ -8,4 +8,5 @@ export interface TicketAssignmentHistory {
   assignedById: number;
   assignedByName: string;
   assignedAt: string;
+  reason: string | null;
 }

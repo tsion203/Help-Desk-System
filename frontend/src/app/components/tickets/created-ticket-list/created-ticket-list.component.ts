@@ -11,6 +11,7 @@ import { ToastService } from '../../../services/toast.service';
 import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { ConfirmationService } from '../../../services/confirmation.service';
 
 @Component({
   selector: 'app-created-ticket-list',
@@ -44,6 +45,7 @@ export class CreatedTicketListComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly toast: ToastService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly confirmation: ConfirmationService,
   ) {}
 
   get canCreate(): boolean { return this.authService.isEmployee() && !this.authService.isAdmin(); }
@@ -85,8 +87,9 @@ export class CreatedTicketListComponent implements OnInit {
 
   changePage(page: number): void { this.page = page; this.loadTickets(); }
 
-  deleteTicket(id: number, event: Event): void {
+  async deleteTicket(id: number, event: Event): Promise<void> {
     event.stopPropagation();
+    const ticket=this.tickets.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Delete ticket?',message:`Delete ${ticket?.ticketNumber || `ticket #${id}`}? This action cannot be undone.`,confirmText:'Delete ticket',danger:true}); if(!result.confirmed)return;
     this.ticketService.delete(id).subscribe({
       next: () => {
         if (this.tickets.length === 1 && this.page > 0) this.page--;
