@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TicketStatusHistory } from '../../../models/ticket-status-history';
 import { TicketService } from '../../../services/ticket.service';
 import { ActivatedRoute } from '@angular/router';
+import { ticketStatusBadge } from '../ticket-badge.util';
 
 @Component({
   selector: 'app-ticket-status-history',
@@ -12,6 +13,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './ticket-status-history.component.scss',
 })
 export class TicketStatusHistoryComponent implements OnInit {
+  statusBadge(status:string):string{return ticketStatusBadge(status)}
   statusHistory: TicketStatusHistory[] = [];
   loading = false;
   errorMessage = '';

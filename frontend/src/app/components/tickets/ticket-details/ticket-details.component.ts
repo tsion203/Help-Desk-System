@@ -9,6 +9,7 @@ import { TicketCommentRequest } from '../../../models/ticket-comment';
 import { TicketService } from '../../../services/ticket.service';
 import { TicketCommentService } from '../../../services/ticket-comment.service';
 import { UserService } from '../../../services/user.service';
+import { ticketPriorityBadge, ticketStatusBadge } from '../ticket-badge.util';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
 import { TicketAttachmentFormComponent } from '../ticket-attachment-form/ticket-attachment-form.component';
@@ -190,33 +191,11 @@ export class TicketDetailsComponent implements OnInit {
   }
 
   formatBadgeStatus(status: string): string {
-    switch (status) {
-      case 'OPEN':
-        return 'status-open';
-      case 'IN_PROGRESS':
-        return 'status-progress';
-      case 'RESOLVED':
-        return 'status-resolved';
-      case 'CLOSED':
-        return 'status-closed';
-      default:
-        return '';
-    }
+    return ticketStatusBadge(status);
   }
 
   formatBadgePriority(priority: string): string {
-    switch (priority) {
-      case 'LOW':
-        return 'priority-low';
-      case 'MEDIUM':
-        return 'priority-medium';
-      case 'HIGH':
-        return 'priority-high';
-      case 'CRITICAL':
-        return 'priority-critical';
-      default:
-        return '';
-    }
+    return ticketPriorityBadge(priority);
   }
 
   formatLabel(value: string): string {

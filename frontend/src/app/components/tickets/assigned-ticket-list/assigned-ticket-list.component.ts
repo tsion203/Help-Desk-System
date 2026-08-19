@@ -12,6 +12,7 @@ import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { ConfirmationService } from '../../../services/confirmation.service';
+import { ticketPriorityBadge, ticketStatusBadge } from '../ticket-badge.util';
 
 @Component({
   selector: 'app-assigned-ticket-list',
@@ -49,6 +50,8 @@ export class AssignedTicketListComponent implements OnInit {
   ) {}
 
   get canUpdate(): boolean { return this.authService.isEmployee(); }
+  statusBadge(status:string):string{return ticketStatusBadge(status)}
+  priorityBadge(priority:string):string{return ticketPriorityBadge(priority)}
 
   ngOnInit(): void {
     this.loadTickets();

@@ -133,7 +133,7 @@
         <div *ngIf="activeTab === 'status'">
           <div *ngIf="currentTicket.statusHistory?.length; else noStatusHistory">
             <article class="history-item" *ngFor="let item of currentTicket.statusHistory">
-              <strong>{{ formatLabel(item.oldStatus || 'Created') }} → {{ formatLabel(item.newStatus) }}</strong>
+              <strong><span *ngIf="item.oldStatus; else createdStatus" class="badge" [ngClass]="formatBadgeStatus(item.oldStatus)">{{ formatLabel(item.oldStatus) }}</span><ng-template #createdStatus>Created</ng-template> → <span class="badge" [ngClass]="formatBadgeStatus(item.newStatus)">{{ formatLabel(item.newStatus) }}</span></strong>
               <p>{{ item.changedByName }} · {{ item.changedAt | date:'medium' }}</p>
             </article>
           </div>

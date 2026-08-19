@@ -1,21 +1,21 @@
 <main class="page">
   <header class="page-header"><h1>{{ pageTitle }}</h1></header>
   <form class="form-card stack" [formGroup]="userForm" (ngSubmit)="onSave()">
-    <div class="grid grid-2">
-      <div class="field"><label for="email">Email</label><input id="email" type="email" formControlName="email" /></div>
-      <div class="field"><label for="firstName">First name</label><input id="firstName" formControlName="firstName" /></div>
-      <div class="field"><label for="lastName">Last name</label><input id="lastName" formControlName="lastName" /></div>
-      <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" formControlName="phoneNumber" /></div>
-
-      <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option><option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option></select></div>
-
-      <div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" formControlName="employeeId" /></div>
-      <div class="field" *ngIf="!userId"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" formControlName="temporaryPassword" minlength="8" autocomplete="new-password" /></div>
-
-      <div class="field"><label for="roleIds">Roles</label><select id="roleIds" formControlName="roleIds" ><option [ngValue]="0">Select role</option><option *ngFor="let role of roles" [ngValue]="role.id">{{ role.name }}</option></select></div>
-
+    <div class="user-form-columns">
+      <div class="form-column">
+        <div class="field"><label for="firstName">First name</label><input id="firstName" formControlName="firstName" /></div>
+        <div class="field"><label for="lastName">Last name</label><input id="lastName" formControlName="lastName" /></div>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" formControlName="email" /></div>
+        <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" formControlName="phoneNumber" /></div>
+      </div>
+      <div class="form-column">
+        <div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" formControlName="employeeId" /></div>
+        <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option><option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option></select></div>
+        <div class="field"><label for="roleIds">Role</label><select id="roleIds" formControlName="roleIds"><option [ngValue]="0">Select role</option><option *ngFor="let role of roles" [ngValue]="role.id">{{ role.name }}</option></select></div>
+        <div class="field active-field"><label>Active status</label><label class="checkbox-control"><input type="checkbox" formControlName="active" /><span>{{ userForm.controls.active.value ? 'Active' : 'Inactive' }}</span></label></div>
+      </div>
     </div>
-    <label><input type="checkbox" formControlName="active" /> Active</label>
+    <div class="field" *ngIf="!userId"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" formControlName="temporaryPassword" minlength="8" autocomplete="new-password" /></div>
     <button class="btn btn-primary" type="submit">Save user</button>
   </form>
 </main>

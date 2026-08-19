@@ -1,47 +1,28 @@
-<main class="page">
-  <header class="page-header">
-    <div>
-      <h1>My profile</h1>
-      <p>View and update your profile information.</p>
-    </div>
-    <button *ngIf="currentUser && !showEditForm" class="btn btn-secondary edit-profile-button" type="button" (click)="enableEdit()" title="Edit profile">
-      <svg class="edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
-      Edit profile
-    </button>
-  </header>
-
+<main class="page profile-page">
+  <header class="page-header"><div><h1>My profile</h1><p>View and update your profile information.</p></div></header>
   <p *ngIf="loading">Loading profile...</p>
-
-  <section *ngIf="!loading && currentUser" class="form-card stack">
-    <article *ngIf="!showEditForm" class="profile-summary">
-      <div class="grid grid-2">
-        <div class="field"><label>First name</label><p>{{ currentUser.firstName }}</p></div>
-        <div class="field"><label>Last name</label><p>{{ currentUser.lastName }}</p></div>
-        <div class="field"><label>Employee ID</label><p>{{ currentUser.employeeId }}</p></div>
-        <div class="field"><label>Email</label><p>{{ currentUser.email }}</p></div>
-        <div class="field"><label>Phone number</label><p>{{ currentUser.phoneNumber || 'Not provided' }}</p></div>
-        <div class="field"><label>Department</label><p>{{ currentUser.departmentName || 'Not assigned' }}</p></div>
-        <div class="field"><label>Role</label><p><span *ngFor="let role of currentUser.roles; let last = last">{{ role.name }}<span *ngIf="!last">, </span></span></p></div>
-        <div class="field"><label>Status</label><p>{{ currentUser.active ? 'Active' : 'Inactive' }}</p></div>
-      </div>
+  <section *ngIf="!loading && currentUser as user" class="profile-section">
+    <header class="section-header"><h2>Profile Information</h2><button *ngIf="!showEditForm" class="btn edit-profile-button" type="button" (click)="enableEdit()"><svg class="edit-icon" viewBox="0 0 24 24"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>Edit</button></header>
+    <article *ngIf="!showEditForm" class="profile-grid">
+      <div><label>First Name</label><strong>{{ user.firstName }}</strong></div><div><label>Last Name</label><strong>{{ user.lastName }}</strong></div>
+      <div><label>Email</label><strong>{{ user.email }}</strong></div><div><label>Phone</label><strong>{{ user.phoneNumber || 'Not provided' }}</strong></div>
+      <div><label>Employee ID</label><strong>{{ user.employeeId }}</strong></div><div><label>Department</label><strong>{{ user.departmentName || 'Not assigned' }}</strong></div>
+      <div><label>Roles</label><p><span class="profile-badge role-badge" *ngFor="let role of user.roles">{{ role.name }}</span></p></div>
+      <div><label>Status</label><p><span class="profile-badge" [class.active-badge]="user.active" [class.inactive-badge]="!user.active">{{ user.active ? 'Active' : 'Inactive' }}</span></p></div>
     </article>
-
-    <form *ngIf="showEditForm" [formGroup]="profileForm" (ngSubmit)="onSave()" class="stack">
-      <div class="grid grid-2">
-        <div class="field"><label>First name</label><input formControlName="firstName" /></div>
-        <div class="field"><label>Last name</label><input formControlName="lastName" /></div>
-        <div class="field"><label>Email</label><input type="email" formControlName="email" /></div>
-        <div class="field"><label>Phone number</label><input type="tel" formControlName="phoneNumber" /></div>
-        <div class="field"><label>Current password</label><input type="password" formControlName="currentPassword" autocomplete="current-password" placeholder="Required when changing password" /></div>
-        <div class="field"><label>New password</label><input type="password" formControlName="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep current password" /></div>
-      </div>
-      <div class="grid grid-2">
-        <button class="btn btn-primary" type="submit">Save profile</button>
-        <button class="btn btn-secondary" type="button" (click)="cancelEdit()">Cancel</button>
-      </div>
+    <form *ngIf="showEditForm" [formGroup]="profileForm" (ngSubmit)="onSave()" class="stack profile-edit-form"><div class="grid grid-2">
+      <div class="field"><label>First name</label><input formControlName="firstName" /></div><div class="field"><label>Last name</label><input formControlName="lastName" /></div>
+      <div class="field"><label>Email</label><input type="email" formControlName="email" /></div><div class="field"><label>Phone number</label><input type="tel" formControlName="phoneNumber" /></div>
+    </div><div class="form-actions"><button class="btn btn-primary" type="submit">Save profile</button><button class="btn btn-secondary" type="button" (click)="cancelEdit()">Cancel</button></div></form>
+  </section>
+  <section *ngIf="!loading && currentUser" class="profile-section password-section">
+    <header class="section-header"><h2>Password</h2><button class="btn password-toggle" type="button" (click)="togglePasswordForm()" [attr.aria-expanded]="showPasswordForm">{{ showPasswordForm ? 'Cancel' : 'Change Password' }}</button></header>
+    <form *ngIf="showPasswordForm" [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="password-form">
+      <div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" formControlName="currentPassword" autocomplete="current-password" /></div>
+      <div class="field"><label for="newPassword">New password</label><input id="newPassword" type="password" formControlName="password" autocomplete="new-password" /></div>
+      <div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" formControlName="confirmPassword" autocomplete="new-password" /><span class="error" *ngIf="passwordForm.controls.confirmPassword.touched && passwordForm.controls.confirmPassword.errors">Passwords must match.</span></div>
+      <button class="btn btn-primary password-submit" type="submit">Update password</button>
     </form>
   </section>
-
   <p *ngIf="!loading && !currentUser" class="error">Unable to load profile.</p>
 </main>
-

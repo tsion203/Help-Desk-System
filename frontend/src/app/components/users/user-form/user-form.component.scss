@@ -1,1 +1,2 @@
 :host { --primary:#153451; display:block; }
+.user-form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}.form-column{display:grid;align-content:start;gap:18px}.active-field{align-content:start}.checkbox-control{display:flex;min-height:42px;align-items:center;gap:9px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff}.checkbox-control input{width:auto}@media(max-width:750px){.user-form-columns{grid-template-columns:1fr}}

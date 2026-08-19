@@ -12,6 +12,7 @@ import { GlobalSearchService } from '../../../services/global-search.service';
 import { GlobalSearchPipe } from '../../shared/global-search/global-search.pipe';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { ConfirmationService } from '../../../services/confirmation.service';
+import { ticketPriorityBadge, ticketStatusBadge } from '../ticket-badge.util';
 
 @Component({
   selector: 'app-created-ticket-list',
@@ -51,6 +52,8 @@ export class CreatedTicketListComponent implements OnInit {
   get canCreate(): boolean { return this.authService.isEmployee() && !this.authService.isAdmin(); }
   get canUpdate(): boolean { return this.authService.isEmployee(); }
   get canDelete(): boolean { return this.authService.isAdmin() || this.authService.isEmployee(); }
+  statusBadge(status:string):string{return ticketStatusBadge(status)}
+  priorityBadge(priority:string):string{return ticketPriorityBadge(priority)}
 
   ngOnInit(): void {
     this.loadTickets();

@@ -1,3 +1,4 @@
 <section class="page"><h2>Ticket Status History</h2><p *ngIf="loading">Loading status history...</p><p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <div class="timeline-item" *ngFor="let item of statusHistory"><strong>{{ item.oldStatus || 'Created' }} → {{ item.newStatus }}</strong><p>Changed by {{ item.changedByName }}</p><small>{{ item.changedAt }}</small></div>
-  <p *ngIf="!loading && !errorMessage && statusHistory.length === 0">No status history found.</p></section>
+  <div class="timeline-item" *ngFor="let item of statusHistory"><strong><span *ngIf="item.oldStatus; else created" class="badge" [ngClass]="statusBadge(item.oldStatus)">{{ item.oldStatus.replace('_', ' ') }}</span><ng-template #created>Created</ng-template> → <span class="badge" [ngClass]="statusBadge(item.newStatus)">{{ item.newStatus.replace('_', ' ') }}</span></strong><p>Changed by {{ item.changedByName }}</p><small>{{ item.changedAt }}</small></div>
+  <p *ngIf="!loading && !errorMessage && statusHistory.length === 0">No status history found.</p>
+</section>

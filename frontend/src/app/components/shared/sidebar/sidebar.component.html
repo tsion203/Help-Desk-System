@@ -13,11 +13,8 @@
     <a class="nav-link" routerLink="/tickets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" title="Tickets">
       <svg viewBox="0 0 24 24"><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V6Z"/><path d="M9 9h6M9 13h4"/></svg><span class="nav-text">Tickets</span>
     </a>
-    <p *ngIf="!isAdmin && !isSupervisor && (isEmployee || isSupportOfficer)" class="nav-label nav-text">My Tickets</p>
-    <a *ngIf="!isAdmin && !isSupervisor && isSupportOfficer" class="nav-link" routerLink="/tickets/assigned-me" routerLinkActive="active" title="Assigned to Me">
-      <svg viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h8M8 15h5"/></svg><span class="nav-text">Assigned to Me</span>
-    </a>
-    <a *ngIf="isEmployee && !isAdmin" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="New Ticket">
+    <p *ngIf="!isAdmin && !isSupervisor && isEmployee && !isSupportOfficer" class="nav-label nav-text">My Tickets</p>
+    <a *ngIf="isEmployee && !isAdmin && !isSupportOfficer" class="nav-link" routerLink="/tickets/new" routerLinkActive="active" title="New Ticket">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="nav-text">New Ticket</span>
     </a>
 

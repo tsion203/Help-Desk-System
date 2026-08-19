@@ -31,8 +31,8 @@
           <td>{{ ticket.ticketNumber }}</td>
           <td>{{ ticket.subject }}</td>
           <td>{{ ticket.createdByName }}</td>
-          <td><span class="badge">{{ ticket.status }}</span></td>
-          <td><span class="badge">{{ ticket.priority }}</span></td>
+          <td><span class="badge" [ngClass]="statusBadge(ticket.status)">{{ ticket.status.replace('_', ' ') }}</span></td>
+          <td><span class="badge" [ngClass]="priorityBadge(ticket.priority)">{{ ticket.priority }}</span></td>
           <td>{{ ticket.updatedAt }}</td>
           <td>
             <div class="ticket-actions">

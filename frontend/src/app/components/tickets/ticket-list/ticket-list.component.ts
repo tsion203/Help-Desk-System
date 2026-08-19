@@ -16,6 +16,7 @@ import { TicketAssignmentControlComponent } from '../ticket-assignment-control/t
 import { TicketStatusControlComponent } from '../ticket-status-control/ticket-status-control.component';
 import { UserService } from '../../../services/user.service';
 import { ConfirmationService } from '../../../services/confirmation.service';
+import { ticketPriorityBadge, ticketStatusBadge } from '../ticket-badge.util';
 
 @Component({
   selector: 'app-ticket-list',
@@ -81,6 +82,8 @@ export class TicketListComponent implements OnInit {
   }
   canUpdateStatus(ticket: Ticket): boolean { return this.statusOptions(ticket).length > 0; }
   canReject(ticket: Ticket): boolean { return ticket.status !== 'CLOSED' && this.authService.isSupportOfficer() && ticket.assignedToId === this.currentUserId; }
+  statusBadge(status:string):string{return ticketStatusBadge(status)}
+  priorityBadge(priority:string):string{return ticketPriorityBadge(priority)}
   openStatus(ticket: Ticket, event: Event): void { event.stopPropagation(); this.selectedTicketForStatus = ticket; }
   closeStatus(): void { this.selectedTicketForStatus = null; }
   statusUpdated(updatedTicket: Ticket): void { this.tickets = this.tickets.map((ticket) => ticket.id === updatedTicket.id ? updatedTicket : ticket); this.closeStatus(); this.cdr.markForCheck(); }
