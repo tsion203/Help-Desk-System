@@ -26,7 +26,13 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         if (handledExpiredToken === token) return throwError(() => error);
         handledExpiredToken = token;
         authService.logout();
-        toast.info('Your session has expired. Please sign in again.');
+        const apiError = error.error as { code?: string; message?: string } | null;
+        const isDeactivated = apiError?.code === 'ACCOUNT_DEACTIVATED';
+        const message = isDeactivated && apiError?.message
+          ? apiError.message
+          : 'Your session has expired. Please sign in again.';
+        if (isDeactivated) toast.error(message, message);
+        else toast.info(message);
         if (router.url.split('?')[0] !== '/login') void router.navigate(['/login']);
       }
 

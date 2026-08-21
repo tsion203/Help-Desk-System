@@ -54,6 +54,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
+                if (!userDetails.isEnabled()) {
+                    SecurityContextHolder.clearContext();
+                    errorWriter.write(request, response, HttpServletResponse.SC_UNAUTHORIZED,
+                            "ACCOUNT_DEACTIVATED",
+                            "Your account has been deactivated. Please log in again or contact an administrator.");
+                    return;
+                }
+
                 if (!jwtUtil.isTokenValid(token, userDetails.getUsername())) {
                     errorWriter.write(request, response, HttpServletResponse.SC_UNAUTHORIZED,
                             "SESSION_EXPIRED", "Your session has expired. Please sign in again.");

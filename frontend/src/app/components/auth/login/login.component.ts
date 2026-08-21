@@ -7,6 +7,7 @@ import { LoginRequest } from '../../../models/auth-request';
 import { LoginResponse } from '../../../models/auth-response';
 import { AuthService } from '../../../services/auth.service';
 import { BrandLogoComponent } from '../../shared/brand-logo/brand-logo.component';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -28,6 +29,7 @@ export class LoginComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly toast: ToastService,
   ) {}
 
   onLogin(): void {
@@ -48,12 +50,20 @@ export class LoginComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.errorMessage = this.getErrorMessage(error);
+        if ((error.error as { code?: string } | null)?.code === 'ACCOUNT_DEACTIVATED') {
+          this.toast.error(error, this.errorMessage);
+        }
         this.loginForm.controls.password.reset('');
       },
     });
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {
+    if ((error.error as { code?: string } | null)?.code === 'ACCOUNT_DEACTIVATED'
+        && typeof error.error?.message === 'string') {
+      return error.error.message;
+    }
+
     if (error.status === 401) {
       return 'Invalid login credentials. Please try again.';
     }
