@@ -19,4 +19,5 @@ public interface DepartmentService {
     DepartmentResponseDTO update(Long id, DepartmentCreateDTO departmentCreateDTO);
 
     void delete(Long id);
+    DepartmentResponseDTO setActive(Long id, boolean active);
 }

@@ -7,14 +7,16 @@ public class TicketCategoryResponseDTO {
     private String name;
 
     private String description;
+    private boolean active;
 
     public TicketCategoryResponseDTO() {
     }
 
-    public TicketCategoryResponseDTO(Long id, String name, String description) {
+    public TicketCategoryResponseDTO(Long id, String name, String description, boolean active) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.active = active;
     }
 
     public Long getId() {
@@ -40,5 +42,7 @@ public class TicketCategoryResponseDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
 }

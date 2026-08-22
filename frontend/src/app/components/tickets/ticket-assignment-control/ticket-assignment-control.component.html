@@ -3,12 +3,12 @@
     <label [for]="'ticket-assignee-' + ticketId">Assignee</label>
     <select [id]="'ticket-assignee-' + ticketId" formControlName="assignedToId" [disabled]="loading">
       <option [ngValue]="0">Unassigned</option>
-      <option *ngFor="let candidate of candidates" [ngValue]="candidate.id">
+      <option *ngFor="let candidate of candidates" [ngValue]="candidate.id" [disabled]="!candidate.active">
         {{ optionLabel(candidate) }}
       </option>
     </select>
     <small *ngIf="loading">Loading available assignees...</small>
-    <small *ngIf="!loading && candidates.length === 0">No active Support Officers are available.</small>
+    <small *ngIf="!loading && candidates.length === 0">No Support Officers are available.</small>
   </div>
   <button class="btn btn-primary" type="submit" [disabled]="loading || submitting">
     {{ submitting ? 'Saving...' : 'Update assignment' }}

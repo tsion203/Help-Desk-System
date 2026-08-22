@@ -30,6 +30,8 @@ public class Role {
 
     @Column(nullable = false)
     private String description;
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
 
     @ManyToMany(mappedBy = "roles")
     private List<User> users;

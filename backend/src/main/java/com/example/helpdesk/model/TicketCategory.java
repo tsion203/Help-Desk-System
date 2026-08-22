@@ -31,6 +31,8 @@ public class TicketCategory {
 
     @Column(nullable = false)
     private String description;
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
 
     @OneToMany(mappedBy = "category")
     private List<Ticket> tickets;

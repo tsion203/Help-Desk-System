@@ -5,4 +5,5 @@ public interface TicketAssigneeOptionProjection {
     String getFirstName();
     String getLastName();
     Long getActiveTicketCount();
+    Boolean getActive();
 }

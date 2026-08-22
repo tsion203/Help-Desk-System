@@ -19,4 +19,5 @@ public interface RoleService {
     RoleResponseDTO update(Long id, RoleCreateDTO roleCreateDTO);
 
     void delete(Long id);
+    RoleResponseDTO setActive(Long id, boolean active);
 }

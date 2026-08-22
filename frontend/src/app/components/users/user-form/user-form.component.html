@@ -10,8 +10,8 @@
       </div>
       <div class="form-column">
         <div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" formControlName="employeeId" /></div>
-        <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option><option *ngFor="let department of departments" [ngValue]="department.id">{{ department.name }}</option></select></div>
-        <div class="field"><label for="roleIds">Role</label><select id="roleIds" formControlName="roleIds"><option [ngValue]="0">Select role</option><option *ngFor="let role of roles" [ngValue]="role.id">{{ role.name }}</option></select></div>
+        <div class="field"><label for="departmentId">Department</label><select id="departmentId" formControlName="departmentId"><option [ngValue]="0">Select department</option><option *ngFor="let department of departments" [ngValue]="department.id" [disabled]="!department.active">{{ department.name }}{{ department.active ? '' : ' (Inactive)' }}</option></select></div>
+        <div class="field"><label for="roleIds">Role</label><select id="roleIds" formControlName="roleIds"><option [ngValue]="0">Select role</option><option *ngFor="let role of roles" [ngValue]="role.id" [disabled]="!role.active">{{ role.name }}{{ role.active ? '' : ' (Inactive)' }}</option></select></div>
         <div class="field active-field"><label>Active status</label><label class="checkbox-control"><input type="checkbox" formControlName="active" /><span>{{ userForm.controls.active.value ? 'Active' : 'Inactive' }}</span></label></div>
       </div>
     </div>

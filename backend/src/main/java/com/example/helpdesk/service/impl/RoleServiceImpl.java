@@ -30,6 +30,7 @@ public class RoleServiceImpl implements RoleService {
         Role role = new Role();
         role.setName(roleCreateDTO.getName());
         role.setDescription(roleCreateDTO.getDescription());
+        role.setActive(true);
         return mapToResponseDTO(roleRepository.save(role));
     }
 
@@ -64,7 +65,15 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void delete(Long id) {
         Role role = findRoleById(id);
-        roleRepository.delete(role);
+        role.setActive(false);
+        roleRepository.save(role);
+    }
+
+    @Override
+    public RoleResponseDTO setActive(Long id, boolean active) {
+        Role role = findRoleById(id);
+        role.setActive(active);
+        return mapToResponseDTO(roleRepository.save(role));
     }
 
     private Role findRoleById(Long id) {
@@ -76,7 +85,7 @@ public class RoleServiceImpl implements RoleService {
         return new RoleResponseDTO(
                 role.getId(),
                 role.getName(),
-                role.getDescription()
+                role.getDescription(), role.isActive()
         );
     }
 }

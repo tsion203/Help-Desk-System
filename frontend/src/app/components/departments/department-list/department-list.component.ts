@@ -25,9 +25,9 @@ export class DepartmentListComponent implements OnInit {
   page=0;readonly pageSize=5;totalElements=0;totalPages=0;
   constructor(private readonly departmentService: DepartmentService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
-  get canDelete(): boolean { return this.authService.isAdmin(); }
+  get canChangeStatus(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void { this.loadPage(); }
   loadPage():void{this.loading=true;this.departmentService.getPage({page:this.page,size:this.pageSize}).subscribe({next:(r)=>{this.departments=r.content;this.totalElements=r.totalElements;this.totalPages=r.totalPages;this.page=r.number;this.loading=false;this.cdr.markForCheck()},error:()=>{this.errorMessage='Unable to load departments.';this.loading=false;this.cdr.markForCheck()}})}
   changePage(p:number):void{this.page=p;this.loadPage()}
-  async deleteDepartment(id: number, event: Event): Promise<void> { event.stopPropagation(); const item=this.departments.find(value=>value.id===id); const result=await this.confirmation.confirm({title:'Delete department?',message:`Delete ${item?.name || `department #${id}`}? This action cannot be undone.`,confirmText:'Delete department',danger:true}); if(!result.confirmed)return; this.departmentService.delete(id).subscribe({ next: () => {if(this.departments.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Department deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete department.') }); }
+  async changeStatus(department: Department, event: Event): Promise<void> { event.stopPropagation(); const active=!department.active; const action=active?'Reactivate':'Deactivate'; const result=await this.confirmation.confirm({title:`${action} department?`,message:`${action} ${department.name}?`,confirmText:action,danger:!active}); if(!result.confirmed)return; this.departmentService.setActive(department.id,active).subscribe({next:()=>{this.loadPage();this.toast.success(`Department ${active?'reactivated':'deactivated'} successfully.`)},error:(error)=>this.toast.error(error,`Unable to ${action.toLowerCase()} department.`)}); }
 }

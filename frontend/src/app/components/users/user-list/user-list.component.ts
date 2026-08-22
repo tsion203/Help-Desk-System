@@ -32,7 +32,7 @@ export class UserListComponent implements OnInit {
   page=0; readonly pageSize=5; totalElements=0; totalPages=0;
   constructor(private readonly userService: UserService, private readonly roleService: RoleService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
-  get canDelete(): boolean { return this.authService.isAdmin(); }
+  get canChangeStatus(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void {
     this.loadUsers();
     this.roleService.getAll().subscribe({ next: (items) => { this.roles = items; this.cdr.markForCheck(); }, error: (error) => this.toast.error(error, 'Unable to load roles.') });
@@ -41,5 +41,5 @@ export class UserListComponent implements OnInit {
   loadUsers(): void { this.loading = true; this.errorMessage = ''; this.userService.getPage(this.roleFilter.value || undefined,{page:this.page,size:this.pageSize}).subscribe({ next: (result) => { this.users=result.content; this.totalElements=result.totalElements; this.totalPages=result.totalPages; this.page=result.number; this.loading=false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load users.'; this.loading = false; this.cdr.markForCheck(); } }); }
   clearRoleFilter(): void { this.roleFilter.setValue(''); }
   changePage(page:number):void{this.page=page;this.loadUsers()}
-  async deleteUser(id: number, event: Event): Promise<void> { event.stopPropagation(); const user=this.users.find(item=>item.id===id); const result=await this.confirmation.confirm({title:'Delete user?',message:`Delete ${user ? `${user.firstName} ${user.lastName}` : `user #${id}`}? This action cannot be undone.`,confirmText:'Delete user',danger:true}); if(!result.confirmed)return; this.userService.delete(id).subscribe({ next: () => { if(this.users.length===1&&this.page>0)this.page--; this.loadUsers(); this.toast.success('User deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete user.') }); }
+  async changeStatus(user: User, event: Event): Promise<void> { event.stopPropagation(); const active=!user.active; const action=active?'Reactivate':'Deactivate'; const result=await this.confirmation.confirm({title:`${action} user?`,message:`${action} ${user.firstName} ${user.lastName}?`,confirmText:action,danger:!active}); if(!result.confirmed)return; this.userService.update(user.id,{employeeId:user.employeeId,firstName:user.firstName,lastName:user.lastName,email:user.email,phoneNumber:user.phoneNumber,active,departmentId:user.departmentId,roleIds:user.roles.map(role=>role.id)}).subscribe({next:()=>{this.loadUsers();this.toast.success(`User ${active?'reactivated':'deactivated'} successfully.`)},error:(error)=>this.toast.error(error,`Unable to ${action.toLowerCase()} user.`)}); }
 }

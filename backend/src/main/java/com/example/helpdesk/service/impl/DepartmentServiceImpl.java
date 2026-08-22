@@ -30,6 +30,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department = new Department();
         department.setName(departmentCreateDTO.getName());
         department.setDescription(departmentCreateDTO.getDescription());
+        department.setActive(true);
         return mapToResponseDTO(departmentRepository.save(department));
     }
 
@@ -64,7 +65,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void delete(Long id) {
         Department department = findDepartmentById(id);
-        departmentRepository.delete(department);
+        department.setActive(false);
+        departmentRepository.save(department);
+    }
+
+    @Override
+    public DepartmentResponseDTO setActive(Long id, boolean active) {
+        Department department = findDepartmentById(id);
+        department.setActive(active);
+        return mapToResponseDTO(departmentRepository.save(department));
     }
 
     private Department findDepartmentById(Long id) {
@@ -76,7 +85,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         return new DepartmentResponseDTO(
                 department.getId(),
                 department.getName(),
-                department.getDescription()
+                department.getDescription(), department.isActive()
         );
     }
 }

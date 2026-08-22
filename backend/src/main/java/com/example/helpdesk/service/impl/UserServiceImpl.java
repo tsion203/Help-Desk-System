@@ -113,10 +113,14 @@ public class UserServiceImpl implements UserService {
             user.setActive(userUpdateDTO.getActive());
         }
         if (userUpdateDTO.getDepartmentId() != null) {
-            user.setDepartment(findDepartmentById(userUpdateDTO.getDepartmentId()));
+            if (user.getDepartment() == null || !user.getDepartment().getId().equals(userUpdateDTO.getDepartmentId())) {
+                user.setDepartment(findDepartmentById(userUpdateDTO.getDepartmentId()));
+            }
         }
         if (userUpdateDTO.getRoleIds() != null) {
-            user.setRoles(findRolesByIds(userUpdateDTO.getRoleIds()));
+            List<Long> currentRoleIds = user.getRoles() == null ? List.of() : user.getRoles().stream().map(Role::getId).sorted().toList();
+            List<Long> requestedRoleIds = userUpdateDTO.getRoleIds().stream().sorted().toList();
+            if (!currentRoleIds.equals(requestedRoleIds)) user.setRoles(findRolesByIds(userUpdateDTO.getRoleIds()));
         }
 
         return mapToResponseDTO(userRepository.save(user));
@@ -150,7 +154,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long id) {
         User user = findUserById(id);
-        userRepository.delete(user);
+        user.setActive(false);
+        userRepository.save(user);
     }
 
     private User findUserById(Long id) {
@@ -168,8 +173,10 @@ public class UserServiceImpl implements UserService {
         if (id == null) {
             return null;
         }
-        return departmentRepository.findById(id)
+        Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
+        if (!department.isActive()) throw new ConflictException("This department is currently inactive and cannot be selected.");
+        return department;
     }
 
     private List<Role> findRolesByIds(List<Long> roleIds) {
@@ -179,6 +186,9 @@ public class UserServiceImpl implements UserService {
         List<Role> roles = roleRepository.findAllById(roleIds);
         if (roles.size() != roleIds.size()) {
             throw new ResourceNotFoundException("One or more roles were not found");
+        }
+        if (roles.stream().anyMatch(role -> !role.isActive())) {
+            throw new ConflictException("This role is currently inactive and cannot be selected.");
         }
         return roles;
     }
@@ -215,7 +225,7 @@ public class UserServiceImpl implements UserService {
             return List.of();
         }
         return roles.stream()
-                .map(role -> new RoleResponseDTO(role.getId(), role.getName(), role.getDescription()))
+                .map(role -> new RoleResponseDTO(role.getId(), role.getName(), role.getDescription(), role.isActive()))
                 .toList();
     }
 }

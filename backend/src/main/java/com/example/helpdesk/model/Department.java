@@ -30,6 +30,8 @@ public class Department {
 
     @Column(nullable = false, unique = true)
     private String name;
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
 
     @OneToMany(mappedBy = "department")
     private List<User> users;

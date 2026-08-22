@@ -1,14 +1,14 @@
 <main class="page">
   <header class="page-header"><div><h1>Roles</h1><p>Control system permissions.</p></div><a class="btn btn-primary" routerLink="/roles/new">Add role</a></header>
   <section class="table-card">
-    <table><thead><tr><th>Role</th><th>Description</th><th>Actions</th></tr></thead>
-      <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>
+    <table><thead><tr><th>Role</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody><tr *ngFor="let role of roles | globalSearch: globalSearch.term()"><td>{{ role.name }}</td><td>{{ role.description }}</td><td>{{ role.active ? 'Active' : 'Inactive' }}</td><td>
           <div class="table-actions">
             <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update role" aria-label="Update role" [routerLink]="['/roles', role.id, 'edit']">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
             </button>
-            <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete role" aria-label="Delete role" (click)="deleteRole(role.id, $event)">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+            <button *ngIf="canChangeStatus" class="icon-action delete-action" type="button" [title]="role.active ? 'Deactivate role' : 'Reactivate role'" (click)="changeStatus(role, $event)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5M9 9l-2 2a5 5 0 1 0 10 0l-2-2"/></svg>
             </button>
           </div>
         </td></tr></tbody>

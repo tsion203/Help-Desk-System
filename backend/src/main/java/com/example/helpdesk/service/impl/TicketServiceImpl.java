@@ -365,7 +365,7 @@ public class TicketServiceImpl implements TicketService {
                         option.getId(),
                         option.getFirstName(),
                         option.getLastName(),
-                        option.getActiveTicketCount()))
+                        option.getActiveTicketCount(), Boolean.TRUE.equals(option.getActive())))
                 .toList();
     }
 
@@ -523,6 +523,9 @@ public class TicketServiceImpl implements TicketService {
 
     private User requireSupportOfficer(Long id) {
         User user = findUserById(id);
+        if (!user.isActive()) {
+            throw new ConflictException("This user is currently inactive and cannot be assigned.");
+        }
         if (!hasRole(user, "SUPPORT_OFFICER")) {
             throw new ConflictException("Tickets can only be assigned to Support Officers.");
         }
@@ -545,8 +548,10 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private TicketCategory findCategoryById(Long id) {
-        return ticketCategoryRepository.findById(id)
+        TicketCategory category = ticketCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket category not found with id: " + id));
+        if (!category.isActive()) throw new ConflictException("This category is currently inactive and cannot be selected.");
+        return category;
     }
 
     private TicketCategory findNullableCategoryById(Long id) {

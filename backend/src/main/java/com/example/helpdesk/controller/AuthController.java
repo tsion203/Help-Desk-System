@@ -96,6 +96,7 @@ public class AuthController {
         if (registerRequestDTO.getDepartmentId() != null) {
             Department department = departmentRepository.findById(registerRequestDTO.getDepartmentId())
                     .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+            if (!department.isActive()) throw new ConflictException("This department is currently inactive and cannot be selected.");
             user.setDepartment(department);
         }
 
@@ -103,6 +104,7 @@ public class AuthController {
                 .filter(role -> "EMPLOYEE".equals(role.getName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("EMPLOYEE role is not configured"));
+        if (!employeeRole.isActive()) throw new ConflictException("This role is currently inactive and cannot be selected.");
         user.setRoles(List.of(employeeRole));
 
         userRepository.save(user);

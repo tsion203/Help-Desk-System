@@ -10,4 +10,5 @@ public class TicketAssigneeOptionDTO {
     private String firstName;
     private String lastName;
     private Long activeTicketCount;
+    private boolean active;
 }

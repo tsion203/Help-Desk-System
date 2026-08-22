@@ -16,4 +16,5 @@ public class RoleResponseDTO {
     private String name;
 
     private String description;
+    private boolean active;
 }

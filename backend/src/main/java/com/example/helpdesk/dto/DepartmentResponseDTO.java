@@ -16,4 +16,5 @@ public class DepartmentResponseDTO {
     private String name;
 
     private String description;
+    private boolean active;
 }

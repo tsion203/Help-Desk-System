@@ -24,19 +24,19 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
             SELECT u.id AS id,
                    u.first_name AS firstName,
                    u.last_name AS lastName,
+                   u.active AS active,
                    COUNT(t.id) AS activeTicketCount
             FROM users u
             LEFT JOIN tickets t ON t.assigned_to = u.id
                 AND t.status NOT IN ('RESOLVED', 'CLOSED')
-            WHERE u.active = 1
-              AND u.id <> :requesterId
+            WHERE u.id <> :requesterId
               AND EXISTS (
                   SELECT 1 FROM users_roles ur
                   JOIN roles r ON r.id = ur.role_id
                   WHERE ur.user_id = u.id
                     AND REPLACE(REPLACE(REPLACE(UPPER(TRIM(r.name)), 'ROLE_', ''), ' ', '_'), '-', '_') = 'SUPPORT_OFFICER'
               )
-            GROUP BY u.id, u.first_name, u.last_name
+            GROUP BY u.id, u.first_name, u.last_name, u.active
             ORDER BY u.first_name, u.last_name
             """, nativeQuery = true)
     List<TicketAssigneeOptionProjection> findTicketAssigneeOptionsExcludingRequester(

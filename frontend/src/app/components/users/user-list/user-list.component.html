@@ -8,8 +8,8 @@
           <button *ngIf="canUpdate" class="icon-action edit-action" type="button" title="Update user" aria-label="Update user" [routerLink]="['/users', user.id, 'edit']" (click)="$event.stopPropagation()">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg>
           </button>
-          <button *ngIf="canDelete" class="icon-action delete-action" type="button" title="Delete user" aria-label="Delete user" (click)="deleteUser(user.id, $event)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+          <button *ngIf="canChangeStatus" class="icon-action delete-action" type="button" [title]="user.active ? 'Deactivate user' : 'Reactivate user'" (click)="changeStatus(user, $event)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5M9 9l-2 2a5 5 0 1 0 10 0l-2-2"/></svg>
           </button>
         </div>
       </td></tr></tbody></table>

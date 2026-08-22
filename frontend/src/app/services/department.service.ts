@@ -34,4 +34,5 @@ export class DepartmentService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+  setActive(id: number, active: boolean): Observable<Department> { return this.http.patch<Department>(`${this.apiUrl}/${id}/active`, null, { params: { active } }); }
 }

@@ -44,7 +44,7 @@ export class TicketAssignmentControlComponent implements OnChanges {
 
   optionLabel(candidate: TicketAssigneeOption): string {
     const suffix = candidate.activeTicketCount === 1 ? 'ticket' : 'tickets';
-    return `${candidate.firstName} ${candidate.lastName} [${candidate.activeTicketCount} ${suffix}]`;
+    return `${candidate.firstName} ${candidate.lastName} [${candidate.activeTicketCount} ${suffix}]${candidate.active ? '' : ' (Inactive)'}`;
   }
 
   updateAssignment(): void {

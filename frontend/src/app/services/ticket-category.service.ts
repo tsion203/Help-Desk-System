@@ -12,7 +12,8 @@ export class TicketCategoryService {
   getAll(): Observable<TicketCategory[]> { return this.getPage({size:1000}).pipe(map((page)=>page.content)); }
   getPage(request:PageRequest={}):Observable<PageResponse<TicketCategory>> { const params=new HttpParams().set('page',request.page??0).set('size',request.size??5).set('sort',request.sort??'name,asc'); return this.http.get<PageResponse<TicketCategory>>(this.apiUrl,{params}); }
   getById(id: number): Observable<TicketCategory> { return this.http.get<TicketCategory>(`${this.apiUrl}/${id}`); }
-  create(category: Omit<TicketCategory, 'id'>): Observable<TicketCategory> { return this.http.post<TicketCategory>(this.apiUrl, category); }
-  update(id: number, category: Omit<TicketCategory, 'id'>): Observable<TicketCategory> { return this.http.put<TicketCategory>(`${this.apiUrl}/${id}`, category); }
+  create(category: Pick<TicketCategory, 'name' | 'description'>): Observable<TicketCategory> { return this.http.post<TicketCategory>(this.apiUrl, category); }
+  update(id: number, category: Pick<TicketCategory, 'name' | 'description'>): Observable<TicketCategory> { return this.http.put<TicketCategory>(`${this.apiUrl}/${id}`, category); }
   delete(id: number): Observable<void> { return this.http.delete<void>(`${this.apiUrl}/${id}`); }
+  setActive(id: number, active: boolean): Observable<TicketCategory> { return this.http.patch<TicketCategory>(`${this.apiUrl}/${id}/active`, null, { params: { active } }); }
 }

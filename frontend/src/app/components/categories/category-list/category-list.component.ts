@@ -17,9 +17,9 @@ export class CategoryListComponent implements OnInit {
   page=0;readonly pageSize=5;totalElements=0;totalPages=0;
   constructor(private readonly categoriesService: TicketCategoryService, private readonly authService: AuthService, private readonly toast: ToastService, private readonly cdr: ChangeDetectorRef, private readonly confirmation: ConfirmationService) {}
   get canUpdate(): boolean { return this.authService.isAdmin(); }
-  get canDelete(): boolean { return this.authService.isAdmin(); }
+  get canChangeStatus(): boolean { return this.authService.isAdmin(); }
   ngOnInit(): void { this.loadPage(); }
   loadPage():void{this.loading=true;this.categoriesService.getPage({page:this.page,size:this.pageSize}).subscribe({next:(r)=>{this.categories=r.content;this.totalElements=r.totalElements;this.totalPages=r.totalPages;this.page=r.number;this.loading=false;this.cdr.markForCheck()},error:(e)=>{this.loading=false;this.toast.error(e,'Unable to load categories.');this.cdr.markForCheck()}})}
   changePage(p:number):void{this.page=p;this.loadPage()}
-  async deleteCategory(id: number, event: Event): Promise<void> { event.stopPropagation(); const item=this.categories.find(value=>value.id===id); const result=await this.confirmation.confirm({title:'Delete category?',message:`Delete ${item?.name || `category #${id}`}? This action cannot be undone.`,confirmText:'Delete category',danger:true}); if(!result.confirmed)return; this.categoriesService.delete(id).subscribe({ next: () => {if(this.categories.length===1&&this.page>0)this.page--;this.loadPage();this.toast.success('Category deleted successfully.'); }, error: (error) => this.toast.error(error, 'Unable to delete category.') }); }
+  async changeStatus(category: TicketCategory, event: Event): Promise<void> { event.stopPropagation(); const active=!category.active; const action=active?'Reactivate':'Deactivate'; const result=await this.confirmation.confirm({title:`${action} category?`,message:`${action} ${category.name}?`,confirmText:action,danger:!active}); if(!result.confirmed)return; this.categoriesService.setActive(category.id,active).subscribe({next:()=>{this.loadPage();this.toast.success(`Category ${active?'reactivated':'deactivated'} successfully.`)},error:(error)=>this.toast.error(error,`Unable to ${action.toLowerCase()} category.`)}); }
 }

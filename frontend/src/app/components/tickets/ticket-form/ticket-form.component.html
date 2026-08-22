@@ -15,7 +15,7 @@
         <label for="category">Category</label
         ><select id="category" formControlName="categoryId">
           <option [ngValue]="0">Select a category</option>
-          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id" [disabled]="!category.active">{{ category.name }}{{ category.active ? '' : ' (Inactive)' }}</option>
         </select>
         <span class="error" *ngIf="ticketForm.controls.categoryId.touched && ticketForm.controls.categoryId.invalid">Please select a ticket category.</span>
       </div>
@@ -32,7 +32,7 @@
         <label for="assignee">Assignee</label
         ><select id="assignee" formControlName="assignedToId">
           <option [ngValue]="0">Unassigned</option>
-          <option *ngFor="let user of users" [ngValue]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+          <option *ngFor="let user of users" [ngValue]="user.id" [disabled]="!user.active">{{ user.firstName }} {{ user.lastName }}{{ user.active ? '' : ' (Inactive)' }}</option>
         </select>
       </div>
       <div class="field">

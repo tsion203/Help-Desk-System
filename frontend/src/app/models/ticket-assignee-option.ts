@@ -3,4 +3,5 @@ export interface TicketAssigneeOption {
   firstName: string;
   lastName: string;
   activeTicketCount: number;
+  active: boolean;
 }

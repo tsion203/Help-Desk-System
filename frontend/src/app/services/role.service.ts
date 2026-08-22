@@ -32,4 +32,5 @@ export class RoleService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+  setActive(id: number, active: boolean): Observable<Role> { return this.http.patch<Role>(`${this.apiUrl}/${id}/active`, null, { params: { active } }); }
 }
