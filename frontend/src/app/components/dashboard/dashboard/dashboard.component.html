@@ -1,8 +1,27 @@
 <main class="page">
   <header class="page-header">
-    <div>
       <h1>{{ dashboardTitle }}</h1>
-      <p>{{ dashboardSubtitle }}</p>
+      
+    <div class="dashboard-heading">
+      <button
+        *ngIf="isManager"
+        class="export-report"
+        type="button"
+        title="Export Report"
+        aria-label="Export dashboard report as PDF"
+        [disabled]="exporting"
+        (click)="exportReport()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h7l4 4v14H7z" />
+          <path d="M14 3v5h5M10 13h5M10 16h5" />
+          <path d="M4 8v11" />
+        </svg>
+        <span>{{ exporting ? 'Exporting...' : 'Export Report' }}</span>
+      </button>
+      <div>
+
+      </div>
     </div>
   </header>
   <p *ngIf="loading">Loading dashboard...</p>

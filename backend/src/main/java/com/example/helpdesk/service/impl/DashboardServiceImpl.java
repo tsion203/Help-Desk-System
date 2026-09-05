@@ -1,11 +1,14 @@
 package com.example.helpdesk.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +33,7 @@ import com.example.helpdesk.service.DashboardService;
 @Service
 public class DashboardServiceImpl implements DashboardService {
     private static final int RECENT_ACTIVITY_LIMIT = 10;
+    private static final DateTimeFormatter REPORT_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
@@ -82,6 +86,80 @@ public class DashboardServiceImpl implements DashboardService {
                 : List.of();
 
         return new DashboardResponseDTO(scopedTickets.size(), statusCounts, priorityCounts, recentActivity, officers);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generatePdfReportForCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !hasAnyRole(authentication, "ADMIN", "SUPERVISOR")) {
+            throw new AccessDeniedException("Only administrators and supervisors can export dashboard reports.");
+        }
+
+        DashboardResponseDTO dashboard = getDashboardForCurrentUser();
+        List<String> lines = new java.util.ArrayList<>();
+        lines.add("Help Desk Ticket Report");
+        lines.add("Generated: " + LocalDateTime.now().format(REPORT_DATE_FORMAT));
+        lines.add("");
+        lines.add("Total tickets: " + dashboard.totalTickets());
+        lines.add("");
+        lines.add("Tickets by status");
+        Arrays.stream(TicketStatus.values()).forEach(status ->
+                lines.add(formatLabel(status.name()) + ": " + dashboard.statusCounts().getOrDefault(status, 0L)));
+        lines.add("");
+        lines.add("Tickets by priority");
+        Arrays.stream(TicketPriority.values()).forEach(priority ->
+                lines.add(formatLabel(priority.name()) + ": " + dashboard.priorityCounts().getOrDefault(priority, 0L)));
+        return createPdf(lines);
+    }
+
+    private byte[] createPdf(List<String> lines) {
+        StringBuilder content = new StringBuilder("BT\n/F1 18 Tf\n50 790 Td\n");
+        for (int index = 0; index < lines.size(); index++) {
+            if (index == 1) content.append("/F1 10 Tf\n");
+            if (index == 3 || index == 5 || index == 14) content.append("/F1 13 Tf\n");
+            if (index == 4 || index == 6 || index == 15) content.append("/F1 10 Tf\n");
+            content.append('(').append(escapePdfText(lines.get(index))).append(") Tj\n0 -24 Td\n");
+        }
+        content.append("ET\n");
+
+        byte[] stream = content.toString().getBytes(StandardCharsets.ISO_8859_1);
+        String[] objects = {
+                "<< /Type /Catalog /Pages 2 0 R >>",
+                "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+                "<< /Length " + stream.length + " >>\nstream\n" + new String(stream, StandardCharsets.ISO_8859_1) + "endstream",
+                "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+        };
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        writePdf(output, "%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n");
+        int[] offsets = new int[objects.length + 1];
+        for (int index = 0; index < objects.length; index++) {
+            offsets[index + 1] = output.size();
+            writePdf(output, (index + 1) + " 0 obj\n" + objects[index] + "\nendobj\n");
+        }
+        int xrefOffset = output.size();
+        writePdf(output, "xref\n0 " + (objects.length + 1) + "\n0000000000 65535 f \n");
+        for (int index = 1; index < offsets.length; index++) {
+            writePdf(output, String.format("%010d 00000 n \n", offsets[index]));
+        }
+        writePdf(output, "trailer\n<< /Size " + (objects.length + 1) + " /Root 1 0 R >>\nstartxref\n"
+                + xrefOffset + "\n%%EOF\n");
+        return output.toByteArray();
+    }
+
+    private void writePdf(ByteArrayOutputStream output, String value) {
+        output.writeBytes(value.getBytes(StandardCharsets.ISO_8859_1));
+    }
+
+    private String escapePdfText(String value) {
+        return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
+    }
+
+    private String formatLabel(String value) {
+        String normalized = value.toLowerCase().replace('_', ' ');
+        return Character.toUpperCase(normalized.charAt(0)) + normalized.substring(1);
     }
 
     private SupportOfficerOverviewDTO toOfficerOverview(User officer) {

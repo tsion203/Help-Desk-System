@@ -26,6 +26,10 @@ export class TicketService {
     return this.http.get<DashboardData>(`${environment.apiUrl}/dashboard`);
   }
 
+  exportDashboardReport(): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/dashboard/report`, { responseType: 'blob' });
+  }
+
   getAll(filters: TicketFilters = {}): Observable<Ticket[]> {
     return this.getPage(filters, { size: 1000 }).pipe(map((page) => page.content));
   }

@@ -48,6 +48,7 @@ export class DashboardComponent implements OnInit {
     supportOfficers: [],
   };
   loading = false;
+  exporting = false;
   errorMessage = '';
   get isAdmin() {
     return this.authService.isAdmin();
@@ -128,5 +129,26 @@ export class DashboardComponent implements OnInit {
   }
   statusClass(status: string) {
     return `status-${status.toLowerCase().replace('_', '-')}`;
+  }
+
+  exportReport(): void {
+    if (!this.isManager || this.exporting) return;
+    this.exporting = true;
+    this.ticketService.exportDashboardReport().subscribe({
+      next: (report) => {
+        const url = URL.createObjectURL(report);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'helpdesk-ticket-report.pdf';
+        link.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.exporting = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 }

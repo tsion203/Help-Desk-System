@@ -5,6 +5,40 @@
 .metrics {
   margin-bottom: 18px;
 }
+.dashboard-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.export-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+.export-report:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: #f8fafc;
+}
+.export-report:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.export-report svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .metric {
   position: relative;
   overflow: hidden;
@@ -216,5 +250,13 @@
     flex-direction: column;
     gap: 20px;
     padding: 20px 0;
+  }
+}
+@media (max-width: 520px) {
+  .dashboard-heading {
+    align-items: flex-start;
+  }
+  .export-report span {
+    display: none;
   }
 }
