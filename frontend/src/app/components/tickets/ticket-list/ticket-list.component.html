@@ -5,6 +5,8 @@
       <label><select formControlName="status"><option value="">All statuses</option><option *ngFor="let status of statuses" [value]="status">{{ status.replace('_', ' ') }}</option></select></label>
       <label><select formControlName="category"><option value="">All categories</option><option *ngFor="let category of categories" [value]="category.name">{{ category.name }}</option></select></label>
       <label><select formControlName="priority"><option value="">All priorities</option><option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option></select></label>
+
+        <select formControlName="sortDirection" aria-label="Sort by updated date/time"><option value="asc">Ascending (oldest first)</option><option value="desc">Descending (newest first)</option></select>
       <button class="clear-filter" type="button" (click)="clearFilters()" [disabled]="!filterForm.controls.status.value && !filterForm.controls.category.value && !filterForm.controls.priority.value">Clear Filters</button>
     </form>
     <table><thead><tr><th>ID</th><th>Subject</th><th>Requester</th><th>Status</th><th>Priority</th><th>Updated</th><th>Actions</th></tr></thead>

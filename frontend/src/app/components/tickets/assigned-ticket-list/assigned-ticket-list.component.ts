@@ -32,6 +32,7 @@ export class AssignedTicketListComponent implements OnInit {
     status: new FormControl('', { nonNullable: true }),
     category: new FormControl('', { nonNullable: true }),
     priority: new FormControl('', { nonNullable: true }),
+    sortDirection: new FormControl<'asc' | 'desc'>('desc', { nonNullable: true }),
   });
   readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   readonly priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
@@ -66,7 +67,7 @@ export class AssignedTicketListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
     const filters = this.filterForm.getRawValue();
-    this.ticketService.getAssignedTickets({ status: filters.status || undefined, category: filters.category || undefined, priority: filters.priority || undefined }, { page: this.page, size: this.pageSize })
+    this.ticketService.getAssignedTickets({ status: filters.status || undefined, category: filters.category || undefined, priority: filters.priority || undefined }, { page: this.page, size: this.pageSize, sort: `updatedAt,${filters.sortDirection}` })
       .subscribe({
         next: (result) => {
           this.tickets = result.content;
@@ -84,7 +85,7 @@ export class AssignedTicketListComponent implements OnInit {
       });
   }
 
-  clearFilters(): void { this.filterForm.reset({ status: '', category: '', priority: '' }); }
+  clearFilters(): void { this.filterForm.patchValue({ status: '', category: '', priority: '' }); }
 
   changePage(page: number): void { this.page = page; this.loadTickets(); }
 

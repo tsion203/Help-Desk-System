@@ -39,6 +39,7 @@ export class TicketListComponent implements OnInit {
     status: new FormControl('', { nonNullable: true }),
     category: new FormControl('', { nonNullable: true }),
     priority: new FormControl('', { nonNullable: true }),
+    sortDirection: new FormControl<'asc' | 'desc'>('desc', { nonNullable: true }),
   });
   readonly statuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'PENDING', 'RESOLVED', 'CLOSED', 'REOPENED'];
   readonly priorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
@@ -57,9 +58,9 @@ export class TicketListComponent implements OnInit {
   loadTickets(): void {
     this.loading = true; this.errorMessage = '';
     const filters = this.filterForm.getRawValue();
-    this.ticketService.getPage({ status: filters.status || undefined, category: filters.category || undefined, priority: filters.priority || undefined },{page:this.page,size:this.pageSize}).subscribe({ next: (result) => { this.tickets=result.content; this.totalElements=result.totalElements; this.totalPages=result.totalPages; this.page=result.number; this.loading=false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load tickets.'; this.loading = false; this.cdr.markForCheck(); } });
+    this.ticketService.getPage({ status: filters.status || undefined, category: filters.category || undefined, priority: filters.priority || undefined },{page:this.page,size:this.pageSize,sort:`updatedAt,${filters.sortDirection}`}).subscribe({ next: (result) => { this.tickets=result.content; this.totalElements=result.totalElements; this.totalPages=result.totalPages; this.page=result.number; this.loading=false; this.cdr.markForCheck(); }, error: () => { this.errorMessage = 'Unable to load tickets.'; this.loading = false; this.cdr.markForCheck(); } });
   }
-  clearFilters(): void { this.filterForm.reset({ status: '', category: '', priority: '' }); }
+  clearFilters(): void { this.filterForm.patchValue({ status: '', category: '', priority: '' }); }
   changePage(page:number):void { this.page=page; this.loadTickets(); }
   openAssignment(ticket: Ticket, event: Event): void { event.stopPropagation(); this.selectedTicketForAssignment = ticket; }
   closeAssignment(): void { this.selectedTicketForAssignment = null; }

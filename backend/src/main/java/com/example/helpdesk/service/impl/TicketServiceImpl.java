@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import com.example.helpdesk.dto.NotificationCreateDTO;
 import com.example.helpdesk.dto.TicketAssignmentHistoryResponseDTO;
@@ -131,7 +133,7 @@ public class TicketServiceImpl implements TicketService {
             return Page.empty(pageable);
         }
 
-        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+        return ticketRepository.findAll(specification, withStableSort(pageable)).map(this::mapToResponseDTO);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class TicketServiceImpl implements TicketService {
         User currentUser = requireCurrentUser();
         Specification<Ticket> specification = buildTicketSpecification(status, category, priority)
                 .and(createdByIdEquals(currentUser.getId()));
-        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+        return ticketRepository.findAll(specification, withStableSort(pageable)).map(this::mapToResponseDTO);
     }
 
     @Override
@@ -149,7 +151,7 @@ public class TicketServiceImpl implements TicketService {
         User currentUser = requireCurrentUser();
         Specification<Ticket> specification = buildTicketSpecification(status, category, priority)
                 .and(assignedToIdEquals(currentUser.getId()));
-        return ticketRepository.findAll(specification, pageable).map(this::mapToResponseDTO);
+        return ticketRepository.findAll(specification, withStableSort(pageable)).map(this::mapToResponseDTO);
     }
 
     @Override
@@ -189,6 +191,18 @@ public class TicketServiceImpl implements TicketService {
             ));
         }
         return mapToResponseDTO(savedTicket);
+    }
+
+    private Pageable withStableSort(Pageable pageable) {
+        Sort sort = pageable.getSort().isSorted()
+                ? pageable.getSort() : Sort.by(Sort.Direction.DESC, "updatedAt");
+        // Equal timestamps must have a deterministic order across page boundaries.
+        if (sort.getOrderFor("id") == null) {
+            sort = sort.and(Sort.by(sort.iterator().next().getDirection(), "id"));
+        }
+        return pageable.isPaged()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)
+                : Pageable.unpaged(sort);
     }
 
     private Specification<Ticket> buildTicketSpecification(TicketStatus status, String category, TicketPriority priority) {
