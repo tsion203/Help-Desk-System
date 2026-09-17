@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, DestroyRef, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { merge, switchMap, timer } from 'rxjs';
@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TicketService } from '../../../services/ticket.service';
 import { AuthService } from '../../../services/auth.service';
 import { DashboardData } from '../../../models/dashboard';
+import { DASHBOARD_FAQ } from './dashboard-faq';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,6 +16,25 @@ import { DashboardData } from '../../../models/dashboard';
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
+  readonly faqSearch = signal('');
+  readonly filteredFaq = computed(() => {
+    const terms = this.faqSearch().trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return DASHBOARD_FAQ.map((category) => ({
+      ...category,
+      items: category.items.filter((item) => {
+        const text = [category.name, item.question, ...item.steps, item.escalation ?? '']
+          .join(' ')
+          .toLowerCase();
+        return terms.every((term) => text.includes(term));
+      }),
+    })).filter((category) => category.items.length > 0);
+  });
+  readonly faqResultCount = computed(() =>
+    this.filteredFaq().reduce((total, category) => total + category.items.length, 0),
+  );
+  get isEmployeeDashboard() {
+    return this.authService.isEmployee() && !this.isManager && !this.authService.isSupportOfficer();
+  }
   readonly statuses = [
     'OPEN',
     'ASSIGNED',

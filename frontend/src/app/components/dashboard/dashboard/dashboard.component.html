@@ -1,8 +1,8 @@
-<main class="page">
+<main class="page" [class.employee-dashboard]="isEmployeeDashboard">
   <header class="page-header">
-      <h1>{{ dashboardTitle }}</h1>
-      
-    <div class="dashboard-heading">
+    <h1>{{ dashboardTitle }}</h1>
+
+    <div class="dashboard-heading" *ngIf="isManager">
       <button
         *ngIf="isManager"
         class="export-report"
@@ -19,14 +19,12 @@
         </svg>
         <span>{{ exporting ? 'Exporting...' : 'Export Report' }}</span>
       </button>
-      <div>
-
-      </div>
+      <div></div>
     </div>
   </header>
   <p *ngIf="loading">Loading dashboard...</p>
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  <section class="grid grid-4 metrics" aria-label="Ticket metrics">
+  <section *ngIf="!isEmployeeDashboard" class="grid grid-4 metrics" aria-label="Ticket metrics">
     <article class="metric total-metric">
       <small>{{ totalLabel }}</small
       ><strong>{{ data.totalTickets }}</strong>
@@ -134,10 +132,15 @@
   </section>
   <section *ngIf="!isManager" class="card activity-card">
     <div class="card-header">
-      <h2>Recent Ticket Activity</h2>
+      <h2 id="recent-activity-title">Recent Ticket Activity</h2>
       <span class="muted">Most recently updated first</span>
     </div>
-    <div class="activity-list">
+    <div
+      class="activity-list"
+      [attr.tabindex]="isEmployeeDashboard ? 0 : null"
+      [attr.role]="isEmployeeDashboard ? 'region' : null"
+      [attr.aria-labelledby]="isEmployeeDashboard ? 'recent-activity-title' : null"
+    >
       <a
         *ngFor="let ticket of data.recentActivity"
         [routerLink]="['/tickets', ticket.id]"
@@ -150,6 +153,73 @@
         }}</span></a
       >
       <p *ngIf="!data.recentActivity.length" class="empty">No recent ticket activity.</p>
+    </div>
+  </section>
+  <section *ngIf="isEmployeeDashboard" class="card faq-card" aria-labelledby="faq-title">
+    <div class="card-header faq-header">
+      <div>
+        <h2 id="faq-title">FAQ &amp; Self-Service Troubleshooting</h2>
+        <p class="muted">Try these simple steps first. If the issue continues, contact support.</p>
+      </div>
+      <div class="faq-actions">
+        <a class="btn btn-secondary" routerLink="/tickets/created-me">My tickets</a>
+        <a class="btn btn-primary" routerLink="/tickets/new">Create ticket</a>
+      </div>
+    </div>
+    <p class="faq-guidance">
+      Save your work before restarting. If a banking transaction is pending or its outcome is
+      unclear, stop and contact support before retrying. Never share passwords or customer data.
+    </p>
+    <div class="faq-search-row">
+      <div class="field">
+        <label for="faq-search">Search help topics</label>
+        <input
+          id="faq-search"
+          type="search"
+          placeholder="Try printer, password, or ticket status"
+          [value]="faqSearch()"
+          (input)="faqSearch.set($any($event.target).value)"
+          aria-controls="faq-results"
+        />
+      </div>
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="faqSearch.set('')"
+        [disabled]="!faqSearch()"
+      >
+        Clear search
+      </button>
+    </div>
+    <p class="muted" role="status">
+      {{ faqResultCount() }} {{ faqResultCount() === 1 ? 'question' : 'questions' }} found
+    </p>
+    <div id="faq-results" class="faq-categories">
+      @for (category of filteredFaq(); track category.name) {
+        <section class="faq-category" [attr.aria-label]="category.name">
+          <h3>{{ category.name }}</h3>
+          @for (item of category.items; track item.question) {
+            <details class="faq-item">
+              <summary>{{ item.question }}</summary>
+              <div class="faq-answer">
+                <ol>
+                  @for (step of item.steps; track $index) {
+                    <li>{{ step }}</li>
+                  }
+                </ol>
+                <p *ngIf="item.escalation" class="faq-escalation">
+                  <strong>When to get help:</strong> {{ item.escalation }}
+                </p>
+              </div>
+            </details>
+          }
+        </section>
+      } @empty {
+        <p class="empty">
+          No matching help topics. Try fewer words, clear your search, or create a ticket if you
+          need help.
+        </p>
+      }
     </div>
   </section>
   <section *ngIf="isAdmin" class="card management">
