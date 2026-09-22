@@ -6,6 +6,12 @@ import { ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequ
 import { LoginResponse } from '../models/auth-response';
 import { environment } from '../../environments/environment';
 
+export interface RegistrationChallenge {
+  registrationId: string;
+  expiresAt: string;
+  resendAvailableAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,8 +27,16 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials);
   }
 
-  register(user: RegisterRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, user);
+  register(user: RegisterRequest): Observable<RegistrationChallenge> {
+    return this.http.post<RegistrationChallenge>(`${this.apiUrl}/register`, user);
+  }
+
+  verifyRegistration(registrationId: string, code: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(this.apiUrl + '/register/verify', { registrationId, code });
+  }
+
+  resendRegistration(registrationId: string): Observable<RegistrationChallenge> {
+    return this.http.post<RegistrationChallenge>(this.apiUrl + '/register/resend', { registrationId });
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<string> {

@@ -29,6 +29,11 @@ import jakarta.validation.ConstraintViolationException;
 public class GlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(RegistrationVerificationException.class)
+    public ResponseEntity<ApiErrorResponse> handleRegistrationVerification(RegistrationVerificationException ex, HttpServletRequest request) {
+        return respond(ex, request, ex.getStatus(), "REGISTRATION_VERIFICATION_FAILED", ex.getMessage());
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         return respond(ex, request, HttpStatus.FORBIDDEN, "FORBIDDEN", "You do not have permission to perform this action.");

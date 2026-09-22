@@ -54,6 +54,7 @@ public class SecurityConfig {
                                         "You do not have permission to perform this action.")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register",
+                                "/api/auth/register/verify", "/api/auth/register/resend",
                                 "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").permitAll()
                         .anyRequest().authenticated())

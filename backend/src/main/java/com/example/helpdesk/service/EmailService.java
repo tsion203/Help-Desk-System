@@ -6,6 +6,8 @@ import com.example.helpdesk.model.User;
 
 public interface EmailService {
 
+    void sendRegistrationVerification(String email, String code);
+
     void sendTicketCreated(Ticket ticket, User recipient);
 
     void sendTicketAssigned(Ticket ticket, User recipient);

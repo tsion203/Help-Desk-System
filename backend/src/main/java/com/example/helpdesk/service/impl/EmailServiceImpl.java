@@ -15,7 +15,6 @@ import com.example.helpdesk.model.User;
 import com.example.helpdesk.service.EmailService;
 
 @Service
-@Async
 public class EmailServiceImpl implements EmailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailServiceImpl.class);
@@ -32,6 +31,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendTicketCreated(Ticket ticket, User recipient) {
         send(ticket, recipient,
                 "Help Desk: Ticket " + ticket.getTicketNumber() + " created",
@@ -39,6 +39,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendTicketAssigned(Ticket ticket, User recipient) {
         send(ticket, recipient,
                 "Help Desk: Ticket " + ticket.getTicketNumber() + " assigned to you",
@@ -46,6 +47,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendTicketStatusChanged(Ticket ticket, User recipient) {
         send(ticket, recipient,
                 "Help Desk: Ticket " + ticket.getTicketNumber() + " status updated",
@@ -53,6 +55,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendTicketResolved(Ticket ticket, User recipient) {
         send(ticket, recipient,
                 "Help Desk: Ticket " + ticket.getTicketNumber() + " resolved",
@@ -60,6 +63,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendCommentAdded(Ticket ticket, TicketComment comment, User recipient) {
         String authorName = fullName(comment.getUser());
         send(ticket, recipient,
@@ -71,6 +75,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendPasswordReset(User recipient, String resetLink, long expiryMinutes) {
         String name = fullName(recipient).trim();
         String body = "Hello " + name + ",\n\n"
@@ -80,6 +85,25 @@ public class EmailServiceImpl implements EmailService {
                 + "If you did not request a password reset, you can safely ignore this email.\n\n"
                 + "Regards,\nHelp Desk Support";
         sendMessage(recipient, "Help Desk: Reset your password", body);
+    }
+
+    @Override
+    public void sendRegistrationVerification(String email, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Help Desk: Verify your email");
+        message.setText("Your Help Desk verification code is: " + code
+                + "\n\nThis code expires in 10 minutes and can only be used once."
+                + "\nIf you did not request registration, ignore this email.");
+        if (StringUtils.hasText(fromAddress)) message.setFrom(fromAddress);
+        try {
+            mailSender.send(message);
+        } catch (org.springframework.mail.MailException exception) {
+            // Mail exceptions can contain the code, so never log or propagate them.
+            throw new com.example.helpdesk.exception.RegistrationVerificationException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+                    "We could not send your verification email. Please try again shortly.");
+        }
     }
 
     private void send(Ticket ticket, User recipient, String subject, String body) {
