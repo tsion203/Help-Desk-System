@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.time.format.DateTimeFormatter;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -77,7 +76,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<DashboardTicketActivityDTO> recentActivity = manager ? List.of() : scopedTickets.stream()
                 .map(this::toActivity)
-                .sorted(Comparator.comparing(DashboardTicketActivityDTO::updatedAt,
+                .sorted(Comparator.comparing((DashboardTicketActivityDTO activity) -> activity.updatedAt(),
                         Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(RECENT_ACTIVITY_LIMIT)
                 .toList();
@@ -182,16 +181,16 @@ public class DashboardServiceImpl implements DashboardService {
     private LocalDateTime latestActivityAt(Ticket ticket) {
         LocalDateTime latest = ticket.getUpdatedAt() != null ? ticket.getUpdatedAt() : ticket.getCreatedAt();
         if (ticket.getComments() != null) {
-            latest = max(latest, ticket.getComments().stream().map(comment -> comment.getCommentedAt()).max(LocalDateTime::compareTo).orElse(null));
+            latest = max(latest, ticket.getComments().stream().map(comment -> comment.getCommentedAt()).max(Comparator.naturalOrder()).orElse(null));
         }
         if (ticket.getAttachments() != null) {
-            latest = max(latest, ticket.getAttachments().stream().map(attachment -> attachment.getUploadedAt()).max(LocalDateTime::compareTo).orElse(null));
+            latest = max(latest, ticket.getAttachments().stream().map(attachment -> attachment.getUploadedAt()).max(Comparator.naturalOrder()).orElse(null));
         }
         if (ticket.getStatusHistory() != null) {
-            latest = max(latest, ticket.getStatusHistory().stream().map(history -> history.getChangedAt()).max(LocalDateTime::compareTo).orElse(null));
+            latest = max(latest, ticket.getStatusHistory().stream().map(history -> history.getChangedAt()).max(Comparator.naturalOrder()).orElse(null));
         }
         if (ticket.getAssignmentHistory() != null) {
-            latest = max(latest, ticket.getAssignmentHistory().stream().map(history -> history.getAssignedAt()).max(LocalDateTime::compareTo).orElse(null));
+            latest = max(latest, ticket.getAssignmentHistory().stream().map(history -> history.getAssignedAt()).max(Comparator.naturalOrder()).orElse(null));
         }
         return latest;
     }
